@@ -794,3 +794,41 @@ input:checked + .slider:before {
 .api-attribution img:hover {
     opacity: 1;
 }
+
+/* Wind Forecast Styles */
+#wind-list {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 15px; /* For scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(37, 99, 235, 0.5) transparent;
+}
+
+#wind-list::-webkit-scrollbar {
+    height: 6px;
+}
+
+#wind-list::-webkit-scrollbar-thumb {
+    background-color: rgba(37, 99, 235, 0.5);
+    border-radius: 3px;
+}
+
+.wind-item {
+    text-align: center;
+    min-width: 80px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+}
+
+.direction-icon {
+    width: 40px;
+    height: 40px;
+    display: block;
+    margin: 10px auto;
+    transition: transform 0.3s ease;
+}
