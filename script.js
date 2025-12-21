@@ -28,6 +28,7 @@ const PATH_CLOSE = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.4
 let currentUnit = 'metric'; // 'metric' or 'imperial'
 let currentCity = localStorage.getItem('lastCity') || 'Delhi';
 let currentForecastData = null;
+let lastFetchedCurrentWeather = null;
 let weatherChart = null;
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 let debounceTimer;
@@ -156,6 +157,7 @@ async function fetchWeather(city) {
         const weatherData = await weatherRes.json();
         currentCity = weatherData.name;
         localStorage.setItem('lastCity', currentCity);
+        lastFetchedCurrentWeather = weatherData;
         
         await fetchAdditionalData(weatherData);
     } catch (error) {
@@ -172,6 +174,7 @@ async function fetchWeatherByCoords(lat, lon) {
         const weatherData = await weatherRes.json();
         currentCity = weatherData.name;
         localStorage.setItem('lastCity', currentCity);
+        lastFetchedCurrentWeather = weatherData;
         
         await fetchAdditionalData(weatherData);
     } catch (error) {
@@ -203,8 +206,7 @@ async function fetchAdditionalData(weatherData) {
         
         updateForecast(forecastData);
         updateHourlyForecast(forecastData);
-        // Pass sys data for sunrise/sunset
-        updateBackground(weatherData.weather[0].main, weatherData.sys);
+        updateBackground(weatherData.weather[0].main, weatherData);
         checkFavoriteStatus(weatherData.name);
         
         hideSkeleton();
@@ -289,36 +291,15 @@ function updateUI(data) {
     updateCountdown(data.sys.sunrise, data.sys.sunset, data.timezone);
 }
 
-function updateBackground(weatherMain, sunData, targetTime = null) {
-    const now = targetTime || Math.floor(Date.now() / 1000);
-    
-    // Handle both data structures (Current Weather 'sys' vs Forecast 'city')
-    // sunData might be the 'sys' object or the 'city' object
-    const sunrise = sunData.sunrise || (sunData.sys ? sunData.sys.sunrise : 0);
-    const sunset = sunData.sunset || (sunData.sys ? sunData.sys.sunset : 0);
-    
-    let isNight = false;
-
-    if (sunrise && sunset) {
-        // Use hours to determine day/night to support "Time Travel" across days
-        // without complex date math for the visual effect
-        const date = new Date(now * 1000);
-        const currentHour = date.getHours();
-        
-        const sunriseDate = new Date(sunrise * 1000);
-        const sunsetDate = new Date(sunset * 1000);
-        const sunriseHour = sunriseDate.getHours();
-        const sunsetHour = sunsetDate.getHours();
-        
-        // Simple check: Night if before sunrise OR after sunset
-        if (currentHour < sunriseHour || currentHour >= sunsetHour) {
-            isNight = true;
-        }
+function updateBackground(weatherMain, data, isNightOverride = null) {
+    let isNight;
+    if (isNightOverride !== null) {
+        isNight = isNightOverride;
+    } else if (data && data.sys) {
+        const now = Math.floor(Date.now() / 1000);
+        isNight = now > data.sys.sunset || now < data.sys.sunrise;
     } else {
-        // Fallback
-        const date = new Date(now * 1000);
-        const hour = date.getHours();
-        isNight = (hour < 6 || hour > 18);
+        isNight = false;
     }
     
     let bgUrl;
@@ -622,30 +603,6 @@ function updateChart(data, type) {
         }
     };
 
-    // 4. Crosshair Plugin for Scrubbing
-    const crosshairPlugin = {
-        id: 'crosshair',
-        afterDraw: (chart) => {
-            if (chart.tooltip?._active?.length) {
-                const activePoint = chart.tooltip._active[0];
-                const { ctx, chartArea } = chart;
-                const x = activePoint.element.x;
-                const topY = chartArea.top;
-                const bottomY = chartArea.bottom;
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.moveTo(x, topY);
-                ctx.lineTo(x, bottomY);
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-                ctx.setLineDash([5, 5]);
-                ctx.stroke();
-                ctx.restore();
-            }
-        }
-    };
-
     // Prepare Data and Styles
     const datasetData = [];
     const pointStyles = [];
@@ -667,20 +624,19 @@ function updateChart(data, type) {
         
         if (showIcon && weatherIconsCache[iconCode]) {
             pointStyles.push(weatherIconsCache[iconCode]);
+            pointRadii.push(15);
+            pointHoverRadii.push(25);
         } else {
             pointStyles.push('circle');
+            pointRadii.push(3);
+            pointHoverRadii.push(5);
         }
-        
-        // Default radius 0 for smooth line, show on hover
-        pointRadii.push(0);
-        pointHoverRadii.push(6);
         
         lastCondition = condition;
     });
 
     // Colors & Gradients
     let label, color, gradient;
-    // Create gradient based on chart height approx 300px
     gradient = ctx.createLinearGradient(0, 0, 0, 300);
 
     if (type === 'humidity') {
@@ -695,7 +651,7 @@ function updateChart(data, type) {
         gradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
     } else {
         label = currentUnit === 'metric' ? 'Temperature (°C)' : 'Temperature (°F)';
-        color = '#f97316'; // Orange/Warm
+        color = '#f97316'; // Orange
         gradient.addColorStop(0, 'rgba(249, 115, 22, 0.6)');
         gradient.addColorStop(1, 'rgba(249, 115, 22, 0)');
     }
@@ -704,7 +660,7 @@ function updateChart(data, type) {
         weatherChart.destroy();
     }
 
-    // Custom Plugin for Glow (Modified to work with hover)
+    // Custom Plugin for Glow
     const glowPlugin = {
         id: 'glowPlugin',
         beforeDraw: (chart) => {
@@ -714,18 +670,38 @@ function updateChart(data, type) {
                 activeElements.forEach(active => {
                     const meta = chart.getDatasetMeta(active.datasetIndex);
                     const point = meta.data[active.index];
-                    // Only glow if point is being hovered (radius > 0)
-                    if (point.options.radius > 0) {
+                    if (point.options.radius > 10) {
                         ctx.save();
                         ctx.shadowColor = color;
                         ctx.shadowBlur = 15;
                         ctx.beginPath();
                         ctx.arc(point.x, point.y, point.options.radius, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                        ctx.fillStyle = 'rgba(255,255,255,0.1)';
                         ctx.fill();
                         ctx.restore();
                     }
                 });
+            }
+        }
+    };
+
+    // Crosshair Plugin for Scrubbing
+    const crosshairPlugin = {
+        id: 'crosshair',
+        afterDraw: (chart) => {
+            if (chart.tooltip?._active?.length) {
+                const x = chart.tooltip._active[0].element.x;
+                const yAxis = chart.scales.y;
+                const ctx = chart.ctx;
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(x, yAxis.top);
+                ctx.lineTo(x, yAxis.bottom);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.restore();
             }
         }
     };
@@ -745,63 +721,55 @@ function updateChart(data, type) {
                 pointStyle: pointStyles,
                 pointRadius: pointRadii,
                 pointHoverRadius: pointHoverRadii,
-                pointBackgroundColor: '#fff',
-                pointBorderColor: color,
+                pointBackgroundColor: color,
+                pointBorderColor: '#fff',
                 pointBorderWidth: 2
             }]
         },
         options: {
-            responsive: true,
+            responsive: true, // Ensure chart resizes
             maintainAspectRatio: false,
             interaction: {
                 mode: 'index',
                 intersect: false,
             },
+            onHover: (event, elements) => {
+                if (elements && elements.length > 0) {
+                    const index = elements[0].index;
+                    const item = slice[index];
+                    const condition = item.weather[0].main;
+                    const isNight = item.sys.pod === 'n';
+                    // Time Travel: Update background to match forecast hour
+                    updateBackground(condition, null, isNight);
+                } else {
+                    // Revert to current weather when not hovering
+                    if (lastFetchedCurrentWeather) {
+                        updateBackground(lastFetchedCurrentWeather.weather[0].main, lastFetchedCurrentWeather);
+                    }
+                }
+            },
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    usePointStyle: true,
-                    yAlign: 'bottom', // Tooltip above finger
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
                     titleColor: '#fff',
                     bodyColor: '#fff',
                     displayColors: false,
                     callbacks: {
                         label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label = label.split('(')[0].trim() + ': ';
-                            }
-                            if (context.parsed.y !== null) {
-                                label += context.parsed.y;
-                                if (type === 'temp') label += currentUnit === 'metric' ? '°C' : '°F';
-                                if (type === 'humidity') label += '%';
-                                if (type === 'wind') label += currentUnit === 'metric' ? ' m/s' : ' mph';
-                            }
-                            return label;
+                            return context.parsed.y + (type === 'humidity' ? '%' : (type === 'temp' ? '°' : ''));
                         }
                     }
                 }
             },
             scales: {
                 x: { 
-                    ticks: { color: '#4b5563' }, 
+                    ticks: { color: '#fff' }, 
                     grid: { display: false } 
                 },
                 y: { 
-                    display: false, // Hide Y axis for cleaner horizon look
-                    min: Math.min(...datasetData) - 5,
-                    max: Math.max(...datasetData) + 5
-                }
-            },
-            onHover: (event, elements) => {
-                if (elements && elements.length > 0) {
-                    const index = elements[0].index;
-                    const item = slice[index];
-                    
-                    // Time Travel Effect: Update background based on hovered forecast item
-                    // Pass city data for sunrise/sunset calculation
-                    updateBackground(item.weather[0].main, data.city, item.dt);
+                    display: false, // Minimal Horizon Look
+                    grid: { display: false } 
                 }
             }
         },
