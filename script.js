@@ -203,7 +203,8 @@ async function fetchAdditionalData(weatherData) {
         
         updateForecast(forecastData);
         updateHourlyForecast(forecastData);
-        updateBackground(weatherData.weather[0].main, weatherData);
+        // Pass sys data for sunrise/sunset
+        updateBackground(weatherData.weather[0].main, weatherData.sys);
         checkFavoriteStatus(weatherData.name);
         
         hideSkeleton();
@@ -288,9 +289,37 @@ function updateUI(data) {
     updateCountdown(data.sys.sunrise, data.sys.sunset, data.timezone);
 }
 
-function updateBackground(weatherMain, data) {
-    const now = Math.floor(Date.now() / 1000);
-    const isNight = now > data.sys.sunset || now < data.sys.sunrise;
+function updateBackground(weatherMain, sunData, targetTime = null) {
+    const now = targetTime || Math.floor(Date.now() / 1000);
+    
+    // Handle both data structures (Current Weather 'sys' vs Forecast 'city')
+    // sunData might be the 'sys' object or the 'city' object
+    const sunrise = sunData.sunrise || (sunData.sys ? sunData.sys.sunrise : 0);
+    const sunset = sunData.sunset || (sunData.sys ? sunData.sys.sunset : 0);
+    
+    let isNight = false;
+
+    if (sunrise && sunset) {
+        // Use hours to determine day/night to support "Time Travel" across days
+        // without complex date math for the visual effect
+        const date = new Date(now * 1000);
+        const currentHour = date.getHours();
+        
+        const sunriseDate = new Date(sunrise * 1000);
+        const sunsetDate = new Date(sunset * 1000);
+        const sunriseHour = sunriseDate.getHours();
+        const sunsetHour = sunsetDate.getHours();
+        
+        // Simple check: Night if before sunrise OR after sunset
+        if (currentHour < sunriseHour || currentHour >= sunsetHour) {
+            isNight = true;
+        }
+    } else {
+        // Fallback
+        const date = new Date(now * 1000);
+        const hour = date.getHours();
+        isNight = (hour < 6 || hour > 18);
+    }
     
     let bgUrl;
     if (isNight && CONFIG.nightBackgrounds) {
@@ -593,6 +622,30 @@ function updateChart(data, type) {
         }
     };
 
+    // 4. Crosshair Plugin for Scrubbing
+    const crosshairPlugin = {
+        id: 'crosshair',
+        afterDraw: (chart) => {
+            if (chart.tooltip?._active?.length) {
+                const activePoint = chart.tooltip._active[0];
+                const { ctx, chartArea } = chart;
+                const x = activePoint.element.x;
+                const topY = chartArea.top;
+                const bottomY = chartArea.bottom;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(x, topY);
+                ctx.lineTo(x, bottomY);
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    };
+
     // Prepare Data and Styles
     const datasetData = [];
     const pointStyles = [];
@@ -614,38 +667,44 @@ function updateChart(data, type) {
         
         if (showIcon && weatherIconsCache[iconCode]) {
             pointStyles.push(weatherIconsCache[iconCode]);
-            pointRadii.push(15);
-            pointHoverRadii.push(25);
         } else {
             pointStyles.push('circle');
-            pointRadii.push(3);
-            pointHoverRadii.push(5);
         }
+        
+        // Default radius 0 for smooth line, show on hover
+        pointRadii.push(0);
+        pointHoverRadii.push(6);
         
         lastCondition = condition;
     });
 
-    // Colors
-    let label, color, bgColor;
+    // Colors & Gradients
+    let label, color, gradient;
+    // Create gradient based on chart height approx 300px
+    gradient = ctx.createLinearGradient(0, 0, 0, 300);
+
     if (type === 'humidity') {
         label = 'Humidity (%)';
-        color = '#10b981';
-        bgColor = 'rgba(16, 185, 129, 0.2)';
+        color = '#3b82f6'; // Blue
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.6)');
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
     } else if (type === 'wind') {
         label = currentUnit === 'metric' ? 'Wind Speed (m/s)' : 'Wind Speed (mph)';
-        color = '#f59e0b';
-        bgColor = 'rgba(245, 158, 11, 0.2)';
+        color = '#f59e0b'; // Amber
+        gradient.addColorStop(0, 'rgba(245, 158, 11, 0.6)');
+        gradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
     } else {
         label = currentUnit === 'metric' ? 'Temperature (°C)' : 'Temperature (°F)';
-        color = '#2563eb';
-        bgColor = 'rgba(37, 99, 235, 0.2)';
+        color = '#f97316'; // Orange/Warm
+        gradient.addColorStop(0, 'rgba(249, 115, 22, 0.6)');
+        gradient.addColorStop(1, 'rgba(249, 115, 22, 0)');
     }
 
     if (weatherChart) {
         weatherChart.destroy();
     }
 
-    // Custom Plugin for Glow
+    // Custom Plugin for Glow (Modified to work with hover)
     const glowPlugin = {
         id: 'glowPlugin',
         beforeDraw: (chart) => {
@@ -655,13 +714,14 @@ function updateChart(data, type) {
                 activeElements.forEach(active => {
                     const meta = chart.getDatasetMeta(active.datasetIndex);
                     const point = meta.data[active.index];
-                    if (point.options.radius > 10) {
+                    // Only glow if point is being hovered (radius > 0)
+                    if (point.options.radius > 0) {
                         ctx.save();
                         ctx.shadowColor = color;
                         ctx.shadowBlur = 15;
                         ctx.beginPath();
                         ctx.arc(point.x, point.y, point.options.radius, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                        ctx.fillStyle = 'rgba(255,255,255,0.8)';
                         ctx.fill();
                         ctx.restore();
                     }
@@ -678,41 +738,74 @@ function updateChart(data, type) {
                 label: label,
                 data: datasetData,
                 borderColor: color,
-                backgroundColor: bgColor,
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
+                backgroundColor: gradient,
+                borderWidth: 3,
+                tension: 0.4, // Smooth Spline
+                fill: true,   // Area Chart
                 pointStyle: pointStyles,
                 pointRadius: pointRadii,
                 pointHoverRadius: pointHoverRadii,
-                pointBackgroundColor: color
+                pointBackgroundColor: '#fff',
+                pointBorderColor: color,
+                pointBorderWidth: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
             plugins: {
-                legend: { labels: { color: '#333' } },
+                legend: { display: false },
                 tooltip: {
                     usePointStyle: true,
+                    yAlign: 'bottom', // Tooltip above finger
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label = label.split('(')[0].trim() + ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y;
+                                if (type === 'temp') label += currentUnit === 'metric' ? '°C' : '°F';
+                                if (type === 'humidity') label += '%';
+                                if (type === 'wind') label += currentUnit === 'metric' ? ' m/s' : ' mph';
+                            }
+                            return label;
+                        }
+                    }
                 }
             },
             scales: {
                 x: { 
                     ticks: { color: '#4b5563' }, 
-                    grid: { display: false } // Hide X grid lines for cleaner look
+                    grid: { display: false } 
                 },
                 y: { 
-                    ticks: { color: '#4b5563' }, 
-                    grid: { color: 'rgba(0,0,0,0.05)' } // Very faint Y grid
+                    display: false, // Hide Y axis for cleaner horizon look
+                    min: Math.min(...datasetData) - 5,
+                    max: Math.max(...datasetData) + 5
                 }
             },
-            hover: {
-                mode: 'nearest',
-                intersect: true
+            onHover: (event, elements) => {
+                if (elements && elements.length > 0) {
+                    const index = elements[0].index;
+                    const item = slice[index];
+                    
+                    // Time Travel Effect: Update background based on hovered forecast item
+                    // Pass city data for sunrise/sunset calculation
+                    updateBackground(item.weather[0].main, data.city, item.dt);
+                }
             }
         },
-        plugins: [glowPlugin, dayNightPlugin]
+        plugins: [glowPlugin, dayNightPlugin, crosshairPlugin]
     });
 }
 
