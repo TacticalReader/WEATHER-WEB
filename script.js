@@ -3,6 +3,7 @@ const searchBtn = document.getElementById('search-btn');
 const cityInput = document.getElementById('city-input');
 const weatherContent = document.getElementById('weather-content');
 const errorMessage = document.getElementById('error-message');
+const forecastList = document.getElementById('forecast-list');
 
 // Chart instance
 let weatherChart = null;
@@ -36,6 +37,7 @@ async function fetchWeather(city) {
 
         updateUI(weatherData);
         updateChart(forecastData);
+        updateForecast(forecastData);
         
         weatherContent.style.display = 'block';
         errorMessage.style.display = 'none';
@@ -61,13 +63,38 @@ function updateUI(data) {
     document.getElementById('sunset').textContent = formatTime(data.sys.sunset, data.timezone);
 }
 
+function updateForecast(data) {
+    forecastList.innerHTML = '';
+    
+    // Filter for one reading per day (e.g., near noon)
+    // The API returns data every 3 hours. We look for entries around 12:00:00
+    const dailyData = data.list.filter(item => item.dt_txt.includes("12:00:00"));
+
+    dailyData.forEach(day => {
+        const date = new Date(day.dt * 1000);
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        const temp = Math.round(day.main.temp);
+        const icon = day.weather[0].icon;
+        const desc = day.weather[0].main;
+
+        const forecastItem = document.createElement('div');
+        forecastItem.className = 'forecast-item';
+        forecastItem.innerHTML = `
+            <p class="f-day">${dayName}</p>
+            <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${desc}">
+            <p class="f-temp">${temp}°C</p>
+            <p class="f-desc">${desc}</p>
+        `;
+        forecastList.appendChild(forecastItem);
+    });
+}
+
 function getCardinalDirection(angle) {
     const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
     return directions[Math.round(angle / 45) % 8];
 }
 
 function formatTime(unixTimestamp, timezoneOffset) {
-    // Create date object shifted to the target timezone
     const date = new Date((unixTimestamp + timezoneOffset) * 1000);
     let hours = date.getUTCHours();
     let minutes = date.getUTCMinutes();
@@ -81,7 +108,6 @@ function formatTime(unixTimestamp, timezoneOffset) {
 function updateChart(data) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
     
-    // Extract next 8 data points (approx 24 hours)
     const slice = data.list.slice(0, 8);
     const labels = slice.map(item => {
         const d = new Date(item.dt * 1000);
@@ -100,12 +126,12 @@ function updateChart(data) {
             datasets: [{
                 label: 'Temperature (°C)',
                 data: temps,
-                borderColor: 'rgba(255, 255, 255, 0.8)',
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                borderColor: '#2563eb', // Darker blue
+                backgroundColor: 'rgba(37, 99, 235, 0.2)',
                 borderWidth: 2,
                 tension: 0.4,
                 fill: true,
-                pointBackgroundColor: '#fff'
+                pointBackgroundColor: '#2563eb'
             }]
         },
         options: {
@@ -113,17 +139,17 @@ function updateChart(data) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    labels: { color: 'white' }
+                    labels: { color: '#333' } // Dark text
                 }
             },
             scales: {
                 x: {
-                    ticks: { color: 'rgba(255,255,255,0.7)' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
+                    ticks: { color: '#4b5563' },
+                    grid: { color: 'rgba(0,0,0,0.1)' }
                 },
                 y: {
-                    ticks: { color: 'rgba(255,255,255,0.7)' },
-                    grid: { color: 'rgba(255,255,255,0.1)' }
+                    ticks: { color: '#4b5563' },
+                    grid: { color: 'rgba(0,0,0,0.1)' }
                 }
             }
         }
