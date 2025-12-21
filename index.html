@@ -9,7 +9,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="parallax-bg"></div>
+    <!-- Double layer for smooth transitions -->
+    <div class="parallax-bg active" id="bg-layer-1"></div>
+    <div class="parallax-bg" id="bg-layer-2"></div>
+
     <div class="container">
         <div class="glass-card">
             <header>
@@ -71,6 +74,7 @@
                                     <button id="fav-btn" class="material-icons fav-btn" title="Add to Favorites">favorite_border</button>
                                 </div>
                                 <div class="temp-container">
+                                    <!-- Animated Icon -->
                                     <img id="weather-icon" src="" alt="Weather Icon">
                                     <span id="temperature">0°C</span>
                                 </div>
@@ -183,6 +187,14 @@
                             </div>
                         </div>
 
+                        <!-- Hourly Forecast Scrollbar -->
+                        <div class="forecast-container">
+                            <h3>Next 24 Hours</h3>
+                            <div id="hourly-forecast" class="hourly-scroll">
+                                <!-- Hourly items injected here -->
+                            </div>
+                        </div>
+
                         <div class="forecast-container">
                             <h3>5-Day Forecast</h3>
                             <div id="forecast-list" class="forecast-list">
@@ -196,10 +208,16 @@
             <div id="error-message" class="error" style="display: none;">
                 <span class="material-icons">error</span>
                 <p id="error-text">City not found or location unavailable. Please try again.</p>
+                <button id="retry-btn" class="retry-btn">Retry</button>
             </div>
         </div>
     </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
     <script src="config.js"></script>
+    <script src="icons.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
