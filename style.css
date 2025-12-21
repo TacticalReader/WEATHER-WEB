@@ -1,5 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
+:root {
+    --celsius-gradient: linear-gradient(to right, #06b6d4, #2563eb);
+    --fahrenheit-gradient: linear-gradient(to right, #f97316, #ef4444);
+    --celsius-glow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+    --fahrenheit-glow: 0 8px 32px 0 rgba(249, 115, 22, 0.3);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -58,11 +65,17 @@ body {
     -webkit-backdrop-filter: blur(15px);
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+    box-shadow: var(--celsius-glow);
     padding: 40px;
     width: 100%;
     max-width: 600px;
-    transition: all 0.3s ease;
+    transition: all 0.5s ease;
+}
+
+/* Warm Glow for Imperial Mode */
+.glass-card.is-imperial {
+    box-shadow: var(--fahrenheit-glow);
+    border-color: rgba(249, 115, 22, 0.3);
 }
 
 @media (min-width: 1024px) {
@@ -114,19 +127,19 @@ header {
     color: #111827;
 }
 
-/* Unit Toggle */
+/* --- Unit Toggle Redesign --- */
 .unit-toggle {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     font-weight: 600;
 }
 
 .switch {
     position: relative;
     display: inline-block;
-    width: 50px;
-    height: 24px;
+    width: 68px;
+    height: 34px;
 }
 
 .switch input {
@@ -142,36 +155,75 @@ header {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
+    background: var(--celsius-gradient);
+    transition: 0.4s;
+    border-radius: 34px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Imperial Background Overlay for Cross-fade */
+.slider::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--fahrenheit-gradient);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.glass-card.is-imperial .slider::after {
+    opacity: 1;
+}
+
+/* The Knob */
 .slider:before {
     position: absolute;
     content: "";
-    height: 16px;
-    width: 16px;
+    height: 26px;
+    width: 26px;
     left: 4px;
     bottom: 4px;
     background-color: white;
-    transition: .4s;
-}
-
-input:checked + .slider {
-    background-color: #2563eb;
-}
-
-input:checked + .slider:before {
-    transform: translateX(26px);
-}
-
-.slider.round {
-    border-radius: 34px;
-}
-
-.slider.round:before {
+    /* Bouncy Transition */
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), width 0.2s;
     border-radius: 50%;
+    z-index: 2;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
+
+/* Move Knob */
+input:checked + .slider:before {
+    transform: translateX(34px);
+}
+
+/* Elastic Stretch on Click */
+.switch:active .slider:before {
+    width: 32px;
+    border-radius: 20px;
+}
+
+/* Icons inside Track */
+.toggle-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: rgba(255, 255, 255, 0.8);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.icon-snowflake {
+    left: 8px;
+}
+
+.icon-sun {
+    right: 8px;
+}
+
+/* --- End Unit Toggle --- */
 
 /* Search Section */
 .search-section {
