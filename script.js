@@ -24,6 +24,7 @@ let weatherChart = null;
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 let debounceTimer;
 let activeBgIndex = 0;
+let weatherIconsCache = {}; // Cache for resized chart icons
 
 // Initialize
 init();
@@ -151,6 +152,9 @@ async function fetchAdditionalData(weatherData) {
         const forecastData = await forecastRes.json();
         currentForecastData = forecastData;
 
+        // Preload icons for the chart (next 24h -> 8 items)
+        await preloadChartIcons(forecastData.list.slice(0, 8));
+
         const airRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${CONFIG.apiKey}`);
         const airData = await airRes.json();
 
@@ -174,6 +178,38 @@ async function fetchAdditionalData(weatherData) {
         updateUI(weatherData);
         hideSkeleton();
     }
+}
+
+// --- Icon Preloading ---
+
+function preloadChartIcons(list) {
+    const uniqueCodes = [...new Set(list.map(item => item.weather[0].icon))];
+    
+    const promises = uniqueCodes.map(code => {
+        if (weatherIconsCache[code]) return Promise.resolve();
+
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = getIconUrl(code);
+            img.onload = () => {
+                // Create a canvas to resize the image to a chart-friendly size (e.g., 40x40)
+                const size = 40;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, size, size);
+                weatherIconsCache[code] = canvas;
+                resolve();
+            };
+            img.onerror = () => {
+                console.warn(`Failed to load icon: ${code}`);
+                resolve();
+            };
+        });
+    });
+    return Promise.all(promises);
 }
 
 // --- UI Updates ---
@@ -365,20 +401,50 @@ function updateChart(data, type) {
         return `${d.getHours()}:00`;
     });
 
-    let datasetData, label, color, bgColor;
+    // Prepare Data and Styles
+    const datasetData = [];
+    const pointStyles = [];
+    const pointRadii = [];
+    const pointHoverRadii = [];
+    let lastCondition = null;
 
+    slice.forEach((item, index) => {
+        // Data Value
+        if (type === 'humidity') datasetData.push(item.main.humidity);
+        else if (type === 'wind') datasetData.push(item.wind.speed);
+        else datasetData.push(item.main.temp);
+
+        // Icon Logic
+        const condition = item.weather[0].main;
+        const iconCode = item.weather[0].icon;
+        
+        // Logic: Show icon if index % 3 === 0 OR condition changed from previous
+        const showIcon = (index % 3 === 0) || (lastCondition && condition !== lastCondition);
+        
+        if (showIcon && weatherIconsCache[iconCode]) {
+            pointStyles.push(weatherIconsCache[iconCode]);
+            pointRadii.push(15); // Normal size (30px diameter)
+            pointHoverRadii.push(25); // Hover size (50px diameter - approx 1.5x area/visual)
+        } else {
+            pointStyles.push('circle');
+            pointRadii.push(3); // Small dot
+            pointHoverRadii.push(5);
+        }
+        
+        lastCondition = condition;
+    });
+
+    // Colors
+    let label, color, bgColor;
     if (type === 'humidity') {
-        datasetData = slice.map(item => item.main.humidity);
         label = 'Humidity (%)';
         color = '#10b981';
         bgColor = 'rgba(16, 185, 129, 0.2)';
     } else if (type === 'wind') {
-        datasetData = slice.map(item => item.wind.speed);
         label = currentUnit === 'metric' ? 'Wind Speed (m/s)' : 'Wind Speed (mph)';
         color = '#f59e0b';
         bgColor = 'rgba(245, 158, 11, 0.2)';
     } else {
-        datasetData = slice.map(item => item.main.temp);
         label = currentUnit === 'metric' ? 'Temperature (°C)' : 'Temperature (°F)';
         color = '#2563eb';
         bgColor = 'rgba(37, 99, 235, 0.2)';
@@ -387,6 +453,32 @@ function updateChart(data, type) {
     if (weatherChart) {
         weatherChart.destroy();
     }
+
+    // Custom Plugin for Glow
+    const glowPlugin = {
+        id: 'glowPlugin',
+        beforeDraw: (chart) => {
+            const activeElements = chart.getActiveElements();
+            if (activeElements.length > 0) {
+                const ctx = chart.ctx;
+                activeElements.forEach(active => {
+                    const meta = chart.getDatasetMeta(active.datasetIndex);
+                    const point = meta.data[active.index];
+                    // Only glow if it's an icon (radius > 10)
+                    if (point.options.radius > 10) {
+                        ctx.save();
+                        ctx.shadowColor = color; // Use dataset color for glow
+                        ctx.shadowBlur = 15;
+                        ctx.beginPath();
+                        ctx.arc(point.x, point.y, point.options.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(255,255,255,0.1)'; // Subtle fill
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                });
+            }
+        }
+    };
 
     weatherChart = new Chart(ctx, {
         type: 'line',
@@ -400,20 +492,31 @@ function updateChart(data, type) {
                 borderWidth: 2,
                 tension: 0.4,
                 fill: true,
-                pointBackgroundColor: color
+                pointStyle: pointStyles,
+                pointRadius: pointRadii,
+                pointHoverRadius: pointHoverRadii,
+                pointBackgroundColor: color // Fallback for circles
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { labels: { color: '#333' } }
+                legend: { labels: { color: '#333' } },
+                tooltip: {
+                    usePointStyle: true,
+                }
             },
             scales: {
                 x: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } },
                 y: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } }
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: true
             }
-        }
+        },
+        plugins: [glowPlugin]
     });
 }
 
