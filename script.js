@@ -395,11 +395,158 @@ function updateForecast(data) {
 function updateChart(data, type) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
     
+    // 1. Prepare Data
     const slice = data.list.slice(0, 8);
     const labels = slice.map(item => {
         const d = new Date(item.dt * 1000);
         return `${d.getHours()}:00`;
     });
+
+    // 2. Calculate Sun Events for the visible range
+    const city = data.city;
+    const startDt = slice[0].dt;
+    const endDt = slice[slice.length - 1].dt;
+
+    // Generate potential sun events (yesterday, today, tomorrow to be safe)
+    const daySeconds = 86400;
+    const baseSunrise = city.sunrise;
+    const baseSunset = city.sunset;
+
+    const sunEvents = [];
+    [-1, 0, 1].forEach(dayOffset => {
+        const sr = baseSunrise + (dayOffset * daySeconds);
+        const ss = baseSunset + (dayOffset * daySeconds);
+        
+        if (sr >= startDt && sr <= endDt) sunEvents.push({ type: 'sunrise', time: sr });
+        if (ss >= startDt && ss <= endDt) sunEvents.push({ type: 'sunset', time: ss });
+    });
+
+    // 3. Define Day/Night Background Plugin
+    const dayNightPlugin = {
+        id: 'dayNightPlugin',
+        beforeDraw: (chart) => {
+            const { ctx, chartArea, scales } = chart;
+            const xAxis = scales.x;
+            
+            // Helper to get pixel from timestamp
+            const getPixelForTime = (timestamp) => {
+                for (let i = 0; i < slice.length - 1; i++) {
+                    const t1 = slice[i].dt;
+                    const t2 = slice[i+1].dt;
+                    if (timestamp >= t1 && timestamp <= t2) {
+                        const pct = (timestamp - t1) / (t2 - t1);
+                        const x1 = xAxis.getPixelForValue(i);
+                        const x2 = xAxis.getPixelForValue(i+1);
+                        return x1 + (x2 - x1) * pct;
+                    }
+                }
+                return null;
+            };
+
+            // Sort events by time
+            sunEvents.sort((a, b) => a.time - b.time);
+
+            // Calculate X positions
+            const eventPixels = sunEvents.map(e => ({ ...e, x: getPixelForTime(e.time) })).filter(e => e.x !== null);
+
+            // Define boundaries: [Left Edge, ...Events, Right Edge]
+            const boundaries = [
+                { x: chartArea.left, time: startDt }, 
+                ...eventPixels, 
+                { x: chartArea.right, time: endDt }
+            ];
+
+            ctx.save();
+            
+            for (let i = 0; i < boundaries.length - 1; i++) {
+                const start = boundaries[i];
+                const end = boundaries[i+1];
+                
+                let isNight = false;
+                
+                // Determine initial state if we are at the start
+                if (i === 0) {
+                    const daysPassed = Math.round((startDt - baseSunrise) / 86400);
+                    const localSR = baseSunrise + daysPassed * 86400;
+                    const localSS = baseSunset + daysPassed * 86400;
+                    
+                    if (startDt >= localSR && startDt < localSS) {
+                        isNight = false;
+                    } else {
+                        isNight = true;
+                    }
+                } else {
+                    // Subsequent segments toggle based on the event type of the boundary
+                    const boundaryType = boundaries[i].type; 
+                    if (boundaryType === 'sunset') isNight = true;
+                    else if (boundaryType === 'sunrise') isNight = false;
+                }
+
+                const width = end.x - start.x;
+                if (width <= 0) continue;
+
+                if (isNight) {
+                    ctx.fillStyle = 'rgba(0, 0, 20, 0.2)';
+                    ctx.fillRect(start.x, chartArea.top, width, chartArea.height);
+                } 
+                
+                // Draw Twilight Gradient at the boundary line
+                if (i > 0) {
+                    const gradientWidth = 40;
+                    const grd = ctx.createLinearGradient(start.x - gradientWidth/2, 0, start.x + gradientWidth/2, 0);
+                    if (boundaries[i].type === 'sunset') {
+                        // Day to Night
+                        grd.addColorStop(0, 'rgba(0, 0, 20, 0)');
+                        grd.addColorStop(1, 'rgba(0, 0, 20, 0.2)');
+                    } else {
+                        // Night to Day
+                        grd.addColorStop(0, 'rgba(0, 0, 20, 0.2)');
+                        grd.addColorStop(1, 'rgba(0, 0, 20, 0)');
+                    }
+                    ctx.fillStyle = grd;
+                    ctx.fillRect(start.x - gradientWidth/2, chartArea.top, gradientWidth, chartArea.height);
+                }
+            }
+            ctx.restore();
+
+            // Draw Icons and Lines
+            ctx.save();
+            eventPixels.forEach(e => {
+                const x = e.x;
+                const yBottom = chartArea.bottom;
+                const yTop = chartArea.top;
+
+                // Dashed Line
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.moveTo(x, yTop);
+                ctx.lineTo(x, yBottom);
+                ctx.stroke();
+
+                // Icon (Horizon Sun)
+                const iconSize = 14;
+                const iconY = yBottom - 10;
+                
+                // Sun
+                ctx.beginPath();
+                ctx.arc(x, iconY, iconSize/2, Math.PI, 0); // Top half arc
+                ctx.fillStyle = '#fbbf24'; // Warm yellow
+                ctx.fill();
+                
+                // Horizon Line
+                ctx.beginPath();
+                ctx.setLineDash([]);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.moveTo(x - iconSize, iconY);
+                ctx.lineTo(x + iconSize, iconY);
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+    };
 
     // Prepare Data and Styles
     const datasetData = [];
@@ -418,16 +565,15 @@ function updateChart(data, type) {
         const condition = item.weather[0].main;
         const iconCode = item.weather[0].icon;
         
-        // Logic: Show icon if index % 3 === 0 OR condition changed from previous
         const showIcon = (index % 3 === 0) || (lastCondition && condition !== lastCondition);
         
         if (showIcon && weatherIconsCache[iconCode]) {
             pointStyles.push(weatherIconsCache[iconCode]);
-            pointRadii.push(15); // Normal size (30px diameter)
-            pointHoverRadii.push(25); // Hover size (50px diameter - approx 1.5x area/visual)
+            pointRadii.push(15);
+            pointHoverRadii.push(25);
         } else {
             pointStyles.push('circle');
-            pointRadii.push(3); // Small dot
+            pointRadii.push(3);
             pointHoverRadii.push(5);
         }
         
@@ -464,14 +610,13 @@ function updateChart(data, type) {
                 activeElements.forEach(active => {
                     const meta = chart.getDatasetMeta(active.datasetIndex);
                     const point = meta.data[active.index];
-                    // Only glow if it's an icon (radius > 10)
                     if (point.options.radius > 10) {
                         ctx.save();
-                        ctx.shadowColor = color; // Use dataset color for glow
+                        ctx.shadowColor = color;
                         ctx.shadowBlur = 15;
                         ctx.beginPath();
                         ctx.arc(point.x, point.y, point.options.radius, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(255,255,255,0.1)'; // Subtle fill
+                        ctx.fillStyle = 'rgba(255,255,255,0.1)';
                         ctx.fill();
                         ctx.restore();
                     }
@@ -495,7 +640,7 @@ function updateChart(data, type) {
                 pointStyle: pointStyles,
                 pointRadius: pointRadii,
                 pointHoverRadius: pointHoverRadii,
-                pointBackgroundColor: color // Fallback for circles
+                pointBackgroundColor: color
             }]
         },
         options: {
@@ -508,15 +653,21 @@ function updateChart(data, type) {
                 }
             },
             scales: {
-                x: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } },
-                y: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } }
+                x: { 
+                    ticks: { color: '#4b5563' }, 
+                    grid: { display: false } // Hide X grid lines for cleaner look
+                },
+                y: { 
+                    ticks: { color: '#4b5563' }, 
+                    grid: { color: 'rgba(0,0,0,0.05)' } // Very faint Y grid
+                }
             },
             hover: {
                 mode: 'nearest',
                 intersect: true
             }
         },
-        plugins: [glowPlugin]
+        plugins: [glowPlugin, dayNightPlugin]
     });
 }
 
