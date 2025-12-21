@@ -19,7 +19,8 @@
                 </div>
                 <div class="search-box">
                     <input type="text" id="city-input" placeholder="Enter city name...">
-                    <button id="search-btn"><span class="material-icons">search</span></button>
+                    <button id="search-btn" title="Search"><span class="material-icons">search</span></button>
+                    <button id="location-btn" title="Current Location"><span class="material-icons">my_location</span></button>
                 </div>
             </header>
 
@@ -39,7 +40,6 @@
                         </div>
 
                         <div class="details-grid">
-                            <!-- Sunrise and Sunset moved to top to be next to each other -->
                             <div class="detail-item">
                                 <span class="material-icons">wb_twilight</span>
                                 <div>
@@ -69,6 +69,63 @@
                                     <span id="humidity">0%</span>
                                 </div>
                             </div>
+                            <!-- New Items -->
+                            <div class="detail-item">
+                                <span class="material-icons">compress</span>
+                                <div>
+                                    <p>Pressure</p>
+                                    <span id="pressure">0 hPa</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <span class="material-icons">visibility</span>
+                                <div>
+                                    <p>Visibility</p>
+                                    <span id="visibility">0 km</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Air Quality Section -->
+                        <div class="aqi-container">
+                            <h3>Air Quality</h3>
+                            <div class="aqi-grid">
+                                <div class="detail-item">
+                                    <span class="material-icons">masks</span>
+                                    <div>
+                                        <p>AQI</p>
+                                        <span id="aqi-status">--</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="material-icons">grain</span>
+                                    <div>
+                                        <p>PM2.5</p>
+                                        <span id="pm25">0</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="material-icons">science</span>
+                                    <div>
+                                        <p>SO2</p>
+                                        <span id="so2">0</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="material-icons">science</span>
+                                    <div>
+                                        <p>NO2</p>
+                                        <span id="no2">0</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="material-icons">bubble_chart</span>
+                                    <div>
+                                        <p>O3</p>
+                                        <span id="o3">0</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -90,7 +147,7 @@
             
             <div id="error-message" class="error" style="display: none;">
                 <span class="material-icons">error</span>
-                <p>City not found. Please try again.</p>
+                <p>City not found or location unavailable. Please try again.</p>
             </div>
         </div>
     </div>
