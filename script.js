@@ -304,26 +304,46 @@ function updateForecast(data) {
     forecastList.innerHTML = '';
     const unitSymbol = currentUnit === 'metric' ? '°C' : '°F';
     
-    const dailyData = data.list.filter(item => item.dt_txt.includes("12:00:00"));
+    // Group forecast data by day
+    const dailyMap = new Map();
+    
+    data.list.forEach(item => {
+        const dateStr = item.dt_txt.split(' ')[0];
+        if (!dailyMap.has(dateStr)) {
+            dailyMap.set(dateStr, []);
+        }
+        dailyMap.get(dateStr).push(item);
+    });
 
-    dailyData.forEach(day => {
-        const date = new Date(day.dt * 1000);
+    // Take up to 5 days
+    const days = Array.from(dailyMap.keys()).slice(0, 5);
+
+    days.forEach(dateStr => {
+        const items = dailyMap.get(dateStr);
+        
+        // Find item closest to 12:00:00 for representative weather
+        let forecastItem = items.find(i => i.dt_txt.includes("12:00:00"));
+        if (!forecastItem) {
+            forecastItem = items[Math.floor(items.length / 2)];
+        }
+
+        const date = new Date(forecastItem.dt * 1000);
         const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-        const temp = Math.round(day.main.temp);
-        const iconCode = day.weather[0].icon;
-        const desc = day.weather[0].main;
-        const pop = Math.round(day.pop * 100);
+        const temp = Math.round(forecastItem.main.temp);
+        const iconCode = forecastItem.weather[0].icon;
+        const desc = forecastItem.weather[0].main;
+        const pop = Math.round(forecastItem.pop * 100);
 
-        const forecastItem = document.createElement('div');
-        forecastItem.className = 'forecast-item';
-        forecastItem.innerHTML = `
+        const div = document.createElement('div');
+        div.className = 'forecast-item';
+        div.innerHTML = `
             <p class="f-day">${dayName}</p>
             <img src="${getIconUrl(iconCode)}" alt="${desc}">
             <p class="f-temp">${temp}${unitSymbol}</p>
             <p class="f-desc">${desc}</p>
             ${pop > 0 ? `<span class="pop-badge">${pop}% Rain</span>` : ''}
         `;
-        forecastList.appendChild(forecastItem);
+        forecastList.appendChild(div);
     });
 }
 
