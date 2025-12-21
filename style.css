@@ -10,6 +10,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Nova Round', sans-serif;
+    user-select: none;
 }
 
 /* Use Orbitron for headers and numbers for a sci-fi/weather station look */
