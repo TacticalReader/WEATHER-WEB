@@ -1,1 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyCast Weather</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="parallax-bg"></div>
+    <div class="container">
+        <div class="glass-card">
+            <header>
+                <div class="logo">
+                    <span class="material-icons">filter_drama</span>
+                    <h1>SkyCast</h1>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="city-input" placeholder="Enter city name...">
+                    <button id="search-btn"><span class="material-icons">search</span></button>
+                </div>
+            </header>
 
+            <main id="weather-content" style="display: none;">
+                <div class="current-weather">
+                    <div class="main-info">
+                        <h2 id="city-name">City Name</h2>
+                        <div class="temp-container">
+                            <img id="weather-icon" src="" alt="Weather Icon">
+                            <span id="temperature">0°C</span>
+                        </div>
+                        <p id="description">Clear Sky</p>
+                    </div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="material-icons">air</span>
+                        <div>
+                            <p>Wind</p>
+                            <span id="wind-speed">0 m/s</span>
+                            <span id="wind-dir" style="font-size: 0.8em; display:block;">N</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="material-icons">wb_twilight</span>
+                        <div>
+                            <p>Sunrise</p>
+                            <span id="sunrise">00:00</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="material-icons">nights_stay</span>
+                        <div>
+                            <p>Sunset</p>
+                            <span id="sunset">00:00</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="material-icons">water_drop</span>
+                        <div>
+                            <p>Humidity</p>
+                            <span id="humidity">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="forecastChart"></canvas>
+                </div>
+            </main>
+            
+            <div id="error-message" class="error" style="display: none;">
+                <span class="material-icons">error</span>
+                <p>City not found. Please try again.</p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
