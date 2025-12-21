@@ -11,6 +11,7 @@ const forecastList = document.getElementById('forecast-list');
 const hourlyForecastList = document.getElementById('hourly-forecast');
 const unitSwitch = document.getElementById('unit-switch');
 const favBtn = document.getElementById('fav-btn');
+const countryFlag = document.getElementById('country-flag');
 const favoritesList = document.getElementById('favorites-list');
 const chartButtons = document.querySelectorAll('.chart-btn');
 const bgLayers = [document.getElementById('bg-layer-1'), document.getElementById('bg-layer-2')];
@@ -253,6 +254,15 @@ function updateUI(data) {
     const speedUnit = currentUnit === 'metric' ? 'm/s' : 'mph';
 
     document.getElementById('city-name').textContent = `${data.name}, ${data.sys.country}`;
+    
+    // Update Flag
+    if (data.sys.country) {
+        countryFlag.src = `https://flagcdn.com/h40/${data.sys.country.toLowerCase()}.png`;
+        countryFlag.style.display = 'block';
+    } else {
+        countryFlag.style.display = 'none';
+    }
+
     document.getElementById('temperature').textContent = `${Math.round(data.main.temp)}${unitSymbol}`;
     document.getElementById('description').textContent = data.weather[0].description;
     
@@ -655,7 +665,7 @@ function updateChart(data, type) {
                         ctx.restore();
                     }
                 });
-            }
+            }ধন
         }
     };
 
@@ -711,7 +721,7 @@ function handleSearchInput(e) {
     const query = e.target.value.trim();
     clearTimeout(debounceTimer);
     
-    // If input is not empty, ensure we are in focus mode (X icon)
+    // If input is not empty, ensure we are in focus mode (icon is X)
     if (query.length > 0) {
         searchBox.classList.add('focus-mode');
         searchIconPath.setAttribute('d', PATH_CLOSE);
@@ -742,7 +752,10 @@ function renderSuggestions(locations) {
 
     locations.forEach(loc => {
         const li = document.createElement('li');
-        li.textContent = `${loc.name}, ${loc.state ? loc.state + ', ' : ''}${loc.country}`;
+        li.innerHTML = `
+            <img src="https://flagcdn.com/w40/${loc.country.toLowerCase()}.png" class="suggestion-flag" alt="${loc.country}">
+            <span>${loc.name}, ${loc.state ? loc.state + ', ' : ''}${loc.country}</span>
+        `;
         li.addEventListener('click', () => {
             cityInput.value = loc.name;
             suggestionsList.classList.remove('show');
