@@ -119,7 +119,7 @@ header {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 
 .logo {
@@ -244,6 +244,7 @@ input:checked + .slider:before {
     gap: 10px;
     position: relative;
     z-index: 20;
+    margin: 0 auto 30px auto;
 }
 
 .search-box {
