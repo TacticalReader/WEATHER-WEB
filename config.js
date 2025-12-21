@@ -1,6 +1,6 @@
 const CONFIG = {
     // Get your free API key from https://openweathermap.org/api
-    apiKey: "YOUR_API_KEY_HERE", 
+        apiKey: "511c0d53e786d6e701870951d85c605d" , 
     
     // Background images for different weather conditions
     backgrounds: {
