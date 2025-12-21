@@ -310,6 +310,8 @@ input:checked + .slider:before {
     cursor: pointer;
     transition: background 0.2s;
     border-bottom: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
 }
 
 .suggestions-list li:hover {
@@ -752,4 +754,20 @@ input:checked + .slider:before {
     .details-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Flag Styles */
+.country-flag {
+    height: 28px;
+    width: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.suggestion-flag {
+    width: 24px;
+    height: auto;
+    margin-right: 12px;
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
