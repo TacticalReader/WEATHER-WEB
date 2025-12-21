@@ -15,6 +15,12 @@ const favoritesList = document.getElementById('favorites-list');
 const chartButtons = document.querySelectorAll('.chart-btn');
 const bgLayers = [document.getElementById('bg-layer-1'), document.getElementById('bg-layer-2')];
 const glassCard = document.querySelector('.glass-card');
+const searchBox = document.querySelector('.search-box');
+const searchIconPath = document.getElementById('search-path');
+
+// SVG Paths
+const PATH_SEARCH = "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z";
+const PATH_CLOSE = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z";
 
 // State
 let currentUnit = 'metric'; // 'metric' or 'imperial'
@@ -41,13 +47,21 @@ function init() {
     
     // Event Listeners
     searchBtn.addEventListener('click', () => {
-        const city = cityInput.value.trim();
-        if (city) {
-            fetchWeather(city);
+        // If in focus mode (icon is X), clear input
+        if (searchBox.classList.contains('focus-mode') && cityInput.value.length > 0) {
+            cityInput.value = '';
+            cityInput.focus();
+            handleSearchInput({ target: cityInput }); // Trigger update
         } else {
-            showToast("Please enter a city name");
+            // Standard search behavior
+            const city = cityInput.value.trim();
+            if (city) {
+                fetchWeather(city);
+                cityInput.blur();
+            } else {
+                cityInput.focus();
+            }
         }
-        suggestionsList.classList.remove('show');
     });
 
     locationBtn.addEventListener('click', handleLocationSearch);
@@ -57,11 +71,31 @@ function init() {
             const city = cityInput.value.trim();
             if (city) {
                 fetchWeather(city);
+                cityInput.blur();
             } else {
                 showToast("Please enter a city name");
             }
             suggestionsList.classList.remove('show');
         }
+    });
+
+    // Search Focus/Blur & Morphing Logic
+    cityInput.addEventListener('focus', () => {
+        searchBox.classList.add('focus-mode');
+        document.body.classList.add('search-focus');
+        searchIconPath.setAttribute('d', PATH_CLOSE);
+    });
+
+    cityInput.addEventListener('blur', () => {
+        // Delay to allow click on suggestions or clear button
+        setTimeout(() => {
+            if (document.activeElement !== cityInput) {
+                searchBox.classList.remove('focus-mode');
+                document.body.classList.remove('search-focus');
+                searchIconPath.setAttribute('d', PATH_SEARCH);
+                suggestionsList.classList.remove('show');
+            }
+        }, 200);
     });
 
     cityInput.addEventListener('input', handleSearchInput);
@@ -677,6 +711,12 @@ function handleSearchInput(e) {
     const query = e.target.value.trim();
     clearTimeout(debounceTimer);
     
+    // If input is not empty, ensure we are in focus mode (X icon)
+    if (query.length > 0) {
+        searchBox.classList.add('focus-mode');
+        searchIconPath.setAttribute('d', PATH_CLOSE);
+    }
+
     if (query.length < 3) {
         suggestionsList.classList.remove('show');
         return;
@@ -743,8 +783,25 @@ function toggleFavorite() {
     if (index === -1) {
         favorites.push(currentCity);
         createFavoriteChip(currentCity);
+        
+        // Animation Logic
         favBtn.classList.add('active');
+        favBtn.classList.add('animating');
         favBtn.textContent = 'favorite';
+        
+        // Trigger Sparks
+        const rect = favBtn.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        if (typeof createSparks === 'function') {
+            createSparks(centerX, centerY + window.scrollY);
+        }
+
+        // Remove animation class after it finishes
+        setTimeout(() => {
+            favBtn.classList.remove('animating');
+        }, 600);
+
         showToast("Added to favorites");
     } else {
         removeFavorite(currentCity);
@@ -807,7 +864,7 @@ function showError(msg) {
     skeletonLoader.style.display = 'none';
     weatherContent.style.display = 'none';
     errorMessage.style.display = 'flex';
-    errorText.textContent = msg || "City not found or location unavailable.";
+    errorText.textContent = msg || "City not found or location unavailable. Please try again.";
 }
 
 function showToast(msg) {
