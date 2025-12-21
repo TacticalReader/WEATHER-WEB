@@ -24,51 +24,66 @@
             </header>
 
             <main id="weather-content" style="display: none;">
-                <div class="current-weather">
-                    <div class="main-info">
-                        <h2 id="city-name">City Name</h2>
-                        <div class="temp-container">
-                            <img id="weather-icon" src="" alt="Weather Icon">
-                            <span id="temperature">0°C</span>
+                <div class="content-grid">
+                    <!-- Left Column: Current Weather & Details -->
+                    <div class="left-column">
+                        <div class="current-weather">
+                            <div class="main-info">
+                                <h2 id="city-name">City Name</h2>
+                                <div class="temp-container">
+                                    <img id="weather-icon" src="" alt="Weather Icon">
+                                    <span id="temperature">0°C</span>
+                                </div>
+                                <p id="description">Clear Sky</p>
+                            </div>
                         </div>
-                        <p id="description">Clear Sky</p>
-                    </div>
-                </div>
 
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <span class="material-icons">air</span>
-                        <div>
-                            <p>Wind</p>
-                            <span id="wind-speed">0 m/s</span>
-                            <span id="wind-dir" style="font-size: 0.8em; display:block;">N</span>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="material-icons">air</span>
+                                <div>
+                                    <p>Wind</p>
+                                    <span id="wind-speed">0 m/s</span>
+                                    <span id="wind-dir" style="font-size: 0.8em; display:block;">N</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <span class="material-icons">wb_twilight</span>
+                                <div>
+                                    <p>Sunrise</p>
+                                    <span id="sunrise">00:00</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <span class="material-icons">nights_stay</span>
+                                <div>
+                                    <p>Sunset</p>
+                                    <span id="sunset">00:00</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <span class="material-icons">water_drop</span>
+                                <div>
+                                    <p>Humidity</p>
+                                    <span id="humidity">0%</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="detail-item">
-                        <span class="material-icons">wb_twilight</span>
-                        <div>
-                            <p>Sunrise</p>
-                            <span id="sunrise">00:00</span>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <span class="material-icons">nights_stay</span>
-                        <div>
-                            <p>Sunset</p>
-                            <span id="sunset">00:00</span>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <span class="material-icons">water_drop</span>
-                        <div>
-                            <p>Humidity</p>
-                            <span id="humidity">0%</span>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="chart-container">
-                    <canvas id="forecastChart"></canvas>
+                    <!-- Right Column: Chart & Forecast -->
+                    <div class="right-column">
+                        <div class="chart-container">
+                            <canvas id="forecastChart"></canvas>
+                        </div>
+
+                        <div class="forecast-container">
+                            <h3>5-Day Forecast</h3>
+                            <div id="forecast-list" class="forecast-list">
+                                <!-- Forecast items injected here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
             
