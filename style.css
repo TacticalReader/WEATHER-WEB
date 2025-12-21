@@ -10,7 +10,7 @@
 body {
     min-height: 100vh;
     overflow-x: hidden;
-    color: #fff;
+    color: #1f2937; /* Dark text */
 }
 
 /* Parallax Background */
@@ -34,7 +34,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.3); /* Dark overlay for contrast */
+    background: rgba(0, 0, 0, 0.1); /* Lighter overlay */
 }
 
 .container {
@@ -45,18 +45,38 @@ body {
     padding: 20px;
 }
 
-/* Glassmorphism Card */
+/* Glassmorphism Card - Updated for Light Theme */
 .glass-card {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    background: rgba(255, 255, 255, 0.75); /* More opaque white */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
     padding: 40px;
     width: 100%;
-    max-width: 600px;
-    transition: transform 0.3s ease;
+    max-width: 600px; /* Default mobile/tablet width */
+    transition: all 0.3s ease;
+}
+
+/* Desktop Layout Expansion */
+@media (min-width: 1024px) {
+    .glass-card {
+        max-width: 1200px; /* Covers more screen on desktop */
+    }
+    
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 40px;
+        align-items: start;
+    }
+
+    .left-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
 }
 
 header {
@@ -75,16 +95,22 @@ header {
 
 .logo .material-icons {
     font-size: 40px;
-    color: #aee1f5;
+    color: #2563eb; /* Blue logo */
+}
+
+.logo h1 {
+    color: #111827;
 }
 
 .search-box {
     display: flex;
     width: 100%;
-    background: rgba(255, 255, 255, 0.2);
+    max-width: 500px;
+    background: rgba(255, 255, 255, 0.6);
     border-radius: 30px;
     padding: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .search-box input {
@@ -93,16 +119,16 @@ header {
     border: none;
     outline: none;
     padding: 10px 20px;
-    color: #fff;
+    color: #1f2937;
     font-size: 16px;
 }
 
 .search-box input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    color: #6b7280;
 }
 
 .search-box button {
-    background: rgba(255, 255, 255, 0.3);
+    background: #2563eb;
     border: none;
     border-radius: 50%;
     width: 40px;
@@ -116,7 +142,7 @@ header {
 }
 
 .search-box button:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: #1d4ed8;
 }
 
 .current-weather {
@@ -133,6 +159,7 @@ header {
 #temperature {
     font-size: 64px;
     font-weight: 600;
+    color: #111827;
 }
 
 #weather-icon {
@@ -144,7 +171,7 @@ header {
     font-size: 20px;
     text-transform: capitalize;
     margin-top: -10px;
-    opacity: 0.9;
+    color: #4b5563;
 }
 
 .details-grid {
@@ -155,41 +182,90 @@ header {
 }
 
 .detail-item {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.5);
     padding: 15px;
     border-radius: 15px;
     display: flex;
     align-items: center;
     gap: 15px;
+    border: 1px solid rgba(255,255,255,0.6);
 }
 
 .detail-item .material-icons {
     font-size: 28px;
-    opacity: 0.8;
+    color: #2563eb;
 }
 
 .detail-item p {
     font-size: 12px;
-    opacity: 0.7;
+    color: #6b7280;
 }
 
 .detail-item span {
     font-size: 16px;
     font-weight: 600;
+    color: #1f2937;
 }
 
 .chart-container {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 15px;
     padding: 15px;
     position: relative;
     height: 250px;
     width: 100%;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255,255,255,0.6);
+}
+
+/* Forecast Section Styles */
+.forecast-container h3 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: #111827;
+}
+
+.forecast-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 10px;
+}
+
+.forecast-item {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 10px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.forecast-item .f-day {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.forecast-item img {
+    width: 40px;
+    height: 40px;
+}
+
+.forecast-item .f-temp {
+    font-weight: bold;
+    color: #111827;
+}
+
+.forecast-item .f-desc {
+    font-size: 0.7rem;
+    color: #6b7280;
 }
 
 .error {
     text-align: center;
-    color: #ff6b6b;
+    color: #ef4444;
     margin-top: 20px;
     display: flex;
     flex-direction: column;
