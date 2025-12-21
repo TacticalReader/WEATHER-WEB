@@ -229,7 +229,7 @@ function preloadChartIcons(list) {
 
         return new Promise((resolve) => {
             const img = new Image();
-            img.crossOrigin = "Anonymous";
+            // Removed crossOrigin for local files
             img.src = getIconUrl(code);
             img.onload = () => {
                 // Create a canvas to resize the image to a chart-friendly size (e.g., 40x40)
@@ -681,7 +681,7 @@ function updateChart(data, type) {
                         ctx.restore();
                     }
                 });
-            }
+            }ধন
         }
     };
 
