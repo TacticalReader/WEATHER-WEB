@@ -681,7 +681,7 @@ function updateChart(data, type) {
                         ctx.restore();
                     }
                 });
-            }ধন
+            }
         }
     };
 
