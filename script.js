@@ -181,32 +181,42 @@ function updateBackground(weatherMain) {
 }
 
 function updateCountdown(sunrise, sunset, timezone) {
-    const now = Math.floor(Date.now() / 1000);
-    // Note: sunrise/sunset from API are UTC timestamps. We compare directly with UTC now.
-    
-    let targetTime, label;
-    
-    if (now < sunrise) {
-        targetTime = sunrise;
-        label = "Sunrise";
-    } else if (now < sunset) {
-        targetTime = sunset;
-        label = "Sunset";
-    } else {
-        // If after sunset, count to next sunrise (approximate by adding 24h to previous sunrise)
-        targetTime = sunrise + 86400;
-        label = "Sunrise";
-    }
-
     const el = document.getElementById('daylight-countdown');
-    if (targetTime) {
+    
+    // Clear existing interval to prevent duplicates
+    if (window.countdownInterval) clearInterval(window.countdownInterval);
+
+    function update() {
+        const now = Math.floor(Date.now() / 1000);
+        let targetTime, label;
+        
+        if (now < sunrise) {
+            targetTime = sunrise;
+            label = "Sunrise";
+        } else if (now < sunset) {
+            targetTime = sunset;
+            label = "Sunset";
+        } else {
+            // It's after sunset, count down to next sunrise (approximate as sunrise + 24h)
+            targetTime = sunrise + 86400; 
+            label = "Sunrise";
+        }
+
         const diff = targetTime - now;
+
+        if (diff <= 0) {
+            el.textContent = "Now";
+            // Optionally refresh weather here
+            return;
+        }
+
         const hrs = Math.floor(diff / 3600);
         const mins = Math.floor((diff % 3600) / 60);
         el.textContent = `${label} in ${hrs}h ${mins}m`;
-    } else {
-        el.textContent = "";
     }
+
+    update(); // Run immediately
+    window.countdownInterval = setInterval(update, 60000); // Update every minute
 }
 
 function updateAirQuality(data) {
@@ -281,42 +291,36 @@ function updateChart(data, type) {
     }
 
     if (weatherChart) {
-        weatherChart.data.labels = labels;
-        weatherChart.data.datasets[0].label = label;
-        weatherChart.data.datasets[0].data = datasetData;
-        weatherChart.data.datasets[0].borderColor = color;
-        weatherChart.data.datasets[0].backgroundColor = bgColor;
-        weatherChart.data.datasets[0].pointBackgroundColor = color;
-        weatherChart.update();
-    } else {
-        weatherChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: label,
-                    data: datasetData,
-                    borderColor: color,
-                    backgroundColor: bgColor,
-                    borderWidth: 2,
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: color
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { labels: { color: '#333' } }
-                },
-                scales: {
-                    x: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } },
-                    y: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } }
-                }
-            }
-        });
+        weatherChart.destroy();
     }
+
+    weatherChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: label,
+                data: datasetData,
+                borderColor: color,
+                backgroundColor: bgColor,
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: color
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#333' } }
+            },
+            scales: {
+                x: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } },
+                y: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } }
+            }
+        }
+    });
 }
 
 // --- Autocomplete ---
