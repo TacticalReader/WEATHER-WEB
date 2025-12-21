@@ -771,3 +771,26 @@ input:checked + .slider:before {
     border-radius: 3px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
+
+/* API Attribution */
+.api-attribution {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: #4b5563;
+    font-weight: 600;
+}
+
+.api-attribution img {
+    height: 25px;
+    width: auto;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.api-attribution img:hover {
+    opacity: 1;
+}
