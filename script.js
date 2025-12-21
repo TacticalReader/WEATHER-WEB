@@ -24,6 +24,13 @@ let debounceTimer;
 init();
 
 function init() {
+    // Check for configuration
+    if (typeof CONFIG === 'undefined') {
+        console.error("CONFIG is not defined. Make sure config.js is included and contains the CONFIG object.");
+        showError("Configuration missing. Please ensure config.js exists.");
+        return;
+    }
+
     loadFavorites();
     fetchWeather(currentCity);
     
