@@ -14,6 +14,7 @@ const favBtn = document.getElementById('fav-btn');
 const favoritesList = document.getElementById('favorites-list');
 const chartButtons = document.querySelectorAll('.chart-btn');
 const bgLayers = [document.getElementById('bg-layer-1'), document.getElementById('bg-layer-2')];
+const glassCard = document.querySelector('.glass-card');
 
 // State
 let currentUnit = 'metric'; // 'metric' or 'imperial'
@@ -72,6 +73,14 @@ function init() {
 
     unitSwitch.addEventListener('change', () => {
         currentUnit = unitSwitch.checked ? 'imperial' : 'metric';
+        
+        // Toggle class for visual effects (Color Psychology)
+        if (currentUnit === 'imperial') {
+            glassCard.classList.add('is-imperial');
+        } else {
+            glassCard.classList.remove('is-imperial');
+        }
+
         fetchWeather(currentCity);
     });
 
