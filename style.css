@@ -10,7 +10,7 @@
 body {
     min-height: 100vh;
     overflow-x: hidden;
-    color: #1f2937; /* Dark text */
+    color: #1f2937;
 }
 
 /* Parallax Background */
@@ -25,6 +25,7 @@ body {
     background-position: center;
     background-size: cover;
     z-index: -1;
+    transition: background-image 1s ease-in-out;
 }
 
 .parallax-bg::after {
@@ -34,7 +35,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.1); /* Lighter overlay */
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .container {
@@ -45,9 +46,8 @@ body {
     padding: 20px;
 }
 
-/* Glassmorphism Card - Enhanced */
 .glass-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3));
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-radius: 20px;
@@ -59,7 +59,6 @@ body {
     transition: all 0.3s ease;
 }
 
-/* Desktop Layout Expansion */
 @media (min-width: 1024px) {
     .glass-card {
         max-width: 1200px;
@@ -83,14 +82,21 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .logo {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 20px;
 }
 
 .logo .material-icons {
@@ -102,20 +108,94 @@ header {
     color: #111827;
 }
 
+/* Unit Toggle */
+.unit-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2563eb;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* Search Section */
+.search-section {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .search-box {
     display: flex;
     width: 100%;
-    max-width: 500px;
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 30px;
     padding: 5px;
     border: 1px solid rgba(255, 255, 255, 0.4);
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     gap: 5px;
+    position: relative;
+    z-index: 10;
+}
+
+.search-wrapper {
+    flex: 1;
+    position: relative;
 }
 
 .search-box input {
-    flex: 1;
+    width: 100%;
     background: transparent;
     border: none;
     outline: none;
@@ -124,8 +204,36 @@ header {
     font-size: 16px;
 }
 
-.search-box input::placeholder {
-    color: #4b5563;
+/* Autocomplete Suggestions */
+.suggestions-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    margin-top: 5px;
+    list-style: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+
+.suggestions-list.show {
+    display: block;
+}
+
+.suggestions-list li {
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.suggestions-list li:hover {
+    background: #eff6ff;
 }
 
 .search-box button {
@@ -146,9 +254,66 @@ header {
     background: #1d4ed8;
 }
 
+/* Favorites */
+.favorites-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    min-height: 30px;
+}
+
+.fav-chip {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.fav-chip:hover {
+    background: #2563eb;
+    color: white;
+}
+
+.fav-chip .remove-fav {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.fav-chip .remove-fav:hover {
+    opacity: 1;
+}
+
+/* Current Weather */
 .current-weather {
     text-align: center;
     margin-bottom: 30px;
+}
+
+.city-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.fav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    font-size: 24px;
+    transition: color 0.3s;
+}
+
+.fav-btn.active {
+    color: #ef4444;
 }
 
 .temp-container {
@@ -173,6 +338,13 @@ header {
     text-transform: capitalize;
     margin-top: -10px;
     color: #4b5563;
+}
+
+.countdown-text {
+    font-size: 0.9rem;
+    color: #2563eb;
+    margin-top: 5px;
+    font-weight: 500;
 }
 
 .details-grid {
@@ -215,7 +387,7 @@ header {
     color: #1f2937;
 }
 
-/* Air Quality Section */
+/* Air Quality */
 .aqi-container {
     margin-top: 20px;
 }
@@ -228,23 +400,58 @@ header {
 
 .aqi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 10px;
 }
 
+/* Chart Section */
 .chart-container {
     background: rgba(255, 255, 255, 0.3);
     border-radius: 15px;
     padding: 15px;
     position: relative;
-    height: 250px;
     width: 100%;
     margin-bottom: 30px;
     border: 1px solid rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(5px);
 }
 
-/* Forecast Section Styles */
+.chart-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.4);
+    padding: 3px;
+    border-radius: 8px;
+}
+
+.chart-btn {
+    background: transparent;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #4b5563;
+    transition: all 0.2s;
+}
+
+.chart-btn.active {
+    background: #2563eb;
+    color: white;
+}
+
+.canvas-wrapper {
+    height: 250px;
+    width: 100%;
+}
+
+/* Forecast */
 .forecast-container h3 {
     margin-bottom: 15px;
     font-size: 1.2rem;
@@ -294,6 +501,19 @@ header {
 .forecast-item .f-desc {
     font-size: 0.7rem;
     color: #4b5563;
+}
+
+/* Skeleton Loader */
+.skeleton-box {
+    background: rgba(200, 200, 200, 0.3);
+    border-radius: 15px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0.6; }
 }
 
 .error {
