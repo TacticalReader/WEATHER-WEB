@@ -9,6 +9,7 @@ const errorText = document.getElementById('error-text');
 const retryBtn = document.getElementById('retry-btn');
 const forecastList = document.getElementById('forecast-list');
 const hourlyForecastList = document.getElementById('hourly-forecast');
+const windList = document.getElementById('wind-list');
 const unitSwitch = document.getElementById('unit-switch');
 const favBtn = document.getElementById('fav-btn');
 const countryFlag = document.getElementById('country-flag');
@@ -206,6 +207,7 @@ async function fetchAdditionalData(weatherData) {
         
         updateForecast(forecastData);
         updateHourlyForecast(forecastData);
+        updateWindForecast(forecastData);
         updateBackground(weatherData.weather[0].main, weatherData);
         checkFavoriteStatus(weatherData.name);
         
@@ -400,6 +402,36 @@ function updateHourlyForecast(data) {
     });
 }
 
+function updateWindForecast(data) {
+    if (!windList) return;
+    windList.innerHTML = '';
+    const speedUnit = currentUnit === 'metric' ? 'm/s' : 'mph';
+
+    // Next 24 hours (approx 8 items)
+    data.list.slice(0, 8).forEach(item => {
+        const windSpeed = item.wind.speed;
+        const windDeg = item.wind.deg;
+        const date = new Date(item.dt * 1000);
+        const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+        const li = document.createElement('li');
+        li.classList.add('wind-item');
+
+        li.innerHTML = `
+            <p class="h-time">${time}</p>
+            <img 
+                src="images/weather_icons/direction.png" 
+                class="direction-icon" 
+                alt="Wind Direction"
+                style="transform: rotate(${windDeg - 180}deg)" 
+            >
+            <p class="h-temp">${Math.round(windSpeed)} ${speedUnit}</p>
+        `;
+
+        windList.appendChild(li);
+    });
+}
+
 function updateForecast(data) {
     forecastList.innerHTML = '';
     const unitSymbol = currentUnit === 'metric' ? '°C' : '°F';
@@ -543,7 +575,7 @@ function updateChart(data, type) {
                 if (isNight) {
                     ctx.fillStyle = 'rgba(0, 0, 20, 0.2)';
                     ctx.fillRect(start.x, chartArea.top, width, chartArea.height);
-                } 
+                }
                 
                 // Draw Twilight Gradient at the boundary line
                 if (i > 0) {
