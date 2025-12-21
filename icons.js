@@ -1,4 +1,3 @@
 function getIconUrl(code) {
-    // Use local PNG icons from images/weather_icons folder
-    return `images/weather_icons/${code}.png`;
+    return `https://openweathermap.org/img/wn/${code}@2x.png`;
 }
