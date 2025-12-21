@@ -13,7 +13,7 @@ body {
     color: #1f2937;
 }
 
-/* Parallax Background */
+/* Parallax Background Layers */
 .parallax-bg {
     position: fixed;
     top: 0;
@@ -24,8 +24,14 @@ body {
     background-attachment: fixed;
     background-position: center;
     background-size: cover;
+    z-index: -2;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.parallax-bg.active {
+    opacity: 1;
     z-index: -1;
-    transition: background-image 1s ease-in-out;
 }
 
 .parallax-bg::after {
@@ -329,8 +335,8 @@ input:checked + .slider:before {
 }
 
 #weather-icon {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
 }
 
 #description {
@@ -451,6 +457,55 @@ input:checked + .slider:before {
     width: 100%;
 }
 
+/* Hourly Forecast */
+.hourly-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(37, 99, 235, 0.5) transparent;
+}
+
+.hourly-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.hourly-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(37, 99, 235, 0.5);
+    border-radius: 3px;
+}
+
+.hourly-item {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 10px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    min-width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.hourly-item img {
+    width: 40px;
+    height: 40px;
+}
+
+.h-time {
+    font-size: 0.8rem;
+    color: #4b5563;
+    margin-bottom: 5px;
+}
+
+.h-temp {
+    font-weight: bold;
+    color: #111827;
+}
+
 /* Forecast */
 .forecast-container h3 {
     margin-bottom: 15px;
@@ -503,6 +558,16 @@ input:checked + .slider:before {
     color: #4b5563;
 }
 
+.pop-badge {
+    font-size: 0.7rem;
+    background: rgba(37, 99, 235, 0.2);
+    color: #2563eb;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-top: 4px;
+    font-weight: 600;
+}
+
 /* Skeleton Loader */
 .skeleton-box {
     background: rgba(200, 200, 200, 0.3);
@@ -524,6 +589,47 @@ input:checked + .slider:before {
     flex-direction: column;
     align-items: center;
     gap: 10px;
+}
+
+.retry-btn {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.retry-btn:hover {
+    background: #dc2626;
+}
+
+/* Toast Notification */
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.toast {
+    background: rgba(31, 41, 55, 0.9);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.toast.show {
+    transform: translateX(0);
 }
 
 @media (max-width: 480px) {
