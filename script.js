@@ -182,21 +182,20 @@ function updateBackground(weatherMain) {
 
 function updateCountdown(sunrise, sunset, timezone) {
     const now = Math.floor(Date.now() / 1000);
-    const localNow = now + timezone;
     // Note: sunrise/sunset from API are UTC timestamps. We compare directly with UTC now.
     
     let targetTime, label;
     
-    if (now < sunset) {
+    if (now < sunrise) {
+        targetTime = sunrise;
+        label = "Sunrise";
+    } else if (now < sunset) {
         targetTime = sunset;
         label = "Sunset";
     } else {
-        // If after sunset, count to next sunrise (approximate by adding 24h to previous sunrise if needed, 
-        // but simpler to just show 'Sunrise tomorrow' logic or just wait for next API fetch)
-        // For simplicity, if passed sunset, we just show "Sunset passed"
-        // A robust solution requires checking if now > sunset, then target is tomorrow's sunrise.
-        // Since we only have today's data, we'll just show "Night time" or similar if passed.
-        targetTime = null;
+        // If after sunset, count to next sunrise (approximate by adding 24h to previous sunrise)
+        targetTime = sunrise + 86400;
+        label = "Sunrise";
     }
 
     const el = document.getElementById('daylight-countdown');
@@ -282,36 +281,42 @@ function updateChart(data, type) {
     }
 
     if (weatherChart) {
-        weatherChart.destroy();
-    }
-
-    weatherChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: label,
-                data: datasetData,
-                borderColor: color,
-                backgroundColor: bgColor,
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: color
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { labels: { color: '#333' } }
+        weatherChart.data.labels = labels;
+        weatherChart.data.datasets[0].label = label;
+        weatherChart.data.datasets[0].data = datasetData;
+        weatherChart.data.datasets[0].borderColor = color;
+        weatherChart.data.datasets[0].backgroundColor = bgColor;
+        weatherChart.data.datasets[0].pointBackgroundColor = color;
+        weatherChart.update();
+    } else {
+        weatherChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: datasetData,
+                    borderColor: color,
+                    backgroundColor: bgColor,
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: color
+                }]
             },
-            scales: {
-                x: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } },
-                y: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#333' } }
+                },
+                scales: {
+                    x: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } },
+                    y: { ticks: { color: '#4b5563' }, grid: { color: 'rgba(0,0,0,0.1)' } }
+                }
             }
-        }
-    });
+        });
+    }
 }
 
 // --- Autocomplete ---
