@@ -75,6 +75,13 @@ body {
     transition: all 0.5s ease;
 }
 
+/* Focus Mode: Dim everything except search */
+body.search-focus .glass-card > *:not(.search-section) {
+    opacity: 0.4;
+    filter: blur(3px);
+    transition: all 0.4s ease;
+}
+
 /* Warm Glow for Imperial Mode */
 .glass-card.is-imperial {
     box-shadow: var(--fahrenheit-glow);
@@ -235,6 +242,8 @@ input:checked + .slider:before {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    position: relative;
+    z-index: 20;
 }
 
 .search-box {
@@ -248,6 +257,15 @@ input:checked + .slider:before {
     gap: 5px;
     position: relative;
     z-index: 10;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Focus Mode Expansion */
+.search-box.focus-mode {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    border-color: rgba(255, 255, 255, 0.8);
 }
 
 .search-wrapper {
@@ -315,6 +333,15 @@ input:checked + .slider:before {
     background: #1d4ed8;
 }
 
+/* Search Icon SVG Transition */
+.search-icon-svg {
+    transition: transform 0.3s ease;
+}
+
+.search-box.focus-mode .search-icon-svg {
+    transform: rotate(90deg);
+}
+
 /* Favorites */
 .favorites-list {
     display: flex;
@@ -371,10 +398,34 @@ input:checked + .slider:before {
     color: #9ca3af;
     font-size: 24px;
     transition: color 0.3s;
+    position: relative;
+}
+
+/* Heart Animation */
+@keyframes heartBurst {
+    0% { transform: scale(1); }
+    40% { transform: scale(0.8); } /* Anticipation */
+    60% { transform: scale(1.2); } /* Burst */
+    100% { transform: scale(1); }
+}
+
+.fav-btn.animating {
+    animation: heartBurst 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .fav-btn.active {
-    color: #ef4444;
+    color: #ff4b4b;
+}
+
+/* Spark Particles */
+.spark {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ff4b4b;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 100;
 }
 
 .temp-container {
@@ -623,17 +674,18 @@ input:checked + .slider:before {
     font-weight: 600;
 }
 
-/* Skeleton Loader */
+/* Skeleton Loader - Shimmer Effect */
 .skeleton-box {
-    background: rgba(200, 200, 200, 0.3);
+    background: #e0e0e0;
+    background: linear-gradient(110deg, rgba(255,255,255,0.1) 8%, rgba(255,255,255,0.3) 18%, rgba(255,255,255,0.1) 33%);
+    background-size: 200% 100%;
     border-radius: 15px;
-    animation: pulse 1.5s infinite;
+    animation: shimmer 1.5s linear infinite;
 }
 
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 0.3; }
-    100% { opacity: 0.6; }
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 .error {
