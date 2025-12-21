@@ -45,24 +45,24 @@ body {
     padding: 20px;
 }
 
-/* Glassmorphism Card - Updated for Light Theme */
+/* Glassmorphism Card - Enhanced */
 .glass-card {
-    background: rgba(255, 255, 255, 0.75); /* More opaque white */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2));
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
     padding: 40px;
     width: 100%;
-    max-width: 600px; /* Default mobile/tablet width */
+    max-width: 600px;
     transition: all 0.3s ease;
 }
 
 /* Desktop Layout Expansion */
 @media (min-width: 1024px) {
     .glass-card {
-        max-width: 1200px; /* Covers more screen on desktop */
+        max-width: 1200px;
     }
     
     .content-grid {
@@ -95,7 +95,7 @@ header {
 
 .logo .material-icons {
     font-size: 40px;
-    color: #2563eb; /* Blue logo */
+    color: #2563eb;
 }
 
 .logo h1 {
@@ -106,10 +106,10 @@ header {
     display: flex;
     width: 100%;
     max-width: 500px;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.4);
     border-radius: 30px;
     padding: 5px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
@@ -124,7 +124,7 @@ header {
 }
 
 .search-box input::placeholder {
-    color: #6b7280;
+    color: #4b5563;
 }
 
 .search-box button {
@@ -182,13 +182,20 @@ header {
 }
 
 .detail-item {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.3);
     padding: 15px;
     border-radius: 15px;
     display: flex;
     align-items: center;
     gap: 15px;
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.detail-item:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
 }
 
 .detail-item .material-icons {
@@ -198,7 +205,7 @@ header {
 
 .detail-item p {
     font-size: 12px;
-    color: #6b7280;
+    color: #4b5563;
 }
 
 .detail-item span {
@@ -208,14 +215,15 @@ header {
 }
 
 .chart-container {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 15px;
     padding: 15px;
     position: relative;
     height: 250px;
     width: 100%;
     margin-bottom: 30px;
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
 }
 
 /* Forecast Section Styles */
@@ -232,14 +240,21 @@ header {
 }
 
 .forecast-item {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.3);
     padding: 10px;
     border-radius: 12px;
     text-align: center;
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     display: flex;
     flex-direction: column;
     align-items: center;
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.forecast-item:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
 }
 
 .forecast-item .f-day {
@@ -260,7 +275,7 @@ header {
 
 .forecast-item .f-desc {
     font-size: 0.7rem;
-    color: #6b7280;
+    color: #4b5563;
 }
 
 .error {
