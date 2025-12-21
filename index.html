@@ -13,16 +13,52 @@
     <div class="container">
         <div class="glass-card">
             <header>
-                <div class="logo">
-                    <span class="material-icons">filter_drama</span>
-                    <h1>SkyCast</h1>
+                <div class="header-top">
+                    <div class="logo">
+                        <span class="material-icons">filter_drama</span>
+                        <h1>SkyCast</h1>
+                    </div>
+                    <div class="unit-toggle">
+                        <span>°C</span>
+                        <label class="switch">
+                            <input type="checkbox" id="unit-switch">
+                            <span class="slider round"></span>
+                        </label>
+                        <span>°F</span>
+                    </div>
                 </div>
-                <div class="search-box">
-                    <input type="text" id="city-input" placeholder="Enter city name...">
-                    <button id="search-btn" title="Search"><span class="material-icons">search</span></button>
-                    <button id="location-btn" title="Current Location"><span class="material-icons">my_location</span></button>
+                
+                <div class="search-section">
+                    <div class="search-box">
+                        <div class="search-wrapper">
+                            <input type="text" id="city-input" placeholder="Enter city name..." autocomplete="off">
+                            <ul id="suggestions-list" class="suggestions-list"></ul>
+                        </div>
+                        <button id="search-btn" title="Search"><span class="material-icons">search</span></button>
+                        <button id="location-btn" title="Current Location"><span class="material-icons">my_location</span></button>
+                    </div>
+                    <div id="favorites-list" class="favorites-list"></div>
                 </div>
             </header>
+
+            <!-- Skeleton Loader -->
+            <div id="skeleton-loader" style="display: none;">
+                <div class="content-grid">
+                    <div class="left-column">
+                        <div class="skeleton-box" style="height: 200px; width: 100%; margin-bottom: 30px;"></div>
+                        <div class="details-grid">
+                            <div class="skeleton-box" style="height: 100px;"></div>
+                            <div class="skeleton-box" style="height: 100px;"></div>
+                            <div class="skeleton-box" style="height: 100px;"></div>
+                            <div class="skeleton-box" style="height: 100px;"></div>
+                        </div>
+                    </div>
+                    <div class="right-column">
+                        <div class="skeleton-box" style="height: 250px; margin-bottom: 30px;"></div>
+                        <div class="skeleton-box" style="height: 150px;"></div>
+                    </div>
+                </div>
+            </div>
 
             <main id="weather-content" style="display: none;">
                 <div class="content-grid">
@@ -30,12 +66,16 @@
                     <div class="left-column">
                         <div class="current-weather">
                             <div class="main-info">
-                                <h2 id="city-name">City Name</h2>
+                                <div class="city-header">
+                                    <h2 id="city-name">City Name</h2>
+                                    <button id="fav-btn" class="material-icons fav-btn" title="Add to Favorites">favorite_border</button>
+                                </div>
                                 <div class="temp-container">
                                     <img id="weather-icon" src="" alt="Weather Icon">
                                     <span id="temperature">0°C</span>
                                 </div>
                                 <p id="description">Clear Sky</p>
+                                <p id="daylight-countdown" class="countdown-text"></p>
                             </div>
                         </div>
 
@@ -69,7 +109,6 @@
                                     <span id="humidity">0%</span>
                                 </div>
                             </div>
-                            <!-- New Items -->
                             <div class="detail-item">
                                 <span class="material-icons">compress</span>
                                 <div>
@@ -132,7 +171,16 @@
                     <!-- Right Column: Chart & Forecast -->
                     <div class="right-column">
                         <div class="chart-container">
-                            <canvas id="forecastChart"></canvas>
+                            <div class="chart-header">
+                                <div class="chart-controls">
+                                    <button class="chart-btn active" data-type="temp">Temp</button>
+                                    <button class="chart-btn" data-type="humidity">Humidity</button>
+                                    <button class="chart-btn" data-type="wind">Wind</button>
+                                </div>
+                            </div>
+                            <div class="canvas-wrapper">
+                                <canvas id="forecastChart"></canvas>
+                            </div>
                         </div>
 
                         <div class="forecast-container">
@@ -147,10 +195,11 @@
             
             <div id="error-message" class="error" style="display: none;">
                 <span class="material-icons">error</span>
-                <p>City not found or location unavailable. Please try again.</p>
+                <p id="error-text">City not found or location unavailable. Please try again.</p>
             </div>
         </div>
     </div>
+    <script src="config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
