@@ -12,6 +12,7 @@ const hourlyForecastList = document.getElementById('hourly-forecast');
 const windList = document.getElementById('wind-list');
 const unitSwitch = document.getElementById('unit-switch');
 const favBtn = document.getElementById('fav-btn');
+const shareBtn = document.getElementById('share-btn');
 const countryFlag = document.getElementById('country-flag');
 const favoritesList = document.getElementById('favorites-list');
 const chartButtons = document.querySelectorAll('.chart-btn');
@@ -112,6 +113,7 @@ function init() {
         fetchWeather(currentCity);
     });
     favBtn.addEventListener('click', toggleFavorite);
+    shareBtn.addEventListener('click', handleShare);
     retryBtn.addEventListener('click', () => {
         fetchWeather(currentCity);
     });
@@ -123,6 +125,69 @@ function init() {
             if (currentForecastData) updateChart(currentForecastData, type);
         });
     });
+}
+
+// --- Share Logic ---
+async function handleShare() {
+    const originalText = shareBtn.innerHTML;
+    shareBtn.innerHTML = '<span class="material-icons">hourglass_empty</span>';
+    
+    try {
+        const canvas = await html2canvas(glassCard, {
+            allowTaint: true,
+            useCORS: true,
+            scale: 2, // Retina quality
+            backgroundColor: null, // Transparent to keep glass effect
+            ignoreElements: (element) => {
+                // Cleaner look: remove search bar and the share button itself
+                if (element.classList.contains('search-section')) return true;
+                if (element.id === 'share-btn') return true;
+                if (element.classList.contains('retry-btn')) return true;
+                return false;
+            }
+        });
+
+        canvas.toBlob(async (blob) => {
+             // Web Share API
+             if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'weather.png', { type: blob.type })] })) {
+                try {
+                    const file = new File([blob], `weather-${currentCity}.png`, { type: 'image/png' });
+                    await navigator.share({
+                        files: [file],
+                        title: `Weather in ${currentCity}`,
+                        text: `Check out the current weather in ${currentCity}!`
+                    });
+                    showToast('Shared successfully!');
+                } catch (err) {
+                     if (err.name !== 'AbortError') {
+                        console.error('Share failed', err);
+                        downloadBlob(blob);
+                     }
+                }
+             } else {
+                 // Fallback to Download
+                 downloadBlob(blob);
+                 showToast('Snapshot downloaded!');
+             }
+             shareBtn.innerHTML = originalText;
+        }, 'image/png');
+
+    } catch (err) {
+        console.error('Screenshot error:', err);
+        showToast('Failed to create snapshot');
+        shareBtn.innerHTML = originalText;
+    }
+}
+
+function downloadBlob(blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `SkyCast-${currentCity}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 // --- Fetching Logic ---
