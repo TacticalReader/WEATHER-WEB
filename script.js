@@ -632,6 +632,7 @@ function updateChart(data, type) {
                 ctx.stroke();
             });
             ctx.restore();
+
         }
     };
 
