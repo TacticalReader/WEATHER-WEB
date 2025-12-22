@@ -19,11 +19,9 @@ const bgLayers = [document.getElementById('bg-layer-1'), document.getElementById
 const glassCard = document.querySelector('.glass-card');
 const searchBox = document.querySelector('.search-box');
 const searchIconPath = document.getElementById('search-path');
-
 // SVG Paths
 const PATH_SEARCH = "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z";
 const PATH_CLOSE = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z";
-
 // State
 let currentUnit = 'metric'; // 'metric' or 'imperial'
 let currentCity = localStorage.getItem('lastCity') || 'Delhi';
@@ -34,10 +32,8 @@ let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 let debounceTimer;
 let activeBgIndex = 0;
 let weatherIconsCache = {}; // Cache for resized chart icons
-
 // Initialize
 init();
-
 function init() {
     if (typeof CONFIG === 'undefined') {
         console.error("CONFIG is not defined.");
@@ -77,7 +73,6 @@ function init() {
             suggestionsList.classList.remove('show');
         }
     });
-
     // Search Focus/Blur & Morphing Logic
     cityInput.addEventListener('focus', () => {
         searchBox.classList.add('focus-mode');
@@ -101,7 +96,6 @@ function init() {
             suggestionsList.classList.remove('show');
         }
     });
-
     unitSwitch.addEventListener('change', () => {
         currentUnit = unitSwitch.checked ? 'imperial' : 'metric';
        
@@ -112,12 +106,10 @@ function init() {
         }
         fetchWeather(currentCity);
     });
-
     favBtn.addEventListener('click', toggleFavorite);
     retryBtn.addEventListener('click', () => {
         fetchWeather(currentCity);
     });
-
     chartButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
             chartButtons.forEach(b => b.classList.remove('active'));
@@ -127,7 +119,6 @@ function init() {
         });
     });
 }
-
 // --- Fetching Logic ---
 async function fetchWeather(city) {
     if (!navigator.onLine) {
@@ -141,7 +132,6 @@ async function fetchWeather(city) {
         if (weatherRes.status === 404) throw new Error('City not found');
         if (weatherRes.status === 429) throw new Error('API Limit Reached');
         if (!weatherRes.ok) throw new Error('Something went wrong');
-        
         const weatherData = await weatherRes.json();
         currentCity = weatherData.name;
         localStorage.setItem('lastCity', currentCity);
@@ -153,7 +143,6 @@ async function fetchWeather(city) {
         showError(error.message);
     }
 }
-
 async function fetchWeatherByCoords(lat, lon) {
     showSkeleton();
     try {
@@ -170,19 +159,15 @@ async function fetchWeatherByCoords(lat, lon) {
         showError(error.message);
     }
 }
-
 async function fetchAdditionalData(weatherData) {
     try {
         const { lat, lon } = weatherData.coord;
         const forecastRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${CONFIG.apiKey}&units=${currentUnit}`);
         const forecastData = await forecastRes.json();
         currentForecastData = forecastData;
-
         await preloadChartIcons(forecastData.list.slice(0, 8));
-
         const airRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${CONFIG.apiKey}`);
         const airData = await airRes.json();
-
         updateUI(weatherData);
         updateAirQuality(airData);
        
@@ -204,7 +189,6 @@ async function fetchAdditionalData(weatherData) {
         hideSkeleton();
     }
 }
-
 // --- Icon Preloading ---
 function preloadChartIcons(list) {
     const uniqueCodes = [...new Set(list.map(item => item.weather[0].icon))];
@@ -232,7 +216,6 @@ function preloadChartIcons(list) {
     });
     return Promise.all(promises);
 }
-
 // --- UI Updates ---
 function updateUI(data) {
     const unitSymbol = currentUnit === 'metric' ? '°C' : '°F';
@@ -266,7 +249,6 @@ function updateUI(data) {
     document.getElementById('sunset').textContent = formatTime(data.sys.sunset, data.timezone);
     updateCountdown(data.sys.sunrise, data.sys.sunset, data.timezone);
 }
-
 function updateBackground(weatherMain, data, isNightOverride = null) {
     let isNight;
     if (isNightOverride !== null) {
@@ -284,7 +266,6 @@ function updateBackground(weatherMain, data, isNightOverride = null) {
     } else {
         bgUrl = CONFIG.backgrounds[weatherMain] || CONFIG.backgrounds['Clear'];
     }
-
     const nextIndex = (activeBgIndex + 1) % 2;
     const nextLayer = bgLayers[nextIndex];
     const currentLayer = bgLayers[activeBgIndex];
@@ -296,7 +277,6 @@ function updateBackground(weatherMain, data, isNightOverride = null) {
         activeBgIndex = nextIndex;
     }, 100);
 }
-
 function updateCountdown(sunrise, sunset, timezone) {
     const el = document.getElementById('daylight-countdown');
    
@@ -327,7 +307,6 @@ function updateCountdown(sunrise, sunset, timezone) {
     update();
     window.countdownInterval = setInterval(update, 60000);
 }
-
 function updateAirQuality(data) {
     if (!data.list || data.list.length === 0) return;
    
@@ -342,7 +321,6 @@ function updateAirQuality(data) {
     document.getElementById('no2').textContent = no2;
     document.getElementById('o3').textContent = o3;
 }
-
 function updateHourlyForecast(data) {
     hourlyForecastList.innerHTML = '';
     const unitSymbol = currentUnit === 'metric' ? '°C' : '°F';
@@ -364,12 +342,10 @@ function updateHourlyForecast(data) {
         hourlyForecastList.appendChild(div);
     });
 }
-
 function updateWindForecast(data) {
     if (!windList) return;
     windList.innerHTML = '';
     const speedUnit = currentUnit === 'metric' ? 'm/s' : 'mph';
-
     data.list.slice(0, 8).forEach(item => {
         const windSpeed = item.wind.speed;
         const windDeg = item.wind.deg;
@@ -390,7 +366,6 @@ function updateWindForecast(data) {
         windList.appendChild(li);
     });
 }
-
 function updateForecast(data) {
     forecastList.innerHTML = '';
     const unitSymbol = currentUnit === 'metric' ? '°C' : '°F';
@@ -404,7 +379,6 @@ function updateForecast(data) {
         }
         dailyMap.get(dateStr).push(item);
     });
-
     const days = Array.from(dailyMap.keys()).slice(0, 5);
     days.forEach(dateStr => {
         const items = dailyMap.get(dateStr);
@@ -431,7 +405,6 @@ function updateForecast(data) {
         forecastList.appendChild(div);
     });
 }
-
 function updateChart(data, type) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
    
@@ -440,8 +413,6 @@ function updateChart(data, type) {
         const d = new Date(item.dt * 1000);
         return `${d.getHours()}:00`;
     });
-
-    // Sun events calculation (same as before)
     const city = data.city;
     const startDt = slice[0].dt;
     const endDt = slice[slice.length - 1].dt;
@@ -456,10 +427,108 @@ function updateChart(data, type) {
         if (sr >= startDt && sr <= endDt) sunEvents.push({ type: 'sunrise', time: sr });
         if (ss >= startDt && ss <= endDt) sunEvents.push({ type: 'sunset', time: ss });
     });
-
-    const dayNightPlugin = { /* ... unchanged ... */ };
-    // (Keep the full dayNightPlugin code exactly as in your original script)
-
+    const dayNightPlugin = {
+        id: 'dayNightPlugin',
+        beforeDraw: (chart) => {
+            const { ctx, chartArea, scales } = chart;
+            const xAxis = scales.x;
+           
+            const getPixelForTime = (timestamp) => {
+                for (let i = 0; i < slice.length - 1; i++) {
+                    const t1 = slice[i].dt;
+                    const t2 = slice[i+1].dt;
+                    if (timestamp >= t1 && timestamp <= t2) {
+                        const pct = (timestamp - t1) / (t2 - t1);
+                        const x1 = xAxis.getPixelForValue(i);
+                        const x2 = xAxis.getPixelForValue(i+1);
+                        return x1 + (x2 - x1) * pct;
+                    }
+                }
+                return null;
+            };
+            sunEvents.sort((a, b) => a.time - b.time);
+            const eventPixels = sunEvents.map(e => ({ ...e, x: getPixelForTime(e.time) })).filter(e => e.x !== null);
+            const boundaries = [
+                { x: chartArea.left, time: startDt },
+                ...eventPixels,
+                { x: chartArea.right, time: endDt }
+            ];
+            ctx.save();
+           
+            for (let i = 0; i < boundaries.length - 1; i++) {
+                const start = boundaries[i];
+                const end = boundaries[i+1];
+               
+                let isNight = false;
+               
+                if (i === 0) {
+                    const daysPassed = Math.round((startDt - baseSunrise) / 86400);
+                    const localSR = baseSunrise + daysPassed * 86400;
+                    const localSS = baseSunset + daysPassed * 86400;
+                   
+                    if (startDt >= localSR && startDt < localSS) {
+                        isNight = false;
+                    } else {
+                        isNight = true;
+                    }
+                } else {
+                    const boundaryType = boundaries[i].type;
+                    if (boundaryType === 'sunset') isNight = true;
+                    else if (boundaryType === 'sunrise') isNight = false;
+                }
+                const width = end.x - start.x;
+                if (width <= 0) continue;
+                if (isNight) {
+                    ctx.fillStyle = 'rgba(0, 0, 20, 0.2)';
+                    ctx.fillRect(start.x, chartArea.top, width, chartArea.height);
+                }
+               
+                if (i > 0) {
+                    const gradientWidth = 40;
+                    const grd = ctx.createLinearGradient(start.x - gradientWidth/2, 0, start.x + gradientWidth/2, 0);
+                    if (boundaries[i].type === 'sunset') {
+                        grd.addColorStop(0, 'rgba(0, 0, 20, 0)');
+                        grd.addColorStop(1, 'rgba(0, 0, 20, 0.2)');
+                    } else {
+                        grd.addColorStop(0, 'rgba(0, 0, 20, 0.2)');
+                        grd.addColorStop(1, 'rgba(0, 0, 20, 0)');
+                    }
+                    ctx.fillStyle = grd;
+                    ctx.fillRect(start.x - gradientWidth/2, chartArea.top, gradientWidth, chartArea.height);
+                }
+            }
+            ctx.restore();
+            ctx.save();
+            eventPixels.forEach(e => {
+                const x = e.x;
+                const yBottom = chartArea.bottom;
+                const yTop = chartArea.top;
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.moveTo(x, yTop);
+                ctx.lineTo(x, yBottom);
+                ctx.stroke();
+                const iconSize = 14;
+                const iconY = yBottom - 10;
+               
+                ctx.beginPath();
+                ctx.arc(x, iconY, iconSize/2, Math.PI, 0);
+                ctx.fillStyle = '#fbbf24';
+                ctx.fill();
+               
+                ctx.beginPath();
+                ctx.setLineDash([]);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.moveTo(x - iconSize, iconY);
+                ctx.lineTo(x + iconSize, iconY);
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+    };
     const datasetData = [];
     const pointStyles = [];
     const pointRadii = [];
@@ -469,7 +538,6 @@ function updateChart(data, type) {
         if (type === 'humidity') datasetData.push(item.main.humidity);
         else if (type === 'wind') datasetData.push(item.wind.speed);
         else datasetData.push(item.main.temp);
-
         const condition = item.weather[0].main;
         const iconCode = item.weather[0].icon;
        
@@ -487,7 +555,6 @@ function updateChart(data, type) {
        
         lastCondition = condition;
     });
-
     let label, color, gradient;
     gradient = ctx.createLinearGradient(0, 0, 0, 300);
     if (type === 'humidity') {
@@ -506,14 +573,51 @@ function updateChart(data, type) {
         gradient.addColorStop(0, 'rgba(249, 115, 22, 0.6)');
         gradient.addColorStop(1, 'rgba(249, 115, 22, 0)');
     }
-
     if (weatherChart) {
         weatherChart.destroy();
     }
-
-    const glowPlugin = { /* ... unchanged ... */ };
-    const crosshairPlugin = { /* ... unchanged ... */ };
-
+    const glowPlugin = {
+        id: 'glowPlugin',
+        beforeDraw: (chart) => {
+            const activeElements = chart.getActiveElements();
+            if (activeElements.length > 0) {
+                const ctx = chart.ctx;
+                activeElements.forEach(active => {
+                    const meta = chart.getDatasetMeta(active.datasetIndex);
+                    const point = meta.data[active.index];
+                    if (point.options.radius > 10) {
+                        ctx.save();
+                        ctx.shadowColor = color;
+                        ctx.shadowBlur = 15;
+                        ctx.beginPath();
+                        ctx.arc(point.x, point.y, point.options.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                });
+            }
+        }
+    };
+    const crosshairPlugin = {
+        id: 'crosshair',
+        afterDraw: (chart) => {
+            if (chart.tooltip?._active?.length) {
+                const x = chart.tooltip._active[0].element.x;
+                const yAxis = chart.scales.y;
+                const ctx = chart.ctx;
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(x, yAxis.top);
+                ctx.lineTo(x, yAxis.bottom);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    };
     weatherChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -541,7 +645,13 @@ function updateChart(data, type) {
                 mode: 'index',
                 intersect: false,
             },
-            // REMOVED onHover callback completely – no background change on hover anymore
+            // REMOVED BACKGROUND CHANGE ON HOVER
+            // The "time travel" background update has been completely removed
+            // to preserve the glassmorphism effect and visual consistency.
+            onHover: (event, elements) => {
+                // No background changes anymore — glassmorphism stays intact
+                // All other hover behaviors (tooltip, crosshair, glow) remain active
+            },
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -570,8 +680,7 @@ function updateChart(data, type) {
         plugins: [glowPlugin, dayNightPlugin, crosshairPlugin]
     });
 }
-
-// --- Autocomplete, Favorites, Helpers (unchanged) ---
+// --- Autocomplete ---
 function handleSearchInput(e) {
     const query = e.target.value.trim();
     clearTimeout(debounceTimer);
@@ -594,7 +703,6 @@ function handleSearchInput(e) {
         }
     }, 300);
 }
-
 function renderSuggestions(locations) {
     suggestionsList.innerHTML = '';
     if (locations.length === 0) {
@@ -616,14 +724,13 @@ function renderSuggestions(locations) {
     });
     suggestionsList.classList.add('show');
 }
-
+// --- Favorites ---
 function loadFavorites() {
     favoritesList.innerHTML = '';
     favorites.forEach(city => {
         createFavoriteChip(city);
     });
 }
-
 function createFavoriteChip(city) {
     const chip = document.createElement('div');
     chip.className = 'fav-chip';
@@ -639,7 +746,6 @@ function createFavoriteChip(city) {
    
     favoritesList.appendChild(chip);
 }
-
 function toggleFavorite() {
     const index = favorites.indexOf(currentCity);
     if (index === -1) {
@@ -666,7 +772,6 @@ function toggleFavorite() {
     }
     localStorage.setItem('favorites', JSON.stringify(favorites));
 }
-
 function removeFavorite(city) {
     favorites = favorites.filter(c => c !== city);
     localStorage.setItem('favorites', JSON.stringify(favorites));
@@ -676,7 +781,6 @@ function removeFavorite(city) {
         favBtn.textContent = 'favorite_border';
     }
 }
-
 function checkFavoriteStatus(city) {
     if (favorites.includes(city)) {
         favBtn.classList.add('active');
@@ -686,7 +790,7 @@ function checkFavoriteStatus(city) {
         favBtn.textContent = 'favorite_border';
     }
 }
-
+// --- Helpers ---
 function handleLocationSearch() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -703,25 +807,21 @@ function handleLocationSearch() {
         showToast("Geolocation not supported");
     }
 }
-
 function showSkeleton() {
     weatherContent.style.display = 'none';
     errorMessage.style.display = 'none';
     skeletonLoader.style.display = 'block';
 }
-
 function hideSkeleton() {
     skeletonLoader.style.display = 'none';
     weatherContent.style.display = 'block';
 }
-
 function showError(msg) {
     skeletonLoader.style.display = 'none';
     weatherContent.style.display = 'none';
     errorMessage.style.display = 'flex';
     errorText.textContent = msg || "City not found or location unavailable. Please try again.";
 }
-
 function showToast(msg) {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
@@ -729,18 +829,18 @@ function showToast(msg) {
     toast.textContent = msg;
     container.appendChild(toast);
    
-    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
-
 function getCardinalDirection(angle) {
     const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
     return directions[Math.round(angle / 45) % 8];
 }
-
 function formatTime(unixTimestamp, timezoneOffset) {
     const date = new Date((unixTimestamp + timezoneOffset) * 1000);
     let hours = date.getUTCHours();
@@ -750,8 +850,4 @@ function formatTime(unixTimestamp, timezoneOffset) {
     hours = hours ? hours : 12;
     minutes = minutes < 10 ? '0'+minutes : minutes;
     return `${hours}:${minutes} ${ampm}`;
-}
-
-function getIconUrl(code) {
-    return `https://openweathermap.org/img/wn/${code}@2x.png`;
 }
