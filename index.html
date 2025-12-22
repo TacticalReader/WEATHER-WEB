@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Geo:ital@0;1&family=Meow+Script&family=Nova+Round&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <!-- Double layer for smooth transitions -->
@@ -25,22 +26,28 @@
                         <span class="material-icons">filter_drama</span>
                         <h1>SkyCast</h1>
                     </div>
-                    <div class="unit-toggle">
-                        <span>°C</span>
-                        <label class="switch">
-                            <input type="checkbox" id="unit-switch">
-                            <span class="slider round">
-                                <!-- Snowflake Icon (Celsius) -->
-                                <svg class="toggle-icon icon-snowflake" viewBox="0 0 24 24">
-                                    <path fill="currentColor" d="M12,2L12,22M2,12L22,12M4.93,4.93L19.07,19.07M4.93,19.07L19.07,4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                </svg>
-                                <!-- Sun Icon (Fahrenheit) -->
-                                <svg class="toggle-icon icon-sun" viewBox="0 0 24 24">
-                                    <path fill="currentColor" d="M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,2V4M12,20V22M4.93,4.93L6.34,6.34M17.66,17.66L19.07,19.07M2,12H4M20,12H22M4.93,19.07L6.34,17.66M17.66,6.34L19.07,4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                </svg>
-                            </span>
-                        </label>
-                        <span>°F</span>
+                    
+                    <div class="header-controls">
+                        <div class="unit-toggle">
+                            <span>°C</span>
+                            <label class="switch">
+                                <input type="checkbox" id="unit-switch">
+                                <span class="slider round">
+                                    <!-- Snowflake Icon (Celsius) -->
+                                    <svg class="toggle-icon icon-snowflake" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M12,2L12,22M2,12L22,12M4.93,4.93L19.07,19.07M4.93,19.07L19.07,4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    </svg>
+                                    <!-- Sun Icon (Fahrenheit) -->
+                                    <svg class="toggle-icon icon-sun" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,2V4M12,20V22M4.93,4.93L6.34,6.34M17.66,17.66L19.07,19.07M2,12H4M20,12H22M4.93,19.07L6.34,17.66M17.66,6.34L19.07,4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    </svg>
+                                </span>
+                            </label>
+                            <span>°F</span>
+                        </div>
+                        <button id="share-btn" class="share-btn" title="Share Snapshot">
+                            <span class="material-icons">share</span>
+                        </button>
                     </div>
                 </div>
             </header>
