@@ -851,3 +851,26 @@ function formatTime(unixTimestamp, timezoneOffset) {
     minutes = minutes < 10 ? '0'+minutes : minutes;
     return `${hours}:${minutes} ${ampm}`;
 }
+
+
+
+
+function getIconUrl(code) {
+    // Use higher resolution icons (@4x) for better quality
+    return `https://openweathermap.org/img/wn/${code}@4x.png`;
+}
+
+// In updateUI(data), after setting the main icon:
+document.getElementById('weather-icon').src = getIconUrl(iconCode);
+const mainWeather = data.weather[0].main.toLowerCase();
+const iconImg = document.getElementById('weather-icon');
+iconImg.className = ''; // Reset
+iconImg.classList.add(`icon-tint-${mainWeather}`);
+if (iconCode.endsWith('n')) iconImg.classList.add('icon-tint-night');
+
+// Also apply similar tinting in updateHourlyForecast and updateForecast loops:
+ // Inside the loops where you create <img src="${getIconUrl(iconCode)}">
+ const hourlyIcon = div.querySelector('img'); // or forecast img
+ const hourlyMain = item.weather[0].main.toLowerCase();
+ hourlyIcon.classList.add(`icon-tint-${hourlyMain}`);
+ if (iconCode.endsWith('n')) hourlyIcon.classList.add('icon-tint-night');
