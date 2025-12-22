@@ -134,7 +134,7 @@ async function handleShare() {
     
     try {
         const canvas = await html2canvas(glassCard, {
-            allowTaint: true,
+            allowTaint: false, // Changed from true to false to prevent tainting error
             useCORS: true,
             scale: 2, // Retina quality
             backgroundColor: null, // Transparent to keep glass effect
@@ -271,6 +271,7 @@ function preloadChartIcons(list) {
         if (weatherIconsCache[code]) return Promise.resolve();
         return new Promise((resolve) => {
             const img = new Image();
+            img.crossOrigin = "Anonymous"; // Allow CORS for icons used in canvas to prevent tainting
             img.src = getIconUrl(code);
             img.onload = () => {
                 const size = 40;
