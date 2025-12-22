@@ -391,7 +391,7 @@ function updateAirQuality(data) {
   
     const record = data.list[0];
     const aqi = record.main.aqi;
-    const { pm2_5, so2, no2, o3 } = record.components;
+    const { pm2_5, so2, no2, o3, co } = record.components;
   
     const aqiLabels = { 1: 'Good', 2: 'Fair', 3: 'Moderate', 4: 'Poor', 5: 'Very Poor' };
     document.getElementById('aqi-status').textContent = aqiLabels[aqi] || aqi;
@@ -399,6 +399,7 @@ function updateAirQuality(data) {
     document.getElementById('so2').textContent = so2;
     document.getElementById('no2').textContent = no2;
     document.getElementById('o3').textContent = o3;
+    document.getElementById('co').textContent = co;
 }
 
 function updateHourlyForecast(data) {
