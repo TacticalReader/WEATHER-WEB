@@ -550,8 +550,13 @@ input:checked + .slider:before {
 
 .aqi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* Increased from 80px to fix overflow */
     gap: 10px;
+}
+
+.aqi-grid .detail-item {
+    padding: 10px; /* Reduced padding for compact fit */
+    gap: 10px; /* Reduced gap */
 }
 
 /* Chart Section */
