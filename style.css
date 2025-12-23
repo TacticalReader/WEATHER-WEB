@@ -970,11 +970,11 @@ input:checked + .slider:before {
 .credit-github {
     text-decoration: none;
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.8rem;
+    font-size: 1.2rem;
     display: flex;
     align-items: center;
     gap: 6px;
-    background: linear-gradient(135deg, #f472b6, #8b5cf6);
+    background: linear-gradient(3deg, #f472b6, #8b5cf6);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
