@@ -13,7 +13,7 @@ const CONFIG = {
     },
     nightBackgrounds: {
         'Default': 'https://images.unsplash.com/photo-1507400492013-162706c8c05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-        'Clear': 'https://images.unsplash.com/photo-1532978023944-5253f3ca5d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+        'Clear': 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.gettyimages.in%2Fvideos%2Fnight-sky-stars-background&psig=AOvVaw2TKw5mITYFNAXFqU4PiLaZ&ust=1766596653093000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCIj1nMSb1JEDFQAAAAAdAAAAABAE',
         'Clouds': 'https://images.unsplash.com/photo-1536532184021-da4272369e80?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'
     }
 };
