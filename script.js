@@ -47,6 +47,7 @@ function init() {
     }
     loadFavorites();
     fetchWeather(currentCity);
+    startClock(); // Start the live clock
   
     // Event Listeners
     searchBtn.addEventListener('click', () => {
@@ -127,6 +128,39 @@ function init() {
     });
 }
 
+// --- Clock Logic ---
+function startClock() {
+    const dateEl = document.getElementById('current-date');
+    const timeEl = document.getElementById('current-time');
+
+    function update() {
+        const now = new Date();
+        
+        // Date: Day, DD/MM/YYYY
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayName = days[now.getDay()];
+        const date = now.getDate().toString().padStart(2, '0');
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const year = now.getFullYear();
+        
+        if (dateEl) dateEl.textContent = `${dayName}, ${date}/${month}/${year}`;
+
+        // Time: HH:MM:SS AM/PM
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        
+        if (timeEl) timeEl.textContent = `${hours}:${minutes}:${seconds} ${ampm}`;
+    }
+    
+    update();
+    setInterval(update, 1000);
+}
+
 // --- Share Logic ---
 async function handleShare() {
     const originalText = shareBtn.innerHTML;
@@ -152,8 +186,8 @@ async function handleShare() {
              if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'weather.png', { type: blob.type })] })) {
                 try {
                     const file = new File([blob], `weather-${currentCity}.png`, { type: 'image/png' });
-                    await navigator.share({
-                        files: [file],
+                    await navigator.share({ 
+                        files: [file], 
                         title: `Weather in ${currentCity}`,
                         text: `Check out the current weather in ${currentCity}!`
                     });
