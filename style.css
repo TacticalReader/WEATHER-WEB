@@ -14,7 +14,7 @@
 }
 
 /* Use Orbitron for headers and numbers for a sci-fi/weather station look */
-h1, h2, #temperature, .unit-toggle {
+h1, h2, #temperature, .unit-toggle, #current-time {
     font-family: 'Orbitron', sans-serif;
 }
 
@@ -65,6 +65,7 @@ body {
 
 .glass-card {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgb(255 255 255 / 1%));
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-radius: 20px;
@@ -495,6 +496,27 @@ input:checked + .slider:before {
     color: #2563eb;
     margin-top: 5px;
     font-weight: 500;
+}
+
+/* Date and Time Styles */
+.date-time-info {
+    text-align: center;
+    margin: 10px 0;
+}
+
+#current-date {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+}
+
+#current-time {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2563eb;
+    margin-top: 5px;
+    letter-spacing: 1px;
 }
 
 .details-grid {
