@@ -11,6 +11,7 @@ A modern, feature-rich weather application with stunning visual effects and comp
 
 ### 🌡️ Weather Information
 - **Real-time Weather Data** - Current temperature, conditions, and weather description
+- **Live Digital Clock** - Real-time local date and time display
 - **Dual Unit Support** - Toggle between Celsius and Fahrenheit with animated switch
 - **5-Day Forecast** - Extended weather predictions with daily summaries
 - **Hourly Forecast** - Next 24 hours detailed weather breakdown
@@ -19,19 +20,20 @@ A modern, feature-rich weather application with stunning visual effects and comp
 ### 🎨 Visual Excellence
 - **Dynamic Backgrounds** - Weather-responsive parallax backgrounds with smooth transitions
 - **Glassmorphism UI** - Modern frosted glass design aesthetic
-- **Animated Weather Icons** - Custom weather condition icons
+- **Animated Weather Icons** - Custom weather condition icons with vibrant filters
 - **Particle Effects** - Dynamic particle system matching weather conditions
 - **Skeleton Loading** - Smooth loading states for better UX
 
 ### 📊 Advanced Metrics
 - **Air Quality Index (AQI)** - Real-time air pollution data
 - **Pollutant Levels** - PM2.5, SO2, NO2, and O3 measurements
-- **Interactive Charts** - Temperature, humidity, and wind speed visualizations using Chart.js
+- **Interactive Charts** - Temperature, humidity, and wind speed visualizations with day/night cycle shading
 - **Sunrise/Sunset Times** - Precise daylight information with countdown
 - **Visibility & Pressure** - Additional atmospheric data
 - **Wind Direction** - Cardinal direction indicators
 
 ### 🎯 Smart Features
+- **Social Sharing** - Generate and share downloadable snapshots of current weather
 - **City Search** - Autocomplete suggestions for quick city lookup
 - **Geolocation** - Automatic weather detection for current location
 - **Favorites System** - Save and quickly access favorite locations
@@ -53,6 +55,7 @@ Visit the live application: [SkyCast Weather](https://tacticalreader.github.io/W
 - **CSS3** - Modern styling with custom properties, animations, and gradients
 - **JavaScript (ES6+)** - Core functionality and API integration
 - **Chart.js** - Interactive weather data visualizations
+- **html2canvas** - Screenshot generation functionality
 - **OpenWeather API** - Weather and air quality data provider
 - **Google Fonts** - Custom typography (Orbitron, Nova Round, Geo)
 - **Material Icons** - Icon set for UI elements
@@ -133,6 +136,11 @@ WEATHER-WEB/
 ### Toggle Temperature Units
 - Use the toggle switch to convert between °C and °F
 - Settings persist across sessions
+
+### Share Snapshot
+1. Click the share icon (top right)
+2. Use the native share menu (mobile) or download the image automatically
+3. Share your weather card with friends
 
 ### Add Favorites
 1. Search for a city
@@ -250,6 +258,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 - [OpenWeather](https://openweathermap.org/) - Weather data API
 - [Unsplash](https://unsplash.com/) - Background imagery
 - [Chart.js](https://www.chartjs.org/) - Data visualization library
+- [html2canvas](https://html2canvas.hertzen.com/) - Screenshot library
 - [Google Fonts](https://fonts.google.com/) - Typography
 - [Material Icons](https://fonts.google.com/icons) - UI iconography
 
@@ -264,8 +273,3 @@ Project Link: [https://github.com/TacticalReader/WEATHER-WEB](https://github.com
 ⭐ Star this repository if you find it helpful!
 
 Made with ❤️ by TacticalReader
-```
-
-This comprehensive README includes all essential sections for a professional GitHub repository, including features, installation instructions, usage guide, customization options, and contribution guidelines. You can now copy this content and use it to replace your current README.md file in the repository.
-
-[1](https://github.com/TacticalReader/WEATHER-WEB)
