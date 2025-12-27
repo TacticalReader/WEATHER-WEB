@@ -58,7 +58,7 @@ body {
 .container {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh;
     padding: 20px;
 }
@@ -75,6 +75,7 @@ body {
     width: 100%;
     max-width: 600px;
     transition: all 0.5s ease;
+    margin: auto 0;
 }
 
 /* Focus Mode: Dim everything except search */
@@ -605,6 +606,8 @@ input:checked + .slider:before {
     background: rgba(255, 255, 255, 0.4);
     padding: 3px;
     border-radius: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .chart-btn {
@@ -815,6 +818,16 @@ input:checked + .slider:before {
     
     .details-grid {
         grid-template-columns: 1fr;
+    }
+
+    .header-top {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .header-controls {
+        width: 100%;
+        justify-content: center;
     }
 }
 
