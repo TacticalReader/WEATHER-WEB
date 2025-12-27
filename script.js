@@ -529,7 +529,11 @@ function updateChart(data, type) {
     const slice = data.list.slice(0, 8);
     const labels = slice.map(item => {
         const d = new Date(item.dt * 1000);
-        return `${d.getHours()}:00`;
+        let hours = d.getHours();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours}:00 ${ampm}`;
     });
     const city = data.city;
     const startDt = slice[0].dt;
