@@ -6,7 +6,7 @@ Thunder.jpg
 clear_daysky.jpg
 clouds.jpg
 mist.jpg
-
+Drizzle.jpg
 night-cloudysky.jpg
 rain.jpg
 snow.jpg
