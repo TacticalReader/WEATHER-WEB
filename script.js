@@ -23,7 +23,7 @@ const searchIconPath = document.getElementById('search-path');
 
 // SVG Paths
 const PATH_SEARCH = "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z";
-const PATH_CLOSE = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z";
+const PATH_CLOSE = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 17.59 13.41 12z";
 
 // State
 let currentUnit = 'metric'; // 'metric' or 'imperial'
@@ -683,35 +683,54 @@ function updateChart(data, type) {
     let label, color, gradient;
     gradient = ctx.createLinearGradient(0, 0, 0, 300);
 
-    // Define Y-axis scale options based on type
-    let yScaleConfig = {
-        display: false, // Keep axis hidden to maintain design
-        grid: { display: false }
-    };
-
+    // Determine label and color first
     if (type === 'humidity') {
         label = 'Humidity (%)';
         color = '#3b82f6';
         gradient.addColorStop(0, 'rgba(59, 130, 246, 0.6)');
         gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
-        
-        // Fixed range for humidity
-        yScaleConfig.min = 0;
-        yScaleConfig.max = 100;
     } else if (type === 'wind') {
         label = currentUnit === 'metric' ? 'Wind Speed (m/s)' : 'Wind Speed (mph)';
         color = '#f59e0b';
         gradient.addColorStop(0, 'rgba(245, 158, 11, 0.6)');
         gradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
-        
-        // Wind speed starts at 0
-        yScaleConfig.beginAtZero = true;
     } else {
         label = currentUnit === 'metric' ? 'Temperature (°C)' : 'Temperature (°F)';
         color = '#f97316';
         gradient.addColorStop(0, 'rgba(249, 115, 22, 0.6)');
         gradient.addColorStop(1, 'rgba(249, 115, 22, 0)');
-        // Temp auto-scales
+    }
+
+    // Configure Y-axis
+    let yScaleConfig = {
+        display: true,
+        title: {
+            display: true,
+            text: label,
+            color: '#4b5563',
+            font: {
+                family: "'Orbitron', sans-serif",
+                size: 12
+            }
+        },
+        grid: { 
+            color: 'rgba(255, 255, 255, 0.1)',
+            drawBorder: false
+        },
+        ticks: {
+            color: '#6b7280',
+            font: {
+                family: "'Nova Round', sans-serif",
+                size: 11
+            }
+        }
+    };
+
+    if (type === 'humidity') {
+        yScaleConfig.min = 0;
+        yScaleConfig.max = 100;
+    } else if (type === 'wind') {
+        yScaleConfig.beginAtZero = true;
     }
 
     if (weatherChart) {
