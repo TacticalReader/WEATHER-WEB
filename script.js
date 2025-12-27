@@ -756,7 +756,7 @@ function updateChart(data, type) {
                 data: datasetData,
                 borderColor: color,
                 backgroundColor: gradient,
-                borderWidth: 4, // Slightly thicker line
+                borderWidth: 4, // Slightly thicker line,
                 tension: 0.4,
                 fill: true,
                 pointStyle: pointStyles,
@@ -804,7 +804,15 @@ function updateChart(data, type) {
                     borderWidth: 1,
                     callbacks: {
                         label: function(context) {
-                            return context.parsed.y + (type === 'humidity' ? '%' : (type === 'temp' ? '°' : ''));
+                            let value = context.parsed.y;
+                            if (type === 'temp') {
+                                return value + (currentUnit === 'metric' ? '°C' : '°F');
+                            } else if (type === 'humidity') {
+                                return value + '%';
+                            } else if (type === 'wind') {
+                                return value + (currentUnit === 'metric' ? ' m/s' : ' mph');
+                            }
+                            return value;
                         }
                     }
                 }
