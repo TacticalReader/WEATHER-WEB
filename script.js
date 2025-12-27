@@ -682,21 +682,36 @@ function updateChart(data, type) {
 
     let label, color, gradient;
     gradient = ctx.createLinearGradient(0, 0, 0, 300);
+
+    // Define Y-axis scale options based on type
+    let yScaleConfig = {
+        display: false, // Keep axis hidden to maintain design
+        grid: { display: false }
+    };
+
     if (type === 'humidity') {
         label = 'Humidity (%)';
         color = '#3b82f6';
         gradient.addColorStop(0, 'rgba(59, 130, 246, 0.6)');
         gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+        
+        // Fixed range for humidity
+        yScaleConfig.min = 0;
+        yScaleConfig.max = 100;
     } else if (type === 'wind') {
         label = currentUnit === 'metric' ? 'Wind Speed (m/s)' : 'Wind Speed (mph)';
         color = '#f59e0b';
         gradient.addColorStop(0, 'rgba(245, 158, 11, 0.6)');
         gradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
+        
+        // Wind speed starts at 0
+        yScaleConfig.beginAtZero = true;
     } else {
         label = currentUnit === 'metric' ? 'Temperature (°C)' : 'Temperature (°F)';
         color = '#f97316';
         gradient.addColorStop(0, 'rgba(249, 115, 22, 0.6)');
         gradient.addColorStop(1, 'rgba(249, 115, 22, 0)');
+        // Temp auto-scales
     }
 
     if (weatherChart) {
@@ -830,10 +845,7 @@ function updateChart(data, type) {
                     },
                     grid: { display: false }
                 },
-                y: {
-                    display: false,
-                    grid: { display: false }
-                }
+                y: yScaleConfig // Use dynamic scale config
             },
             layout: {
                 padding: { top: 10, bottom: 5, left: 10, right: 10 }
