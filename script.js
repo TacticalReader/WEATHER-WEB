@@ -363,12 +363,19 @@ function updateUI(data) {
 function updateBackground(weatherMain, data, isNightOverride = null) {
     let isNight;
     if (isNightOverride !== null) {
-        isNight = isNightOverride;
+        isNight = isNightOverride; // Allow manual override for testing
     } else if (data && data.sys) {
         const now = Math.floor(Date.now() / 1000);
         isNight = now > data.sys.sunset || now < data.sys.sunrise;
     } else {
         isNight = false;
+    }
+  
+    // Toggle night-mode class on body for CSS styling
+    if (isNight) {
+        document.body.classList.add('night-mode');
+    } else {
+        document.body.classList.remove('night-mode');
     }
   
     let bgUrl;
