@@ -277,6 +277,11 @@ async function fetchAdditionalData(weatherData) {
         const airData = await airRes.json();
         updateUI(weatherData);
         updateAirQuality(airData);
+        
+        // Initialize Hazard Interpretation Layer
+        if (typeof HazardSystem !== 'undefined') {
+            updateHazards(weatherData, forecastData, airData);
+        }
       
         chartButtons.forEach(b => b.classList.remove('active'));
         document.querySelector('[data-type="temp"]').classList.add('active');
@@ -358,6 +363,33 @@ function updateUI(data) {
     document.getElementById('sunrise').textContent = formatTime(data.sys.sunrise, data.timezone);
     document.getElementById('sunset').textContent = formatTime(data.sys.sunset, data.timezone);
     updateCountdown(data.sys.sunrise, data.sys.sunset, data.timezone);
+}
+
+function updateHazards(current, forecast, air) {
+    const container = document.getElementById('hazard-container');
+    if (!container) return;
+    
+    const alerts = HazardSystem.analyze(current, forecast, air, currentUnit);
+    
+    container.innerHTML = '';
+    if (alerts.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'flex';
+    alerts.forEach(alert => {
+        const div = document.createElement('div');
+        div.className = `hazard-item hazard-${alert.level}`;
+        div.innerHTML = `
+            <span class="material-icons hazard-icon">${alert.icon}</span>
+            <div class="hazard-content">
+                <strong>${alert.title}</strong>
+                <p>${alert.msg}</p>
+            </div>
+        `;
+        container.appendChild(div);
+    });
 }
 
 function updateBackground(weatherMain, data, isNightOverride = null) {
