@@ -707,30 +707,43 @@ function updateChart(data, type) {
         title: {
             display: true,
             text: label,
-            color: '#4b5563',
+            color: '#374151',
             font: {
                 family: "'Orbitron', sans-serif",
-                size: 12
-            }
+                size: 13,
+                weight: 'bold'
+            },
+            padding: { bottom: 10 }
         },
         grid: { 
-            color: 'rgba(255, 255, 255, 0.1)',
-            drawBorder: false
+            color: 'rgba(0, 0, 0, 0.06)',
+            drawBorder: false,
+            tickLength: 8
+        },
+        border: {
+            display: false
         },
         ticks: {
-            color: '#6b7280',
+            color: '#4b5563',
             font: {
                 family: "'Nova Round', sans-serif",
-                size: 11
-            }
+                size: 11,
+                weight: '600'
+            },
+            padding: 8
         }
     };
 
     if (type === 'humidity') {
         yScaleConfig.min = 0;
         yScaleConfig.max = 100;
+        yScaleConfig.ticks.stepSize = 20;
     } else if (type === 'wind') {
         yScaleConfig.beginAtZero = true;
+        yScaleConfig.suggestedMax = 15;
+    } else {
+        // Temperature
+        yScaleConfig.grace = '15%';
     }
 
     if (weatherChart) {
