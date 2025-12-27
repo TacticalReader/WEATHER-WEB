@@ -444,8 +444,8 @@ input:checked + .slider:before {
 /* Heart Animation */
 @keyframes heartBurst {
     0% { transform: scale(1); }
-    40% { transform: scale(0.8); } /* Anticipation */
-    60% { transform: scale(1.2); } /* Burst */
+    40% { transform: scale(0.8); }
+    60% { transform: scale(1.2); }
     100% { transform: scale(1); }
 }
 
@@ -573,13 +573,13 @@ input:checked + .slider:before {
 
 .aqi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* Increased from 80px to fix overflow */
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 10px;
 }
 
 .aqi-grid .detail-item {
-    padding: 10px; /* Reduced padding for compact fit */
-    gap: 10px; /* Reduced gap */
+    padding: 10px;
+    gap: 10px;
 }
 
 /* Chart Section */
@@ -786,7 +786,7 @@ input:checked + .slider:before {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    display: flex;
+    display: flex; 
     flex-direction: column;
     gap: 10px;
     z-index: 1000;
@@ -1064,4 +1064,32 @@ input:checked + .slider:before {
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+/* --- Night Mode Text Visibility --- */
+body.night-mode #description,
+body.night-mode #current-date {
+    color: #e0f2fe;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    transition: color 0.5s ease, text-shadow 0.5s ease;
+}
+
+body.night-mode #city-name,
+body.night-mode #temperature,
+body.night-mode #current-time,
+body.night-mode .unit-toggle {
+    color: #f0f9ff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+body.night-mode .detail-item p,
+body.night-mode .forecast-item .f-day,
+body.night-mode .hourly-item .h-time {
+    color: #cbd5e1;
+}
+
+body.night-mode .detail-item span,
+body.night-mode .forecast-item .f-temp,
+body.night-mode .hourly-item .h-temp {
+    color: #f1f5f9;
 }
