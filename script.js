@@ -597,7 +597,8 @@ function updateChart(data, type) {
                 const width = end.x - start.x;
                 if (width <= 0) continue;
                 if (isNight) {
-                    ctx.fillStyle = 'rgba(0, 0, 20, 0.2)';
+                    // Darker slate blue for night
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
                     ctx.fillRect(start.x, chartArea.top, width, chartArea.height);
                 }
               
@@ -605,11 +606,11 @@ function updateChart(data, type) {
                     const gradientWidth = 40;
                     const grd = ctx.createLinearGradient(start.x - gradientWidth/2, 0, start.x + gradientWidth/2, 0);
                     if (boundaries[i].type === 'sunset') {
-                        grd.addColorStop(0, 'rgba(0, 0, 20, 0)');
-                        grd.addColorStop(1, 'rgba(0, 0, 20, 0.2)');
+                        grd.addColorStop(0, 'rgba(15, 23, 42, 0)');
+                        grd.addColorStop(1, 'rgba(15, 23, 42, 0.2)');
                     } else {
-                        grd.addColorStop(0, 'rgba(0, 0, 20, 0.2)');
-                        grd.addColorStop(1, 'rgba(0, 0, 20, 0)');
+                        grd.addColorStop(0, 'rgba(15, 23, 42, 0.2)');
+                        grd.addColorStop(1, 'rgba(15, 23, 42, 0)');
                     }
                     ctx.fillStyle = grd;
                     ctx.fillRect(start.x - gradientWidth/2, chartArea.top, gradientWidth, chartArea.height);
@@ -751,7 +752,7 @@ function updateChart(data, type) {
                 data: datasetData,
                 borderColor: color,
                 backgroundColor: gradient,
-                borderWidth: 3,
+                borderWidth: 4, // Slightly thicker line
                 tension: 0.4,
                 fill: true,
                 pointStyle: pointStyles,
@@ -759,12 +760,17 @@ function updateChart(data, type) {
                 pointHoverRadius: pointHoverRadii,
                 pointBackgroundColor: color,
                 pointBorderColor: '#fff',
-                pointBorderWidth: 2
+                pointBorderWidth: 3, // Thicker border for points
+                pointHitRadius: 20
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: {
+                duration: 800,
+                easing: 'easeOutQuart'
+            },
             interaction: {
                 mode: 'index',
                 intersect: false,
@@ -775,10 +781,23 @@ function updateChart(data, type) {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
+                    enabled: true,
+                    backgroundColor: 'rgba(17, 24, 39, 0.9)', // Darker, more opaque
+                    titleColor: '#f3f4f6',
+                    bodyColor: '#e5e7eb',
+                    titleFont: {
+                        family: "'Orbitron', sans-serif",
+                        size: 13
+                    },
+                    bodyFont: {
+                        family: "'Nova Round', sans-serif",
+                        size: 13
+                    },
+                    padding: 12,
+                    cornerRadius: 12,
                     displayColors: false,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
                     callbacks: {
                         label: function(context) {
                             return context.parsed.y + (type === 'humidity' ? '%' : (type === 'temp' ? '°' : ''));
@@ -789,7 +808,13 @@ function updateChart(data, type) {
             scales: {
                 x: {
                     ticks: { 
-                        color: '#000000'  // Changed from '#fff' to black
+                        color: '#374151', // Soft dark gray
+                        font: {
+                            family: "'Nova Round', sans-serif",
+                            size: 12,
+                            weight: 'bold'
+                        },
+                        padding: 8
                     },
                     grid: { display: false }
                 },
@@ -797,6 +822,9 @@ function updateChart(data, type) {
                     display: false,
                     grid: { display: false }
                 }
+            },
+            layout: {
+                padding: { top: 10, bottom: 5, left: 10, right: 10 }
             }
         },
         plugins: [glowPlugin, dayNightPlugin, crosshairPlugin]
