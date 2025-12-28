@@ -205,151 +205,111 @@ const WindMap = {
     animationFrame: null,
     width: 0,
     height: 0,
-    timeline: [], // Array of {speed, angle, label}
-    cycleDuration: 12000, // 12 seconds for full cycle
-    startTime: 0,
+    speed: 0,
+    angle: 0,
+    noiseOffset: 0,
+    resizeObserver: null,
 
-    init: function(canvasId, currentWind, forecastList) {
+    init: function(canvasId, windSpeed, windDeg) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) return;
         
         this.ctx = this.canvas.getContext('2d');
+        this.updateData(windSpeed, windDeg);
         
-        // Build timeline: Current -> +3h -> +6h -> +9h
-        this.timeline = [];
-        
-        const addPoint = (speed, deg, label) => {
-            // Convert deg to flow angle (radians)
-            // Wind from N(0) -> flows to S(90 in canvas). 
-            // Formula: (deg + 90) converts Meteo deg to Canvas radians
-            let angle = (deg + 90) * (Math.PI / 180);
-            this.timeline.push({ speed, angle, label });
-        };
-
-        addPoint(currentWind.speed, currentWind.deg, 'Now');
-
-        if (forecastList && forecastList.length) {
-            // Take next 3 points (9 hours)
-            for(let i=0; i<3; i++) {
-                if(forecastList[i]) {
-                    const item = forecastList[i];
-                    const date = new Date(item.dt * 1000);
-                    const label = date.getHours() + ':00';
-                    addPoint(item.wind.speed, item.wind.deg, label);
-                }
-            }
+        // Robust resizing: Observe parent for size changes (handles display:none -> block)
+        if (!this.resizeObserver) {
+            this.resizeObserver = new ResizeObserver(() => this.resize());
+            this.resizeObserver.observe(this.canvas.parentElement);
         }
         
-        // If no forecast, just duplicate current to keep logic simple
-        if (this.timeline.length === 1) {
-            this.timeline.push(this.timeline[0]);
-        }
-
         this.resize();
-        window.addEventListener('resize', () => this.resize());
-        this.createParticles();
         this.start();
+    },
+
+    updateData: function(speed, deg) {
+        this.speed = speed;
+        // Convert wind direction (coming from) to flow direction (going to) in canvas radians
+        // 0(N) -> blows S (90 deg canvas). Formula: (deg + 90)
+        this.angle = (deg + 90) * (Math.PI / 180);
     },
 
     resize: function() {
         if (!this.canvas) return;
-        const rect = this.canvas.parentElement.getBoundingClientRect();
-        this.canvas.width = rect.width;
-        this.canvas.height = rect.height;
-        this.width = rect.width;
-        this.height = rect.height;
-    },
-
-    createParticles: function() {
-        const count = 120;
-        this.particles = [];
-        for (let i = 0; i < count; i++) {
-            this.particles.push(this.resetParticle({}));
+        const parent = this.canvas.parentElement;
+        const rect = parent.getBoundingClientRect();
+        
+        if (rect.width > 0 && rect.height > 0) {
+            this.canvas.width = rect.width;
+            this.canvas.height = rect.height;
+            this.width = rect.width;
+            this.height = rect.height;
+            this.createParticles();
         }
     },
 
-    resetParticle: function(p) {
+    createParticles: function() {
+        // Density based on area
+        const particleCount = Math.floor((this.width * this.height) / 600);
+        this.particles = [];
+        for (let i = 0; i < particleCount; i++) {
+            this.particles.push(this.resetParticle({}, true));
+        }
+    },
+
+    resetParticle: function(p, randomAge = false) {
         p.x = Math.random() * this.width;
         p.y = Math.random() * this.height;
-        p.life = Math.random() * 80 + 40;
-        p.age = Math.random() * p.life;
-        p.speedVar = 0.8 + Math.random() * 0.4; // 0.8 - 1.2
+        p.life = 60 + Math.random() * 60;
+        p.age = randomAge ? Math.random() * p.life : 0;
+        p.speedVar = 0.5 + Math.random(); // Speed variance
         return p;
     },
 
-    getCurrentState: function() {
-        const now = Date.now();
-        if (!this.startTime) this.startTime = now;
-        const elapsed = (now - this.startTime) % this.cycleDuration;
-        const progress = elapsed / this.cycleDuration;
-        
-        // Determine which segment we are in
-        const count = this.timeline.length;
-        const segmentDuration = 1 / count;
-        const index = Math.floor(progress * count);
-        const nextIndex = (index + 1) % count;
-        const segmentProgress = (progress - index * segmentDuration) / segmentDuration; // 0..1
-
-        const p1 = this.timeline[index];
-        const p2 = this.timeline[nextIndex];
-
-        // Interpolate Speed
-        const speed = p1.speed + (p2.speed - p1.speed) * segmentProgress;
-
-        // Interpolate Angle (Shortest path)
-        let a1 = p1.angle;
-        let a2 = p2.angle;
-        const diff = a2 - a1;
-        // Normalize diff to -PI to +PI
-        const delta = Math.atan2(Math.sin(diff), Math.cos(diff));
-        const angle = a1 + delta * segmentProgress;
-
-        return { speed, angle, label: p1.label, nextLabel: p2.label, progress: segmentProgress };
-    },
-
     update: function() {
-        this.ctx.clearRect(0, 0, this.width, this.height);
-        
-        const state = this.getCurrentState();
-        
-        // Global flow parameters
-        const baseSpeed = state.speed * 1.5; // Scale for pixels
-        const baseAngle = state.angle;
+        if (!this.width || !this.height) return;
 
+        this.ctx.clearRect(0, 0, this.width, this.height);
         this.ctx.lineWidth = 1.5;
         this.ctx.lineCap = 'round';
+        
+        // Evolve noise offset for temporal awareness (shifting patterns)
+        this.noiseOffset += 0.002;
+
+        // Base velocity vector
+        const visualSpeed = Math.min(this.speed * 1.5, 15); // Cap speed for visuals
 
         for (let p of this.particles) {
             const prevX = p.x;
             const prevY = p.y;
+            
+            // Spatial Noise: Create "gusts" and "calm pockets"
+            // Simple sine interference pattern based on position
+            const noise = Math.sin(p.x * 0.01 + this.noiseOffset) * Math.cos(p.y * 0.01 + this.noiseOffset);
+            
+            // Apply noise to direction (turbulence) and speed (gusts)
+            const angleMod = noise * 0.5; 
+            const speedMod = 1 + noise * 0.3;
 
-            // Spatial Noise: Simple noise based on position to simulate "grid" flow
-            const noise = Math.sin(p.x * 0.01 + p.y * 0.01 + Date.now() * 0.001) * 0.3;
-            const angle = baseAngle + noise;
-
-            const vx = Math.cos(angle) * baseSpeed * p.speedVar;
-            const vy = Math.sin(angle) * baseSpeed * p.speedVar;
+            const vx = Math.cos(this.angle + angleMod) * visualSpeed * p.speedVar * speedMod;
+            const vy = Math.sin(this.angle + angleMod) * visualSpeed * p.speedVar * speedMod;
 
             p.x += vx;
             p.y += vy;
             p.age++;
-
-            // Wrap around
-            if (p.age > p.life) {
+            
+            // Reset if out of bounds or dead
+            if (p.age >= p.life || 
+                p.x < -20 || p.x > this.width + 20 || 
+                p.y < -20 || p.y > this.height + 20) {
                 this.resetParticle(p);
-                p.age = 0;
-                p.x = Math.random() * this.width;
-                p.y = Math.random() * this.height;
-            } else {
-                // Boundary wrap
-                if (p.x < -20) p.x = this.width + 20;
-                if (p.x > this.width + 20) p.x = -20;
-                if (p.y < -20) p.y = this.height + 20;
-                if (p.y > this.height + 20) p.y = -20;
             }
-
-            // Draw
-            const alpha = Math.min(1, Math.sin((p.age / p.life) * Math.PI)) * 0.8;
+            
+            // Draw flowing line (trail effect via opacity)
+            const lifeRatio = p.age / p.life;
+            // Fade in and out smoothly
+            const alpha = Math.sin(lifeRatio * Math.PI) * 0.6;
+            
             this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
             this.ctx.beginPath();
             this.ctx.moveTo(prevX, prevY);
@@ -357,11 +317,6 @@ const WindMap = {
             this.ctx.stroke();
         }
         
-        // Draw Time Indicator
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        this.ctx.font = '12px "Nova Round", sans-serif';
-        this.ctx.fillText(`Flow: ${state.label}`, 10, this.height - 10);
-
         this.animationFrame = requestAnimationFrame(() => this.update());
     },
 
