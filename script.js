@@ -519,7 +519,8 @@ function updateHourlyForecast(data) {
     const hourlyData = data.list.slice(0, 8);
     hourlyData.forEach(item => {
         const date = new Date(item.dt * 1000);
-        const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        // Changed to ensure 12 hour format
+        const time = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
         const temp = Math.round(item.main.temp);
         const iconCode = item.weather[0].icon;
       
@@ -542,7 +543,8 @@ function updateWindForecast(data) {
         const windSpeed = item.wind.speed;
         const windDeg = item.wind.deg;
         const date = new Date(item.dt * 1000);
-        const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        // Changed to ensure 12 hour format
+        const time = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
         const li = document.createElement('li');
         li.classList.add('wind-item');
         li.innerHTML = `
@@ -944,7 +946,7 @@ function updateChart(data, type) {
                 x: {
                     ticks: { 
                         color: '#374151', // Soft dark gray
-                        font: {
+                        font: { 
                             family: "'Nova Round', sans-serif",
                             size: 12,
                             weight: 'bold'
