@@ -106,3 +106,82 @@ const HazardSystem = {
         return alerts;
     }
 };
+
+const ProbabilitySystem = {
+    analyze: function(forecast) {
+        if (!forecast || !forecast.list) return null;
+
+        // Analyze next 12 hours (4 segments of 3h)
+        const segments = forecast.list.slice(0, 4);
+        
+        // Calculate Max POP and Average POP
+        const pops = segments.map(s => s.pop);
+        const maxPop = Math.max(...pops);
+        
+        // If probability is negligible, don't show the panel
+        if (maxPop < 0.2) return null;
+
+        // 1. Trend Analysis
+        let trend = 'Steady';
+        let trendClass = 'trend-steady';
+        
+        // Compare first half vs second half of the 12h window
+        const firstHalf = (pops[0] + pops[1]) / 2;
+        const secondHalf = (pops[2] + pops[3]) / 2;
+        
+        if (secondHalf > firstHalf + 0.1) {
+            trend = 'Rising Chance';
+            trendClass = 'trend-increasing';
+        } else if (secondHalf < firstHalf - 0.1) {
+            trend = 'Clearing Up';
+            trendClass = 'trend-decreasing';
+        }
+
+        // 2. Intensity & Duration
+        let rainVolume = 0;
+        let rainySegments = 0;
+        
+        segments.forEach(s => {
+            if (s.rain && s.rain['3h']) {
+                rainVolume += s.rain['3h'];
+                rainySegments++;
+            } else if (s.snow && s.snow['3h']) {
+                rainVolume += s.snow['3h'];
+                rainySegments++;
+            }
+        });
+
+        let intensity = 'Light';
+        if (rainVolume > 10) intensity = 'Heavy';
+        else if (rainVolume > 2.5) intensity = 'Moderate';
+
+        const duration = rainySegments * 3;
+        
+        // 3. Linguistic Phrasing
+        let phrase = '';
+        const popPct = Math.round(maxPop * 100);
+        
+        if (popPct >= 80) phrase = 'Precipitation Definite';
+        else if (popPct >= 60) phrase = 'Rain Likely';
+        else if (popPct >= 40) phrase = 'Showers Possible';
+        else phrase = 'Low Chance of Rain';
+
+        // 4. Contextual Framing
+        let context = `${intensity} intensity expected. `;
+        if (duration > 0) {
+            context += `Likely to last around ${duration} hours in the upcoming window.`;
+        } else {
+            context += `Brief or intermittent precipitation expected.`;
+        }
+
+        return {
+            pop: popPct,
+            phrase,
+            trend,
+            trendClass,
+            context,
+            explanation: "Probability refers to the likelihood of measurable precipitation at your specific location during the forecast interval, not the area covered.",
+            disclaimer: "Note: A lower percentage does not guarantee dryness, and a higher percentage does not guarantee continuous rain."
+        };
+    }
+};
