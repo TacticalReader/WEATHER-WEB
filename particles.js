@@ -197,3 +197,98 @@ const ProbabilitySystem = {
         };
     }
 };
+
+const WindMap = {
+    canvas: null,
+    ctx: null,
+    particles: [],
+    animationFrame: null,
+    width: 0,
+    height: 0,
+    speed: 0,
+    angle: 0,
+
+    init: function(canvasId, windSpeed, windDeg) {
+        this.canvas = document.getElementById(canvasId);
+        if (!this.canvas) return;
+        
+        this.ctx = this.canvas.getContext('2d');
+        this.speed = windSpeed; // m/s
+        // Convert wind direction (coming from) to flow direction (going to) in canvas radians
+        // Wind 0(N) -> blows to S (90 deg canvas). Formula: (deg + 90)
+        this.angle = (windDeg + 90) * (Math.PI / 180);
+        
+        this.resize();
+        this.createParticles();
+        this.start();
+    },
+
+    resize: function() {
+        const rect = this.canvas.parentElement.getBoundingClientRect();
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height;
+        this.width = rect.width;
+        this.height = rect.height;
+    },
+
+    createParticles: function() {
+        const particleCount = 150;
+        this.particles = [];
+        for (let i = 0; i < particleCount; i++) {
+            this.particles.push(this.resetParticle({}));
+        }
+    },
+
+    resetParticle: function(p) {
+        p.x = Math.random() * this.width;
+        p.y = Math.random() * this.height;
+        p.life = Math.random() * 100 + 50;
+        p.age = Math.random() * p.life;
+        // Speed simulation: scale wind speed to pixels
+        const speedFactor = Math.max(this.speed, 2) * 1.5;
+        const variance = (Math.random() - 0.5) * 0.2;
+        p.vx = Math.cos(this.angle + variance) * speedFactor;
+        p.vy = Math.sin(this.angle + variance) * speedFactor;
+        return p;
+    },
+
+    update: function() {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        this.ctx.lineWidth = 1.5;
+        this.ctx.lineCap = 'round';
+        
+        for (let p of this.particles) {
+            const prevX = p.x;
+            const prevY = p.y;
+            
+            p.x += p.vx;
+            p.y += p.vy;
+            p.age++;
+            
+            if (p.age >= p.life || 
+                p.x < -50 || p.x > this.width + 50 || 
+                p.y < -50 || p.y > this.height + 50) {
+                this.resetParticle(p);
+                p.x = Math.random() * this.width;
+                p.y = Math.random() * this.height;
+                p.age = 0;
+            }
+            
+            const lifeRatio = p.age / p.life;
+            const alpha = Math.sin(lifeRatio * Math.PI) * 0.6;
+            
+            this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            this.ctx.beginPath();
+            this.ctx.moveTo(prevX, prevY);
+            this.ctx.lineTo(p.x, p.y);
+            this.ctx.stroke();
+        }
+        
+        this.animationFrame = requestAnimationFrame(() => this.update());
+    },
+
+    start: function() {
+        if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
+        this.update();
+    }
+};
