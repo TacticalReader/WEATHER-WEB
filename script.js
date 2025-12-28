@@ -368,6 +368,11 @@ function updateUI(data) {
     document.getElementById('sunrise').textContent = formatTime(data.sys.sunrise, data.timezone);
     document.getElementById('sunset').textContent = formatTime(data.sys.sunset, data.timezone);
     updateCountdown(data.sys.sunrise, data.sys.sunset, data.timezone);
+
+    // Initialize Wind Map
+    if (typeof WindMap !== 'undefined') {
+        WindMap.init('windMapCanvas', data.wind.speed, data.wind.deg);
+    }
 }
 
 function updateHazards(current, forecast, air) {
