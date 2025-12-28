@@ -32,6 +32,11 @@ A modern, feature-rich weather application with stunning visual effects and comp
 - **Visibility & Pressure** - Additional atmospheric data
 - **Wind Direction** - Cardinal direction indicators
 
+### 🛡️ Intelligent Insights
+- **Hazard Alerts** - Real-time safety warnings for extreme heat, cold, wind, visibility, and air quality
+- **Precipitation Analysis** - Contextual rain probability with trend indicators (rising/falling), intensity forecasts, and duration estimates
+- **Health Recommendations** - Actionable advice based on current air quality and weather conditions
+
 ### 🎯 Smart Features
 - **Social Sharing** - Generate and share downloadable snapshots of current weather
 - **City Search** - Autocomplete suggestions for quick city lookup
@@ -114,6 +119,7 @@ WEATHER-WEB/
 ├── config.js           # API key and configuration
 ├── icons.js            # Weather icon mappings
 ├── particles.js        # Particle effects system
+├── analysis.js         # Weather analysis logic
 ├── LICENSE             # Apache 2.0 License
 ├── README.md           # Documentation
 ├── images/             # Image assets
@@ -206,6 +212,16 @@ Configure Chart.js options in `script.js` under the `createChart()` function.
 - Precipitation probability
 - Min/Max temperature ranges
 - Weather condition icons for quick recognition
+
+### Hazard Interpretation Engine
+- Analyzes multiple weather parameters simultaneously
+- Provides color-coded alerts (Caution, Danger, Severe)
+- Monitors thermal comfort, wind safety, and visibility risks
+
+### Precipitation Probability Logic
+- Goes beyond simple percentages
+- Analyzes forecast trends (intensifying vs clearing)
+- Provides human-readable context about rain duration and intensity
 
 ## 🐛 Troubleshooting
 
