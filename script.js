@@ -282,6 +282,11 @@ async function fetchAdditionalData(weatherData) {
         if (typeof HazardSystem !== 'undefined') {
             updateHazards(weatherData, forecastData, airData);
         }
+
+        // Initialize Precipitation Probability Layer
+        if (typeof ProbabilitySystem !== 'undefined') {
+            updatePrecipitation(forecastData);
+        }
       
         chartButtons.forEach(b => b.classList.remove('active'));
         document.querySelector('[data-type="temp"]').classList.add('active');
@@ -390,6 +395,38 @@ function updateHazards(current, forecast, air) {
         `;
         container.appendChild(div);
     });
+}
+
+function updatePrecipitation(forecast) {
+    const container = document.getElementById('precip-container');
+    if (!container) return;
+
+    if (typeof ProbabilitySystem === 'undefined') {
+        container.style.display = 'none';
+        return;
+    }
+
+    const data = ProbabilitySystem.analyze(forecast);
+    
+    if (!data) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    container.innerHTML = `
+        <div class="precip-header">
+            <span class="precip-title">Rain Probability: ${data.pop}%</span>
+            <span class="precip-trend ${data.trendClass}">${data.trend}</span>
+        </div>
+        <div class="precip-phrase">${data.phrase}</div>
+        <div class="precip-context">${data.context}</div>
+        <div class="precip-explanation">
+            <span class="material-icons" style="font-size: 14px; vertical-align: middle;">info</span>
+            ${data.explanation}
+        </div>
+        <div class="precip-disclaimer">${data.disclaimer}</div>
+    `;
 }
 
 function updateBackground(weatherMain, data, isNightOverride = null) {
