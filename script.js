@@ -287,11 +287,6 @@ async function fetchAdditionalData(weatherData) {
         if (typeof ProbabilitySystem !== 'undefined') {
             updatePrecipitation(forecastData);
         }
-
-        // Initialize Wind Map with Forecast for Temporal Awareness
-        if (typeof WindMap !== 'undefined') {
-            WindMap.init('windMapCanvas', weatherData.wind, forecastData.list);
-        }
       
         chartButtons.forEach(b => b.classList.remove('active'));
         document.querySelector('[data-type="temp"]').classList.add('active');
@@ -308,10 +303,6 @@ async function fetchAdditionalData(weatherData) {
         console.error(error);
         showToast("Failed to load some details");
         updateUI(weatherData);
-        // Fallback for WindMap if forecast fails
-        if (typeof WindMap !== 'undefined') {
-            WindMap.init('windMapCanvas', weatherData.wind, null);
-        }
         hideSkeleton();
     }
 }
@@ -377,6 +368,11 @@ function updateUI(data) {
     document.getElementById('sunrise').textContent = formatTime(data.sys.sunrise, data.timezone);
     document.getElementById('sunset').textContent = formatTime(data.sys.sunset, data.timezone);
     updateCountdown(data.sys.sunrise, data.sys.sunset, data.timezone);
+
+    // Initialize Wind Map
+    if (typeof WindMap !== 'undefined') {
+        WindMap.init('windMapCanvas', data.wind.speed, data.wind.deg);
+    }
 }
 
 function updateHazards(current, forecast, air) {
@@ -1118,6 +1114,8 @@ function showSkeleton() {
 function hideSkeleton() {
     skeletonLoader.style.display = 'none';
     weatherContent.style.display = 'block';
+    // Fix for WindMap visibility
+    if (typeof WindMap !== 'undefined') WindMap.resize();
 }
 
 function showError(msg) {
