@@ -206,117 +206,118 @@ const WindMap = {
     width: 0,
     height: 0,
     speed: 0,
-    angle: 0,
-    noiseOffset: 0,
-    resizeObserver: null,
+    direction: 0,
+    time: 0,
+    boundResize: null,
 
     init: function(canvasId, windSpeed, windDeg) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) return;
         
         this.ctx = this.canvas.getContext('2d');
-        this.updateData(windSpeed, windDeg);
-        
-        // Robust resizing: Observe parent for size changes (handles display:none -> block)
-        if (!this.resizeObserver) {
-            this.resizeObserver = new ResizeObserver(() => this.resize());
-            this.resizeObserver.observe(this.canvas.parentElement);
-        }
+        this.speed = windSpeed;
+        // Convert wind deg (from) to flow angle (to)
+        // 0 deg (N) -> 90 deg (S) in canvas (PI/2)
+        this.direction = (windDeg - 90 + 180) * (Math.PI / 180);
         
         this.resize();
-        this.start();
-    },
+        
+        // Retry if hidden (dimensions 0)
+        if (this.width === 0) {
+            setTimeout(() => this.init(canvasId, windSpeed, windDeg), 200);
+            return;
+        }
 
-    updateData: function(speed, deg) {
-        this.speed = speed;
-        // Convert wind direction (coming from) to flow direction (going to) in canvas radians
-        // 0(N) -> blows S (90 deg canvas). Formula: (deg + 90)
-        this.angle = (deg + 90) * (Math.PI / 180);
+        this.createParticles();
+        this.start();
+        
+        if (this.boundResize) window.removeEventListener('resize', this.boundResize);
+        this.boundResize = this.resize.bind(this);
+        window.addEventListener('resize', this.boundResize);
     },
 
     resize: function() {
         if (!this.canvas) return;
-        const parent = this.canvas.parentElement;
-        const rect = parent.getBoundingClientRect();
+        const rect = this.canvas.parentElement.getBoundingClientRect();
+        if (rect.width === 0) return;
         
-        if (rect.width > 0 && rect.height > 0) {
-            this.canvas.width = rect.width;
-            this.canvas.height = rect.height;
-            this.width = rect.width;
-            this.height = rect.height;
-            this.createParticles();
-        }
+        this.width = rect.width;
+        this.height = rect.height;
+        
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.width = this.width * dpr;
+        this.canvas.height = this.height * dpr;
+        this.ctx.scale(dpr, dpr);
     },
 
     createParticles: function() {
-        // Density based on area
-        const particleCount = Math.floor((this.width * this.height) / 600);
         this.particles = [];
+        const particleCount = 120;
         for (let i = 0; i < particleCount; i++) {
-            this.particles.push(this.resetParticle({}, true));
+            this.particles.push(this.resetParticle({}));
         }
     },
 
-    resetParticle: function(p, randomAge = false) {
+    resetParticle: function(p) {
         p.x = Math.random() * this.width;
         p.y = Math.random() * this.height;
-        p.life = 60 + Math.random() * 60;
-        p.age = randomAge ? Math.random() * p.life : 0;
-        p.speedVar = 0.5 + Math.random(); // Speed variance
+        p.age = 0;
+        p.life = Math.random() * 60 + 40;
         return p;
     },
 
+    getFlowVector: function(x, y) {
+        // Spatial context: Sine waves to simulate flow patterns
+        const scale = 0.015;
+        const noise = Math.sin(x * scale + this.time) * Math.cos(y * scale + this.time);
+        return this.direction + (noise * 0.5);
+    },
+
     update: function() {
-        if (!this.width || !this.height) return;
+        if (!this.width) {
+             this.resize();
+             if (!this.width) {
+                 this.animationFrame = requestAnimationFrame(() => this.update());
+                 return;
+             }
+        }
 
         this.ctx.clearRect(0, 0, this.width, this.height);
+        this.time += 0.005; // Temporal evolution
+
+        const isNight = document.body.classList.contains('night-mode');
+        const color = isNight ? 'rgba(200, 230, 255,' : 'rgba(37, 99, 235,';
+
         this.ctx.lineWidth = 1.5;
         this.ctx.lineCap = 'round';
-        
-        // Evolve noise offset for temporal awareness (shifting patterns)
-        this.noiseOffset += 0.002;
-
-        // Base velocity vector
-        const visualSpeed = Math.min(this.speed * 1.5, 15); // Cap speed for visuals
 
         for (let p of this.particles) {
+            const angle = this.getFlowVector(p.x, p.y);
+            
+            // Speed visualization
+            const speedFactor = Math.min(Math.max(this.speed, 2), 25) * 0.8;
+            const vx = Math.cos(angle) * speedFactor;
+            const vy = Math.sin(angle) * speedFactor;
+
             const prevX = p.x;
             const prevY = p.y;
-            
-            // Spatial Noise: Create "gusts" and "calm pockets"
-            // Simple sine interference pattern based on position
-            const noise = Math.sin(p.x * 0.01 + this.noiseOffset) * Math.cos(p.y * 0.01 + this.noiseOffset);
-            
-            // Apply noise to direction (turbulence) and speed (gusts)
-            const angleMod = noise * 0.5; 
-            const speedMod = 1 + noise * 0.3;
-
-            const vx = Math.cos(this.angle + angleMod) * visualSpeed * p.speedVar * speedMod;
-            const vy = Math.sin(this.angle + angleMod) * visualSpeed * p.speedVar * speedMod;
 
             p.x += vx;
             p.y += vy;
             p.age++;
-            
-            // Reset if out of bounds or dead
-            if (p.age >= p.life || 
-                p.x < -20 || p.x > this.width + 20 || 
-                p.y < -20 || p.y > this.height + 20) {
-                this.resetParticle(p);
-            }
-            
-            // Draw flowing line (trail effect via opacity)
-            const lifeRatio = p.age / p.life;
-            // Fade in and out smoothly
-            const alpha = Math.sin(lifeRatio * Math.PI) * 0.6;
-            
-            this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+
+            const alpha = Math.sin((p.age / p.life) * Math.PI);
+            this.ctx.strokeStyle = `${color} ${alpha})`;
             this.ctx.beginPath();
             this.ctx.moveTo(prevX, prevY);
             this.ctx.lineTo(p.x, p.y);
             this.ctx.stroke();
+
+            if (p.age >= p.life || p.x < -20 || p.x > this.width + 20 || p.y < -20 || p.y > this.height + 20) {
+                this.resetParticle(p);
+            }
         }
-        
+
         this.animationFrame = requestAnimationFrame(() => this.update());
     },
 
