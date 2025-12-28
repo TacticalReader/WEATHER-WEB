@@ -205,25 +205,54 @@ const WindMap = {
     animationFrame: null,
     width: 0,
     height: 0,
-    speed: 0,
-    angle: 0,
+    timeline: [], // Array of {speed, angle, label}
+    cycleDuration: 12000, // 12 seconds for full cycle
+    startTime: 0,
 
-    init: function(canvasId, windSpeed, windDeg) {
+    init: function(canvasId, currentWind, forecastList) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) return;
         
         this.ctx = this.canvas.getContext('2d');
-        this.speed = windSpeed; // m/s
-        // Convert wind direction (coming from) to flow direction (going to) in canvas radians
-        // Wind 0(N) -> blows to S (90 deg canvas). Formula: (deg + 90)
-        this.angle = (windDeg + 90) * (Math.PI / 180);
         
+        // Build timeline: Current -> +3h -> +6h -> +9h
+        this.timeline = [];
+        
+        const addPoint = (speed, deg, label) => {
+            // Convert deg to flow angle (radians)
+            // Wind from N(0) -> flows to S(90 in canvas). 
+            // Formula: (deg + 90) converts Meteo deg to Canvas radians
+            let angle = (deg + 90) * (Math.PI / 180);
+            this.timeline.push({ speed, angle, label });
+        };
+
+        addPoint(currentWind.speed, currentWind.deg, 'Now');
+
+        if (forecastList && forecastList.length) {
+            // Take next 3 points (9 hours)
+            for(let i=0; i<3; i++) {
+                if(forecastList[i]) {
+                    const item = forecastList[i];
+                    const date = new Date(item.dt * 1000);
+                    const label = date.getHours() + ':00';
+                    addPoint(item.wind.speed, item.wind.deg, label);
+                }
+            }
+        }
+        
+        // If no forecast, just duplicate current to keep logic simple
+        if (this.timeline.length === 1) {
+            this.timeline.push(this.timeline[0]);
+        }
+
         this.resize();
+        window.addEventListener('resize', () => this.resize());
         this.createParticles();
         this.start();
     },
 
     resize: function() {
+        if (!this.canvas) return;
         const rect = this.canvas.parentElement.getBoundingClientRect();
         this.canvas.width = rect.width;
         this.canvas.height = rect.height;
@@ -232,9 +261,9 @@ const WindMap = {
     },
 
     createParticles: function() {
-        const particleCount = 150;
+        const count = 120;
         this.particles = [];
-        for (let i = 0; i < particleCount; i++) {
+        for (let i = 0; i < count; i++) {
             this.particles.push(this.resetParticle({}));
         }
     },
@@ -242,41 +271,85 @@ const WindMap = {
     resetParticle: function(p) {
         p.x = Math.random() * this.width;
         p.y = Math.random() * this.height;
-        p.life = Math.random() * 100 + 50;
+        p.life = Math.random() * 80 + 40;
         p.age = Math.random() * p.life;
-        // Speed simulation: scale wind speed to pixels
-        const speedFactor = Math.max(this.speed, 2) * 1.5;
-        const variance = (Math.random() - 0.5) * 0.2;
-        p.vx = Math.cos(this.angle + variance) * speedFactor;
-        p.vy = Math.sin(this.angle + variance) * speedFactor;
+        p.speedVar = 0.8 + Math.random() * 0.4; // 0.8 - 1.2
         return p;
+    },
+
+    getCurrentState: function() {
+        const now = Date.now();
+        if (!this.startTime) this.startTime = now;
+        const elapsed = (now - this.startTime) % this.cycleDuration;
+        const progress = elapsed / this.cycleDuration;
+        
+        // Determine which segment we are in
+        const count = this.timeline.length;
+        const segmentDuration = 1 / count;
+        const index = Math.floor(progress * count);
+        const nextIndex = (index + 1) % count;
+        const segmentProgress = (progress - index * segmentDuration) / segmentDuration; // 0..1
+
+        const p1 = this.timeline[index];
+        const p2 = this.timeline[nextIndex];
+
+        // Interpolate Speed
+        const speed = p1.speed + (p2.speed - p1.speed) * segmentProgress;
+
+        // Interpolate Angle (Shortest path)
+        let a1 = p1.angle;
+        let a2 = p2.angle;
+        const diff = a2 - a1;
+        // Normalize diff to -PI to +PI
+        const delta = Math.atan2(Math.sin(diff), Math.cos(diff));
+        const angle = a1 + delta * segmentProgress;
+
+        return { speed, angle, label: p1.label, nextLabel: p2.label, progress: segmentProgress };
     },
 
     update: function() {
         this.ctx.clearRect(0, 0, this.width, this.height);
+        
+        const state = this.getCurrentState();
+        
+        // Global flow parameters
+        const baseSpeed = state.speed * 1.5; // Scale for pixels
+        const baseAngle = state.angle;
+
         this.ctx.lineWidth = 1.5;
         this.ctx.lineCap = 'round';
-        
+
         for (let p of this.particles) {
             const prevX = p.x;
             const prevY = p.y;
-            
-            p.x += p.vx;
-            p.y += p.vy;
+
+            // Spatial Noise: Simple noise based on position to simulate "grid" flow
+            const noise = Math.sin(p.x * 0.01 + p.y * 0.01 + Date.now() * 0.001) * 0.3;
+            const angle = baseAngle + noise;
+
+            const vx = Math.cos(angle) * baseSpeed * p.speedVar;
+            const vy = Math.sin(angle) * baseSpeed * p.speedVar;
+
+            p.x += vx;
+            p.y += vy;
             p.age++;
-            
-            if (p.age >= p.life || 
-                p.x < -50 || p.x > this.width + 50 || 
-                p.y < -50 || p.y > this.height + 50) {
+
+            // Wrap around
+            if (p.age > p.life) {
                 this.resetParticle(p);
+                p.age = 0;
                 p.x = Math.random() * this.width;
                 p.y = Math.random() * this.height;
-                p.age = 0;
+            } else {
+                // Boundary wrap
+                if (p.x < -20) p.x = this.width + 20;
+                if (p.x > this.width + 20) p.x = -20;
+                if (p.y < -20) p.y = this.height + 20;
+                if (p.y > this.height + 20) p.y = -20;
             }
-            
-            const lifeRatio = p.age / p.life;
-            const alpha = Math.sin(lifeRatio * Math.PI) * 0.6;
-            
+
+            // Draw
+            const alpha = Math.min(1, Math.sin((p.age / p.life) * Math.PI)) * 0.8;
             this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
             this.ctx.beginPath();
             this.ctx.moveTo(prevX, prevY);
@@ -284,6 +357,11 @@ const WindMap = {
             this.ctx.stroke();
         }
         
+        // Draw Time Indicator
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        this.ctx.font = '12px "Nova Round", sans-serif';
+        this.ctx.fillText(`Flow: ${state.label}`, 10, this.height - 10);
+
         this.animationFrame = requestAnimationFrame(() => this.update());
     },
 
