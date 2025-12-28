@@ -22,6 +22,7 @@ function createSparks(x, y) {
         }).onfinish = () => spark.remove();
     }
 }
+
 const HazardSystem = {
     thresholds: {
         wind: { caution: 10, danger: 17, severe: 24 }, // m/s
@@ -42,8 +43,6 @@ const HazardSystem = {
         if (unit === 'imperial') {
             t = (t - 32) * 5 / 9; // F to C
             w = w * 0.44704; // mph to m/s
-            // Visibility usually comes in meters from API even if unit is imperial, 
-            // but if it was miles, we'd convert. OpenWeatherMap standard is meters.
         }
         
         // Helper to add alert
@@ -83,7 +82,6 @@ const HazardSystem = {
         }
 
         // 4. Forecast (Upcoming Risk)
-        // Check next 3-6 hours
         if (forecast && forecast.list) {
             const nextPoints = forecast.list.slice(0, 2); // Next 6 hours
             let rainIncoming = false;
@@ -95,7 +93,6 @@ const HazardSystem = {
                 if (id >= 500 && id < 600) rainIncoming = true;
             });
 
-            // Only show upcoming if not currently happening
             const currentIsRain = (weatherId >= 500 && weatherId < 600);
             const currentIsStorm = (weatherId >= 200 && weatherId < 300);
 
@@ -114,25 +111,24 @@ const ProbabilitySystem = {
         // Analyze next 12 hours (4 segments of 3h)
         const segments = forecast.list.slice(0, 4);
         
-        // Calculate Max POP and Average POP
+        // Calculate Max POP
         const pops = segments.map(s => s.pop);
         const maxPop = Math.max(...pops);
         
         // If probability is negligible, don't show the panel
-        if (maxPop < 0.2) return null;
+        if (maxPop < 0.25) return null;
 
         // 1. Trend Analysis
         let trend = 'Steady';
         let trendClass = 'trend-steady';
         
-        // Compare first half vs second half of the 12h window
         const firstHalf = (pops[0] + pops[1]) / 2;
         const secondHalf = (pops[2] + pops[3]) / 2;
         
-        if (secondHalf > firstHalf + 0.1) {
+        if (secondHalf > firstHalf + 0.15) {
             trend = 'Rising Chance';
             trendClass = 'trend-increasing';
-        } else if (secondHalf < firstHalf - 0.1) {
+        } else if (secondHalf < firstHalf - 0.15) {
             trend = 'Clearing Up';
             trendClass = 'trend-decreasing';
         }
@@ -140,20 +136,28 @@ const ProbabilitySystem = {
         // 2. Intensity & Duration
         let rainVolume = 0;
         let rainySegments = 0;
+        let breaks = 0;
+        let wasRaining = false;
         
         segments.forEach(s => {
-            if (s.rain && s.rain['3h']) {
-                rainVolume += s.rain['3h'];
+            let precip = 0;
+            if (s.rain && s.rain['3h']) precip += s.rain['3h'];
+            if (s.snow && s.snow['3h']) precip += s.snow['3h'];
+            
+            rainVolume += precip;
+            
+            if (precip > 0.1) {
                 rainySegments++;
-            } else if (s.snow && s.snow['3h']) {
-                rainVolume += s.snow['3h'];
-                rainySegments++;
+                if (wasRaining === false && rainySegments > 1) breaks++; // Gap detected before this segment
+                wasRaining = true;
+            } else {
+                wasRaining = false;
             }
         });
 
         let intensity = 'Light';
-        if (rainVolume > 10) intensity = 'Heavy';
-        else if (rainVolume > 2.5) intensity = 'Moderate';
+        if (rainVolume > 15) intensity = 'Heavy';
+        else if (rainVolume > 5) intensity = 'Moderate';
 
         const duration = rainySegments * 3;
         
@@ -161,15 +165,24 @@ const ProbabilitySystem = {
         let phrase = '';
         const popPct = Math.round(maxPop * 100);
         
-        if (popPct >= 80) phrase = 'Precipitation Definite';
-        else if (popPct >= 60) phrase = 'Rain Likely';
-        else if (popPct >= 40) phrase = 'Showers Possible';
-        else phrase = 'Low Chance of Rain';
+        if (popPct >= 80) {
+            if (intensity === 'Heavy' && duration >= 6) phrase = 'High Chance of Sustained Rainfall';
+            else phrase = 'Precipitation Definite';
+        } else if (popPct >= 60) {
+            phrase = 'Rain Likely';
+        } else if (popPct >= 40) {
+            if (breaks > 0 || duration <= 3) phrase = 'Scattered Showers Possible';
+            else phrase = 'Showers Possible';
+        } else {
+            phrase = 'Low Chance of Rain';
+        }
 
         // 4. Contextual Framing
         let context = `${intensity} intensity expected. `;
         if (duration > 0) {
-            context += `Likely to last around ${duration} hours in the upcoming window.`;
+            if (breaks > 0) context += `Intermittent precipitation spread over the next 12 hours.`;
+            else if (duration <= 3) context += `Brief precipitation expected.`;
+            else context += `Likely to last around ${duration} hours in the upcoming window.`;
         } else {
             context += `Brief or intermittent precipitation expected.`;
         }
@@ -180,7 +193,7 @@ const ProbabilitySystem = {
             trend,
             trendClass,
             context,
-            explanation: "Probability refers to the likelihood of measurable precipitation at your specific location during the forecast interval, not the area covered.",
+            explanation: "In OpenWeather forecasts, precipitation probability (POP) typically refers to the likelihood of measurable precipitation at the given location during the forecast interval, not duration or coverage.",
             disclaimer: "Note: A lower percentage does not guarantee dryness, and a higher percentage does not guarantee continuous rain."
         };
     }
