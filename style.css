@@ -636,6 +636,7 @@ input:checked + .slider:before {
 .hazard-danger .hazard-icon { color: #f97316; }
 
 .hazard-severe {
+    margin: 7px;
     background: rgba(239, 68, 68, 0.2); /* Red */
     border-color: rgba(239, 68, 68, 0.5);
     color: #7f1d1d;
