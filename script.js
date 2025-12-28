@@ -302,10 +302,9 @@ async function fetchAdditionalData(weatherData) {
 
         // Initialize Wind Map here (after element is visible)
         if (typeof WindMap !== 'undefined') {
-            // Calculate isNight for WindMap context
-            const now = Math.floor(Date.now() / 1000);
-            const isNight = now > weatherData.sys.sunset || now < weatherData.sys.sunrise;
-            WindMap.init('windMapCanvas', weatherData.wind.speed, weatherData.wind.deg, weatherData.weather[0].id, isNight);
+            const weatherId = weatherData.weather[0].id;
+            const isNight = document.body.classList.contains('night-mode');
+            WindMap.init('windMapCanvas', weatherData.wind.speed, weatherData.wind.deg, weatherId, isNight);
         }
     } catch (error) {
         console.error(error);
@@ -314,9 +313,7 @@ async function fetchAdditionalData(weatherData) {
         hideSkeleton();
         // Initialize Wind Map even on partial error if basic data exists
         if (typeof WindMap !== 'undefined') {
-            const now = Math.floor(Date.now() / 1000);
-            const isNight = now > weatherData.sys.sunset || now < weatherData.sys.sunrise;
-            WindMap.init('windMapCanvas', weatherData.wind.speed, weatherData.wind.deg, weatherData.weather[0].id, isNight);
+            WindMap.init('windMapCanvas', weatherData.wind.speed, weatherData.wind.deg, weatherData.weather[0].id, false);
         }
     }
 }
