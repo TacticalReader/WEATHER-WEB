@@ -18,9 +18,9 @@ A modern, feature-rich weather application with stunning visual effects and comp
 - **Wind Forecast** - Comprehensive wind speed and direction data
 
 ### 🎨 Visual Excellence
-- **Dynamic Backgrounds** - Weather-responsive parallax backgrounds with smooth transitions
+- **Dynamic Backgrounds** - Weather-responsive parallax backgrounds with smooth transitions (Day/Night support)
 - **Glassmorphism UI** - Modern frosted glass design aesthetic
-- **Animated Weather Icons** - Custom weather condition icons with vibrant filters
+- **Dynamic Weather Visuals** - Weather condition icons with vibrant filters and effects
 - **Particle Effects** - Dynamic particle system matching weather conditions
 - **Skeleton Loading** - Smooth loading states for better UX
 
@@ -28,6 +28,7 @@ A modern, feature-rich weather application with stunning visual effects and comp
 - **Air Quality Index (AQI)** - Real-time air pollution data
 - **Pollutant Levels** - PM2.5, SO2, NO2, and O3 measurements
 - **Interactive Charts** - Temperature, humidity, and wind speed visualizations with day/night cycle shading
+- **Wind Flow Map** - Interactive particle visualization of wind speed and direction
 - **Sunrise/Sunset Times** - Precise daylight information with countdown
 - **Visibility & Pressure** - Additional atmospheric data
 - **Wind Direction** - Cardinal direction indicators
@@ -88,7 +89,7 @@ Visit the live application: [SkyCast Weather](https://tacticalreader.github.io/W
 3. **Configure API Key**
    - Open `config.js`
    - Replace the existing API key with your own:
-     ```
+     ```javascript
      const CONFIG = {
          apiKey: "YOUR_API_KEY_HERE",
          // ... rest of config
@@ -98,7 +99,7 @@ Visit the live application: [SkyCast Weather](https://tacticalreader.github.io/W
 4. **Launch the application**
    - Open `index.html` in your web browser
    - Or use a local server:
-     ```
+     ```bash
      # Using Python
      python -m http.server 8000
      
@@ -118,8 +119,7 @@ WEATHER-WEB/
 ├── script.js           # Core application logic
 ├── config.js           # API key and configuration
 ├── icons.js            # Weather icon mappings
-├── particles.js        # Particle effects system
-├── analysis.js         # Weather analysis logic
+├── particles.js        # Particle effects, hazard analysis, and wind map logic
 ├── LICENSE             # Apache 2.0 License
 ├── README.md           # Documentation
 ├── images/             # Image assets
@@ -170,22 +170,29 @@ WEATHER-WEB/
 ## 🎨 Customization
 
 ### Modify Backgrounds
-Edit `config.js` to change weather-condition backgrounds:
-```
-backgrounds: {
-    'Clear': 'YOUR_IMAGE_URL',
-    'Clouds': 'YOUR_IMAGE_URL',
-    // ... add more conditions
-}
+Edit `config.js` to change weather-condition backgrounds for day and night:
+```javascript
+const CONFIG = {
+    // ...
+    backgrounds: {
+        'Clear': 'YOUR_DAY_IMAGE_URL',
+        'Clouds': 'YOUR_DAY_IMAGE_URL',
+        // ... add more conditions
+    },
+    nightBackgrounds: {
+        'Clear': 'YOUR_NIGHT_IMAGE_URL',
+        'Clouds': 'YOUR_NIGHT_IMAGE_URL',
+        // ... add more conditions
+    }
+};
 ```
 
 ### Change Color Scheme
 Modify CSS custom properties in `style.css`:
-```
+```css
 :root {
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --accent: #64B5F6;
+    --celsius-gradient: linear-gradient(to right, #06b6d4, #2563eb);
+    --fahrenheit-gradient: linear-gradient(to right, #f97316, #ef4444);
     /* ... customize colors */
 }
 ```
