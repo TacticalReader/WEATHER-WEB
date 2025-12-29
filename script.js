@@ -638,6 +638,7 @@ function updateChart(data, type) {
         if (sr >= startDt && sr <= endDt) sunEvents.push({ type: 'sunrise', time: sr });
         if (ss >= startDt && ss <= endDt) sunEvents.push({ type: 'sunset', time: ss });
     });
+
     const dayNightPlugin = {
         id: 'dayNightPlugin',
         beforeDraw: (chart) => {
@@ -690,7 +691,6 @@ function updateChart(data, type) {
                 const width = end.x - start.x;
                 if (width <= 0) continue;
                 if (isNight) {
-                    // Darker slate blue for night
                     ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
                     ctx.fillRect(start.x, chartArea.top, width, chartArea.height);
                 }
@@ -762,50 +762,48 @@ function updateChart(data, type) {
             pointHoverRadii.push(25);
         } else {
             pointStyles.push('circle');
-            pointRadii.push(3);
-            pointHoverRadii.push(5);
+            pointRadii.push(4);
+            pointHoverRadii.push(7);
         }
       
         lastCondition = condition;
     });
 
     let label, color, gradient;
-    gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient = ctx.createLinearGradient(0, 0, 0, 400);
 
-    // Determine label and color first
     if (type === 'humidity') {
         label = 'Humidity (%)';
-        color = '#3b82f6';
-        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.6)');
-        gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+        color = '#38bdf8';
+        gradient.addColorStop(0, 'rgba(56, 189, 248, 0.5)');
+        gradient.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
     } else if (type === 'wind') {
         label = currentUnit === 'metric' ? 'Wind Speed (m/s)' : 'Wind Speed (mph)';
-        color = '#f59e0b';
-        gradient.addColorStop(0, 'rgba(245, 158, 11, 0.6)');
-        gradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
+        color = '#fbbf24';
+        gradient.addColorStop(0, 'rgba(251, 191, 36, 0.5)');
+        gradient.addColorStop(1, 'rgba(251, 191, 36, 0.0)');
     } else {
         label = currentUnit === 'metric' ? 'Temperature (°C)' : 'Temperature (°F)';
-        color = '#f97316';
-        gradient.addColorStop(0, 'rgba(249, 115, 22, 0.6)');
-        gradient.addColorStop(1, 'rgba(249, 115, 22, 0)');
+        color = '#fb923c';
+        gradient.addColorStop(0, 'rgba(251, 146, 60, 0.5)');
+        gradient.addColorStop(1, 'rgba(251, 146, 60, 0.0)');
     }
 
-    // Configure Y-axis
     let yScaleConfig = {
         display: true,
         title: {
             display: true,
             text: label,
-            color: '#374151',
+            color: '#9ca3af',
             font: {
                 family: "'Orbitron', sans-serif",
-                size: 13,
+                size: 12,
                 weight: 'bold'
             },
             padding: { bottom: 10 }
         },
         grid: { 
-            color: 'rgba(0, 0, 0, 0.06)',
+            color: 'rgba(255, 255, 255, 0.05)',
             drawBorder: false,
             tickLength: 8
         },
@@ -813,7 +811,7 @@ function updateChart(data, type) {
             display: false
         },
         ticks: {
-            color: '#4b5563',
+            color: '#9ca3af',
             font: {
                 family: "'Nova Round', sans-serif",
                 size: 11,
@@ -831,13 +829,27 @@ function updateChart(data, type) {
         yScaleConfig.beginAtZero = true;
         yScaleConfig.suggestedMax = 15;
     } else {
-        // Temperature
         yScaleConfig.grace = '15%';
     }
 
     if (weatherChart) {
         weatherChart.destroy();
     }
+
+    const lineGlowPlugin = {
+        id: 'lineGlow',
+        beforeDatasetDraw: (chart, args) => {
+            const ctx = chart.ctx;
+            ctx.save();
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+        },
+        afterDatasetDraw: (chart) => {
+            chart.ctx.restore();
+        }
+    };
 
     const glowPlugin = {
         id: 'glowPlugin',
@@ -851,10 +863,11 @@ function updateChart(data, type) {
                     if (point.options.radius > 10) {
                         ctx.save();
                         ctx.shadowColor = color;
-                        ctx.shadowBlur = 15;
+                        ctx.shadowBlur = 20;
                         ctx.beginPath();
-                        ctx.arc(point.x, point.y, point.options.radius, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                        ctx.arc(point.x, point.y, point.options.radius + 2, 0, Math.PI * 2);
+                        ctx.fillStyle = color;
+                        ctx.globalAlpha = 0.3;
                         ctx.fill();
                         ctx.restore();
                     }
@@ -874,8 +887,8 @@ function updateChart(data, type) {
                 ctx.beginPath();
                 ctx.moveTo(x, yAxis.top);
                 ctx.lineTo(x, yAxis.bottom);
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
                 ctx.setLineDash([5, 5]);
                 ctx.stroke();
                 ctx.restore();
@@ -892,23 +905,26 @@ function updateChart(data, type) {
                 data: datasetData,
                 borderColor: color,
                 backgroundColor: gradient,
-                borderWidth: 4, // Slightly thicker line,
+                borderWidth: 3,
                 tension: 0.4,
                 fill: true,
                 pointStyle: pointStyles,
                 pointRadius: pointRadii,
                 pointHoverRadius: pointHoverRadii,
-                pointBackgroundColor: color,
-                pointBorderColor: '#fff',
-                pointBorderWidth: 3, // Thicker border for points
-                pointHitRadius: 20
+                pointBackgroundColor: '#1f2937',
+                pointBorderColor: color,
+                pointBorderWidth: 2,
+                pointHoverBackgroundColor: color,
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 3,
+                pointHitRadius: 30
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             animation: {
-                duration: 800,
+                duration: 1000,
                 easing: 'easeOutQuart'
             },
             interaction: {
@@ -922,7 +938,7 @@ function updateChart(data, type) {
                 legend: { display: false },
                 tooltip: {
                     enabled: true,
-                    backgroundColor: 'rgba(17, 24, 39, 0.9)', // Darker, more opaque
+                    backgroundColor: 'rgba(17, 24, 39, 0.9)',
                     titleColor: '#f3f4f6',
                     bodyColor: '#e5e7eb',
                     titleFont: {
@@ -934,7 +950,7 @@ function updateChart(data, type) {
                         size: 13
                     },
                     padding: 12,
-                    cornerRadius: 12,
+                    cornerRadius: 8,
                     displayColors: false,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     borderWidth: 1,
@@ -956,7 +972,7 @@ function updateChart(data, type) {
             scales: {
                 x: {
                     ticks: { 
-                        color: '#374151', // Soft dark gray
+                        color: '#9ca3af',
                         font: { 
                             family: "'Nova Round', sans-serif",
                             size: 12,
@@ -966,13 +982,13 @@ function updateChart(data, type) {
                     },
                     grid: { display: false }
                 },
-                y: yScaleConfig // Use dynamic scale config
+                y: yScaleConfig
             },
             layout: {
                 padding: { top: 10, bottom: 5, left: 10, right: 10 }
             }
         },
-        plugins: [glowPlugin, dayNightPlugin, crosshairPlugin]
+        plugins: [lineGlowPlugin, dayNightPlugin, crosshairPlugin, glowPlugin]
     });
 }
 
