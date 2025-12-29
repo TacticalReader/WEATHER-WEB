@@ -810,15 +810,15 @@ function updateChart(data, type) {
             pointStyles.push(weatherIconsCache[iconCode]);
             pointRadii.push(15);
             pointHoverRadii.push(25);
-            pointBackgroundColors.push('#1f2937'); // Fallback
+            pointBackgroundColors.push('rgba(255, 255, 255, 0.2)'); // Slight backing for icon
             pointBorderColors.push(color);
         } else {
-            // Standard Dot
+            // Standard Dot - Changed to White to avoid "Black dot" confusion
             pointStyles.push('circle');
             pointRadii.push(4);
             pointHoverRadii.push(7);
-            pointBackgroundColors.push('#1f2937'); // Dark neutral
-            pointBorderColors.push(color); // Graph color
+            pointBackgroundColors.push('#ffffff'); 
+            pointBorderColors.push(color); 
         }
       
         lastCondition = condition;
@@ -993,13 +993,22 @@ function updateChart(data, type) {
                         label: function(context) {
                             let value = context.parsed.y;
                             let suffix = '';
-                            if (type === 'temp') suffix = (currentUnit === 'metric' ? '°C' : '°F');
-                            else if (type === 'humidity') suffix = '%';
-                            else if (type === 'wind') suffix = (currentUnit === 'metric' ? ' m/s' : ' mph');
+                            let typeLabel = '';
+                            
+                            if (type === 'temp') {
+                                suffix = (currentUnit === 'metric' ? '°C' : '°F');
+                                typeLabel = 'Temperature';
+                            } else if (type === 'humidity') {
+                                suffix = '%';
+                                typeLabel = 'Humidity';
+                            } else if (type === 'wind') {
+                                suffix = (currentUnit === 'metric' ? ' m/s' : ' mph');
+                                typeLabel = 'Wind Speed';
+                            }
                             
                             let extra = '';
-                            if (value === maxVal) extra = ' (Peak)';
-                            if (value === minVal) extra = ' (Low)';
+                            if (value === maxVal) extra = ` (Peak ${typeLabel})`;
+                            if (value === minVal) extra = ` (Lowest Point)`;
                             
                             return `${value}${suffix}${extra}`;
                         }
