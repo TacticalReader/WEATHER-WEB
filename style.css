@@ -867,40 +867,43 @@ body.night-mode .precip-explanation {
     color: #111827;
 }
 
-/* Wind Map */
+/* Wind Map Enhanced */
 .wind-map-container {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 15px;
-    padding: 15px;
-    margin-bottom: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(5px);
-    height: 220px;
     position: relative;
+    width: 100%;
+    height: 280px; /* Increased height */
+    background: linear-gradient(135deg, #0f172a, #1e293b); /* Dark tech background */
+    border-radius: 24px;
     overflow: hidden;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    margin-bottom: 30px;
     display: flex;
     flex-direction: column;
 }
 
 .wind-map-container h3 {
-    margin-bottom: 10px;
-    font-size: 1.2rem;
-    color: #111827;
+    position: absolute;
+    top: 20px;
+    left: 20px;
     z-index: 10;
-    position: relative;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 6px 14px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    pointer-events: none;
 }
 
 #windMapCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
-}
-
-body.night-mode .wind-map-container h3 {
-    color: #f0f9ff;
+    cursor: crosshair;
+    display: block;
 }
 
 /* Forecast */
