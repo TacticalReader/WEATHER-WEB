@@ -742,32 +742,23 @@ function updateChart(data, type) {
         }
     };
 
+    // Prepare Data & Semantic Coloring
     const datasetData = [];
     const pointStyles = [];
     const pointRadii = [];
     const pointHoverRadii = [];
-    let lastCondition = null;
-    slice.forEach((item, index) => {
+    const pointBackgroundColors = [];
+    const pointBorderColors = [];
+    
+    // Extract values first to determine Min/Max
+    slice.forEach(item => {
         if (type === 'humidity') datasetData.push(item.main.humidity);
         else if (type === 'wind') datasetData.push(item.wind.speed);
         else datasetData.push(item.main.temp);
-        const condition = item.weather[0].main;
-        const iconCode = item.weather[0].icon;
-      
-        const showIcon = (index % 3 === 0) || (lastCondition && condition !== lastCondition);
-      
-        if (showIcon && weatherIconsCache[iconCode]) {
-            pointStyles.push(weatherIconsCache[iconCode]);
-            pointRadii.push(15);
-            pointHoverRadii.push(25);
-        } else {
-            pointStyles.push('circle');
-            pointRadii.push(4);
-            pointHoverRadii.push(7);
-        }
-      
-        lastCondition = condition;
     });
+
+    const minVal = Math.min(...datasetData);
+    const maxVal = Math.max(...datasetData);
 
     let label, color, gradient;
     gradient = ctx.createLinearGradient(0, 0, 0, 400);
@@ -788,6 +779,50 @@ function updateChart(data, type) {
         gradient.addColorStop(0, 'rgba(251, 146, 60, 0.5)');
         gradient.addColorStop(1, 'rgba(251, 146, 60, 0.0)');
     }
+
+    let lastCondition = null;
+    slice.forEach((item, index) => {
+        const val = datasetData[index];
+        const condition = item.weather[0].main;
+        const iconCode = item.weather[0].icon;
+        const showIcon = (index % 3 === 0) || (lastCondition && condition !== lastCondition);
+        
+        const isMax = val === maxVal;
+        const isMin = val === minVal;
+
+        // Semantic Coloring Logic
+        if (isMax) {
+            // Peak: Red Dot
+            pointStyles.push('circle');
+            pointRadii.push(6);
+            pointHoverRadii.push(9);
+            pointBackgroundColors.push('#ef4444');
+            pointBorderColors.push('#fff');
+        } else if (isMin) {
+            // Low: Blue Dot
+            pointStyles.push('circle');
+            pointRadii.push(6);
+            pointHoverRadii.push(9);
+            pointBackgroundColors.push('#3b82f6');
+            pointBorderColors.push('#fff');
+        } else if (showIcon && weatherIconsCache[iconCode]) {
+            // Icon
+            pointStyles.push(weatherIconsCache[iconCode]);
+            pointRadii.push(15);
+            pointHoverRadii.push(25);
+            pointBackgroundColors.push('#1f2937'); // Fallback
+            pointBorderColors.push(color);
+        } else {
+            // Standard Dot
+            pointStyles.push('circle');
+            pointRadii.push(4);
+            pointHoverRadii.push(7);
+            pointBackgroundColors.push('#1f2937'); // Dark neutral
+            pointBorderColors.push(color); // Graph color
+        }
+      
+        lastCondition = condition;
+    });
 
     let yScaleConfig = {
         display: true,
@@ -911,10 +946,10 @@ function updateChart(data, type) {
                 pointStyle: pointStyles,
                 pointRadius: pointRadii,
                 pointHoverRadius: pointHoverRadii,
-                pointBackgroundColor: '#1f2937',
-                pointBorderColor: color,
+                pointBackgroundColor: pointBackgroundColors,
+                pointBorderColor: pointBorderColors,
                 pointBorderWidth: 2,
-                pointHoverBackgroundColor: color,
+                pointHoverBackgroundColor: pointBorderColors,
                 pointHoverBorderColor: '#fff',
                 pointHoverBorderWidth: 3,
                 pointHitRadius: 30
@@ -957,14 +992,16 @@ function updateChart(data, type) {
                     callbacks: {
                         label: function(context) {
                             let value = context.parsed.y;
-                            if (type === 'temp') {
-                                return value + (currentUnit === 'metric' ? '°C' : '°F');
-                            } else if (type === 'humidity') {
-                                return value + '%';
-                            } else if (type === 'wind') {
-                                return value + (currentUnit === 'metric' ? ' m/s' : ' mph');
-                            }
-                            return value;
+                            let suffix = '';
+                            if (type === 'temp') suffix = (currentUnit === 'metric' ? '°C' : '°F');
+                            else if (type === 'humidity') suffix = '%';
+                            else if (type === 'wind') suffix = (currentUnit === 'metric' ? ' m/s' : ' mph');
+                            
+                            let extra = '';
+                            if (value === maxVal) extra = ' (Peak)';
+                            if (value === minVal) extra = ' (Low)';
+                            
+                            return `${value}${suffix}${extra}`;
                         }
                     }
                 }
