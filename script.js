@@ -690,31 +690,30 @@ function updateChart(data, type) {
                 }
                 const width = end.x - start.x;
                 if (width <= 0) continue;
+
+                // Enhanced Backgrounds
+                const grd = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
                 if (isNight) {
-                    ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
-                    ctx.fillRect(start.x, chartArea.top, width, chartArea.height);
+                    // Night: Deep Blue/Purple gradient
+                    grd.addColorStop(0, 'rgba(15, 23, 42, 0.6)');
+                    grd.addColorStop(1, 'rgba(15, 23, 42, 0.2)');
+                } else {
+                    // Day: Warm/Clear gradient
+                    grd.addColorStop(0, 'rgba(255, 251, 235, 0.4)');
+                    grd.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
                 }
-              
-                if (i > 0) {
-                    const gradientWidth = 40;
-                    const grd = ctx.createLinearGradient(start.x - gradientWidth/2, 0, start.x + gradientWidth/2, 0);
-                    if (boundaries[i].type === 'sunset') {
-                        grd.addColorStop(0, 'rgba(15, 23, 42, 0)');
-                        grd.addColorStop(1, 'rgba(15, 23, 42, 0.2)');
-                    } else {
-                        grd.addColorStop(0, 'rgba(15, 23, 42, 0.2)');
-                        grd.addColorStop(1, 'rgba(15, 23, 42, 0)');
-                    }
-                    ctx.fillStyle = grd;
-                    ctx.fillRect(start.x - gradientWidth/2, chartArea.top, gradientWidth, chartArea.height);
-                }
+                ctx.fillStyle = grd;
+                ctx.fillRect(start.x, chartArea.top, width, chartArea.height);
             }
             ctx.restore();
+
+            // Draw Event Lines & Icons
             ctx.save();
             eventPixels.forEach(e => {
                 const x = e.x;
                 const yBottom = chartArea.bottom;
                 const yTop = chartArea.top;
+                
                 ctx.beginPath();
                 ctx.setLineDash([5, 5]);
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
@@ -722,6 +721,7 @@ function updateChart(data, type) {
                 ctx.moveTo(x, yTop);
                 ctx.lineTo(x, yBottom);
                 ctx.stroke();
+                
                 const iconSize = 14;
                 const iconY = yBottom - 10;
               
@@ -838,7 +838,7 @@ function updateChart(data, type) {
             padding: { bottom: 10 }
         },
         grid: { 
-            color: 'rgba(255, 255, 255, 0.05)',
+            color: 'rgba(255, 255, 255, 0.1)',
             drawBorder: false,
             tickLength: 8
         },
@@ -935,7 +935,7 @@ function updateChart(data, type) {
         type: 'line',
         data: {
             labels: labels,
-            datasets: [{
+            datasets: [{ 
                 label: label,
                 data: datasetData,
                 borderColor: color,
