@@ -333,58 +333,111 @@ const WindMap = {
     },
 
     drawBackground: function() {
-        // Gradient
+        // Enhanced Gradient
         const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
         if (this.isNight) {
-            grad.addColorStop(0, 'rgba(15, 23, 42, 0.3)');
-            grad.addColorStop(1, 'rgba(30, 27, 75, 0.3)');
+            grad.addColorStop(0, '#0f172a'); // Slate 900
+            grad.addColorStop(1, '#1e1b4b'); // Indigo 950
         } else {
-            grad.addColorStop(0, 'rgba(239, 246, 255, 0.3)');
-            grad.addColorStop(1, 'rgba(219, 234, 254, 0.3)');
+            grad.addColorStop(0, '#dbeafe'); // Blue 100
+            grad.addColorStop(1, '#bfdbfe'); // Blue 200
         }
         this.ctx.fillStyle = grad;
         this.ctx.fillRect(0, 0, this.width, this.height);
 
+        // Grid Overlay
+        this.ctx.save();
+        this.ctx.strokeStyle = this.isNight ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+        this.ctx.lineWidth = 1;
+        const gridSize = 40;
+        
+        this.ctx.beginPath();
+        for(let x = 0; x <= this.width; x += gridSize) {
+            this.ctx.moveTo(x, 0);
+            this.ctx.lineTo(x, this.height);
+        }
+        for(let y = 0; y <= this.height; y += gridSize) {
+            this.ctx.moveTo(0, y);
+            this.ctx.lineTo(this.width, y);
+        }
+        this.ctx.stroke();
+        this.ctx.restore();
+
         // Weather Overlay (Clouds/Mist)
         const isCloudy = (this.weatherId >= 801 && this.weatherId <= 804) || (this.weatherId >= 200 && this.weatherId < 600);
         if (isCloudy) {
-            this.ctx.fillStyle = this.isNight ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.1)';
+            this.ctx.fillStyle = this.isNight ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.15)';
             this.ctx.beginPath();
-            this.ctx.arc(this.width * 0.2, this.height * 0.3, 60, 0, Math.PI*2);
-            this.ctx.arc(this.width * 0.8, this.height * 0.7, 80, 0, Math.PI*2);
+            this.ctx.arc(this.width * 0.2, this.height * 0.3, 80, 0, Math.PI*2);
+            this.ctx.arc(this.width * 0.8, this.height * 0.7, 100, 0, Math.PI*2);
             this.ctx.fill();
         }
     },
 
     drawCompass: function() {
-        const r = 20;
-        const cx = this.width - r - 15;
-        const cy = this.height - r - 15;
+        const r = 24; // Slightly larger
+        const padding = 20;
+        const cx = this.width - r - padding;
+        const cy = this.height - r - padding;
 
         this.ctx.save();
         this.ctx.translate(cx, cy);
         
-        this.ctx.strokeStyle = this.isNight ? 'rgba(255,255,255,0.4)' : 'rgba(30, 58, 138, 0.4)';
-        this.ctx.lineWidth = 1.5;
+        // Compass Background
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, r + 4, 0, Math.PI*2);
+        this.ctx.fillStyle = this.isNight ? 'rgba(15, 23, 42, 0.6)' : 'rgba(255, 255, 255, 0.6)';
+        this.ctx.fill();
+        this.ctx.strokeStyle = this.isNight ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)';
+        this.ctx.stroke();
+
+        // Compass Ring
+        this.ctx.strokeStyle = this.isNight ? 'rgba(255,255,255,0.6)' : 'rgba(30, 58, 138, 0.6)';
+        this.ctx.lineWidth = 2;
         this.ctx.beginPath();
         this.ctx.arc(0, 0, r, 0, Math.PI*2);
         this.ctx.stroke();
 
+        // Ticks
+        this.ctx.lineWidth = 1;
+        for(let i=0; i<4; i++) {
+            this.ctx.rotate(Math.PI/2);
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, -r);
+            this.ctx.lineTo(0, -r + 4);
+            this.ctx.stroke();
+        }
+
+        // Labels
         this.ctx.fillStyle = this.isNight ? '#fff' : '#1e3a8a';
-        this.ctx.font = "bold 10px sans-serif";
+        this.ctx.font = "bold 10px 'Orbitron', sans-serif";
         this.ctx.textAlign = "center";
         this.ctx.textBaseline = "middle";
 
-        this.ctx.fillText("N", 0, -r + 6);
-        this.ctx.fillText("S", 0, r - 6);
-        this.ctx.fillText("E", r - 6, 0);
-        this.ctx.fillText("W", -r + 6, 0);
-
-        // North Arrow
+        this.ctx.fillText("N", 0, -r + 10);
+        
+        // North Arrow (Red tip)
+        this.ctx.rotate(-Math.PI); // Reset rotation
+        
+        // Draw Needle
         this.ctx.beginPath();
-        this.ctx.moveTo(0, -r - 5);
-        this.ctx.lineTo(-3, -r);
-        this.ctx.lineTo(3, -r);
+        this.ctx.moveTo(0, -r + 6);
+        this.ctx.lineTo(-4, 4);
+        this.ctx.lineTo(4, 4);
+        this.ctx.fillStyle = '#ef4444'; // Red for North
+        this.ctx.fill();
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, r - 6);
+        this.ctx.lineTo(-4, 4);
+        this.ctx.lineTo(4, 4);
+        this.ctx.fillStyle = this.isNight ? '#94a3b8' : '#64748b'; // Grey for South
+        this.ctx.fill();
+
+        // Center Dot
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 2, 0, Math.PI*2);
+        this.ctx.fillStyle = '#fff';
         this.ctx.fill();
 
         this.ctx.restore();
