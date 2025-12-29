@@ -202,291 +202,170 @@ const WindMap = {
     canvas: null,
     ctx: null,
     particles: [],
-    burstParticles: [],
-    animationFrame: null,
     width: 0,
     height: 0,
     speed: 0,
+    direction: 0,
     targetDirection: 0,
-    currentDirection: null,
     time: 0,
-    weatherId: 800,
-    isNight: false,
-    mouse: { x: -1000, y: -1000, active: false },
-    boundResize: null,
-    boundMouse: null,
-    boundLeave: null,
-
-    init: function(canvasId, windSpeed, windDeg, weatherId, isNight) {
+    animationFrame: null,
+    
+    init: function(canvasId, speed, deg, weatherId, isNight) {
         this.canvas = document.getElementById(canvasId);
-        if (!this.canvas) return;
-        
+        if(!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
-        this.speed = windSpeed;
-        this.weatherId = weatherId || 800;
-        this.isNight = isNight;
-
-        // Convert wind deg (from) to flow angle (to)
-        // 0 deg (N) -> flows to S (90 deg in canvas)
-        const targetDir = (windDeg - 90 + 180) * (Math.PI / 180);
         
-        if (this.currentDirection === null) {
-            this.currentDirection = targetDir;
-        }
-        this.targetDirection = targetDir;
-
+        this.speed = speed || 5;
+        // Convert meteorological degrees (0=N, 90=E) to canvas radians (0=E, 90=S)
+        // Wind comes FROM deg.
+        // If wind is 0 (N), it blows TO South (90 deg).
+        // Canvas 0 is East. South is PI/2.
+        // Angle = (deg - 90 + 180) * PI/180
+        this.targetDirection = (deg - 90 + 180) * (Math.PI / 180);
+        this.direction = this.targetDirection;
+        
         this.resize();
+        window.addEventListener('resize', () => this.resize());
         
-        if (this.width === 0) {
-            setTimeout(() => this.init(canvasId, windSpeed, windDeg, weatherId, isNight), 200);
-            return;
-        }
-
-        // Setup interaction
-        if (!this.boundMouse) {
-            this.boundMouse = (e) => {
-                const rect = this.canvas.getBoundingClientRect();
-                const scaleX = this.canvas.width / rect.width;
-                const scaleY = this.canvas.height / rect.height;
-                this.mouse.x = (e.clientX - rect.left) * scaleX;
-                this.mouse.y = (e.clientY - rect.top) * scaleY;
-                this.mouse.active = true;
-            };
-            this.boundLeave = () => { this.mouse.active = false; };
-            
-            this.canvas.addEventListener('mousemove', this.boundMouse);
-            this.canvas.addEventListener('mouseleave', this.boundLeave);
-            this.canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                this.boundMouse(e.touches[0]);
-            }, {passive: false});
-            this.canvas.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                this.boundMouse(e.touches[0]);
-            }, {passive: false});
-        }
-
         this.createParticles();
         this.start();
-        
-        if (this.boundResize) window.removeEventListener('resize', this.boundResize);
-        this.boundResize = this.resize.bind(this);
-        window.addEventListener('resize', this.boundResize);
     },
-
+    
     resize: function() {
-        if (!this.canvas) return;
         const rect = this.canvas.parentElement.getBoundingClientRect();
-        if (rect.width === 0) return;
-        
         this.width = rect.width;
         this.height = rect.height;
-        
-        const dpr = window.devicePixelRatio || 1;
-        this.canvas.width = this.width * dpr;
-        this.canvas.height = this.height * dpr;
-        this.ctx.scale(dpr, dpr);
+        this.canvas.width = this.width * window.devicePixelRatio;
+        this.canvas.height = this.height * window.devicePixelRatio;
+        this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     },
-
+    
     createParticles: function() {
-        const baseCount = this.speed > 10 ? 200 : 120;
-        const count = Math.min(baseCount, window.innerWidth < 768 ? 100 : 300);
-        
+        const count = 200;
         this.particles = [];
-        for (let i = 0; i < count; i++) {
-            this.particles.push(this.resetParticle({}));
+        for(let i=0; i<count; i++) {
+            this.particles.push({
+                x: Math.random() * this.width,
+                y: Math.random() * this.height,
+                age: Math.random() * 100,
+                life: 50 + Math.random() * 100,
+                speed: this.speed * (0.5 + Math.random()),
+                offset: Math.random() * 1000
+            });
         }
     },
-
-    resetParticle: function(p, isBurst = false) {
-        p.x = Math.random() * this.width;
-        p.y = Math.random() * this.height;
-        
-        // If burst, spawn upstream relative to current direction
-        if (isBurst) {
-            const dist = Math.random() * 100;
-            const angle = this.currentDirection + Math.PI;
-            p.x = (this.width/2) + Math.cos(angle) * (this.width/2 + dist);
-            p.y = (this.height/2) + Math.sin(angle) * (this.height/2 + dist);
-        }
-
-        p.age = 0;
-        p.life = Math.random() * 60 + 40;
-        if (isBurst) p.life = 30 + Math.random() * 20;
-
-        p.trail = [];
-        p.trailLength = 10 + Math.random() * 20;
-        p.thickness = 0.5 + Math.random() * 1.5;
-        p.speedMult = 0.8 + Math.random() * 0.4;
-        if (isBurst) p.speedMult *= 1.5;
-
-        // Color variation
-        if (this.isNight) {
-            const v = Math.floor(Math.random() * 55) + 200;
-            p.color = `rgba(${v}, ${v}, 255,`;
-        } else {
-            const g = Math.floor(Math.random() * 100) + 50;
-            p.color = `rgba(37, ${g}, 235,`;
-        }
-        
-        return p;
-    },
-
-    drawBackground: function() {
-        // Gradient
-        const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
-        if (this.isNight) {
-            grad.addColorStop(0, 'rgba(15, 23, 42, 0.3)');
-            grad.addColorStop(1, 'rgba(30, 27, 75, 0.3)');
-        } else {
-            grad.addColorStop(0, 'rgba(239, 246, 255, 0.3)');
-            grad.addColorStop(1, 'rgba(219, 234, 254, 0.3)');
-        }
-        this.ctx.fillStyle = grad;
-        this.ctx.fillRect(0, 0, this.width, this.height);
-
-        // Weather Overlay (Clouds/Mist)
-        const isCloudy = (this.weatherId >= 801 && this.weatherId <= 804) || (this.weatherId >= 200 && this.weatherId < 600);
-        if (isCloudy) {
-            this.ctx.fillStyle = this.isNight ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.1)';
-            this.ctx.beginPath();
-            this.ctx.arc(this.width * 0.2, this.height * 0.3, 60, 0, Math.PI*2);
-            this.ctx.arc(this.width * 0.8, this.height * 0.7, 80, 0, Math.PI*2);
-            this.ctx.fill();
-        }
-    },
-
-    drawCompass: function() {
-        const r = 20;
-        const cx = this.width - r - 15;
-        const cy = this.height - r - 15;
-
-        this.ctx.save();
-        this.ctx.translate(cx, cy);
-        
-        this.ctx.strokeStyle = this.isNight ? 'rgba(255,255,255,0.4)' : 'rgba(30, 58, 138, 0.4)';
-        this.ctx.lineWidth = 1.5;
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, r, 0, Math.PI*2);
-        this.ctx.stroke();
-
-        this.ctx.fillStyle = this.isNight ? '#fff' : '#1e3a8a';
-        this.ctx.font = "bold 10px sans-serif";
-        this.ctx.textAlign = "center";
-        this.ctx.textBaseline = "middle";
-
-        this.ctx.fillText("N", 0, -r + 6);
-        this.ctx.fillText("S", 0, r - 6);
-        this.ctx.fillText("E", r - 6, 0);
-        this.ctx.fillText("W", -r + 6, 0);
-
-        // North Arrow
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, -r - 5);
-        this.ctx.lineTo(-3, -r);
-        this.ctx.lineTo(3, -r);
-        this.ctx.fill();
-
-        this.ctx.restore();
-    },
-
+    
     update: function() {
-        if (!this.width) {
-             this.resize();
-             if (!this.width) {
-                 this.animationFrame = requestAnimationFrame(() => this.update());
-                 return;
-             }
-        }
-
-        this.ctx.clearRect(0, 0, this.width, this.height);
-        this.drawBackground();
-        this.drawCompass();
-
-        // Interpolate Direction
-        const diff = this.targetDirection - this.currentDirection;
-        if (Math.abs(diff) > 0.001) {
-            this.currentDirection += diff * 0.05;
-        }
-
-        this.time += 0.01;
-        const noiseTime = this.time * 0.2;
-
-        // Bursts
-        if (Math.random() < 0.005) {
-            for(let k=0; k<10; k++) this.burstParticles.push(this.resetParticle({}, true));
-        }
-
-        const all = [...this.particles, ...this.burstParticles];
+        // Dark trail effect
+        this.ctx.fillStyle = 'rgba(15, 23, 42, 0.2)'; // Dark blue-ish slate
+        this.ctx.fillRect(0, 0, this.width, this.height);
+        
+        // Grid
+        this.drawGrid();
+        
+        this.time += 0.005;
+        
+        this.ctx.lineWidth = 2;
         this.ctx.lineCap = 'round';
-
-        for (let i = all.length - 1; i >= 0; i--) {
-            let p = all[i];
+        
+        this.particles.forEach(p => {
+            // Noise for waviness
+            const noise = Math.sin(p.x * 0.005 + this.time) * Math.cos(p.y * 0.005 + p.offset);
+            const angle = this.direction + noise * 0.5;
             
-            // Flow Vector with Noise
-            const scale = 0.01;
-            const noise = Math.sin(p.x * scale + noiseTime) * Math.cos(p.y * scale + noiseTime);
-            const angle = this.currentDirection + (noise * 0.3);
+            const vx = Math.cos(angle) * p.speed * 0.5; // Scale down for pixels
+            const vy = Math.sin(angle) * p.speed * 0.5;
             
-            const speedFactor = Math.min(Math.max(this.speed, 2), 20) * p.speedMult;
-            const vx = Math.cos(angle) * speedFactor;
-            const vy = Math.sin(angle) * speedFactor;
-
+            const oldX = p.x;
+            const oldY = p.y;
+            
             p.x += vx;
             p.y += vy;
             p.age++;
-
-            p.trail.push({x: p.x, y: p.y});
-            if (p.trail.length > p.trailLength) p.trail.shift();
-
-            // Interaction & Appearance
-            let alpha = Math.sin((p.age / p.life) * Math.PI);
-            let thickness = p.thickness;
             
-            if (this.mouse.active) {
-                const dx = p.x - this.mouse.x;
-                const dy = p.y - this.mouse.y;
-                if (dx*dx + dy*dy < 2500) {
-                    alpha = Math.min(1, alpha + 0.3);
-                    thickness += 1;
-                }
+            // Reset
+            if(p.age > p.life || p.x < -20 || p.x > this.width + 20 || p.y < -20 || p.y > this.height + 20) {
+                p.x = Math.random() * this.width;
+                p.y = Math.random() * this.height;
+                p.age = 0;
             }
-
-            this.ctx.strokeStyle = `${p.color} ${alpha})`;
-            this.ctx.lineWidth = thickness;
             
-            if (this.speed < 5) {
-                this.ctx.shadowBlur = 4;
-                this.ctx.shadowColor = p.color + "0.5)";
-            }
-
-            if (p.trail.length > 1) {
-                this.ctx.beginPath();
-                this.ctx.moveTo(p.trail[0].x, p.trail[0].y);
-                for (let j = 1; j < p.trail.length; j++) {
-                    this.ctx.lineTo(p.trail[j].x, p.trail[j].y);
-                }
-                this.ctx.stroke();
-            }
-            this.ctx.shadowBlur = 0;
-
-            // Cleanup
-            const isBurst = this.burstParticles.includes(p);
-            if (p.age >= p.life || p.x < -50 || p.x > this.width + 50 || p.y < -50 || p.y > this.height + 50) {
-                if (isBurst) {
-                    this.burstParticles.splice(this.burstParticles.indexOf(p), 1);
-                } else {
-                    this.resetParticle(p);
-                    p.trail = [];
-                }
-            }
-        }
-
+            // Draw
+            const lifeRatio = p.age / p.life;
+            const alpha = Math.sin(lifeRatio * Math.PI); // Fade in and out
+            
+            // Color gradient based on speed
+            // Fast = Cyan/White, Slow = Blue/Purple
+            const speedNorm = Math.min(p.speed / 20, 1);
+            const r = 50 + speedNorm * 100;
+            const g = 100 + speedNorm * 155;
+            const b = 255;
+            
+            this.ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+            this.ctx.beginPath();
+            this.ctx.moveTo(oldX, oldY);
+            this.ctx.lineTo(p.x, p.y);
+            this.ctx.stroke();
+        });
+        
+        this.drawCompass();
+        
         this.animationFrame = requestAnimationFrame(() => this.update());
     },
-
+    
+    drawGrid: function() {
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        this.ctx.lineWidth = 1;
+        const step = 50;
+        this.ctx.beginPath();
+        for(let x=0; x<this.width; x+=step) {
+            this.ctx.moveTo(x, 0);
+            this.ctx.lineTo(x, this.height);
+        }
+        for(let y=0; y<this.height; y+=step) {
+            this.ctx.moveTo(0, y);
+            this.ctx.lineTo(this.width, y);
+        }
+        this.ctx.stroke();
+    },
+    
+    drawCompass: function() {
+        const cx = this.width - 40;
+        const cy = 40;
+        const r = 25;
+        
+        this.ctx.save();
+        this.ctx.translate(cx, cy);
+        
+        // Outer ring
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, r, 0, Math.PI*2);
+        this.ctx.stroke();
+        
+        // N/S/E/W
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        this.ctx.font = '10px Orbitron';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('N', 0, -r + 8);
+        
+        // Dynamic arrow pointing to wind direction
+        this.ctx.rotate(this.direction);
+        
+        this.ctx.fillStyle = '#38bdf8';
+        this.ctx.beginPath();
+        this.ctx.moveTo(10, 0);
+        this.ctx.lineTo(-5, 5);
+        this.ctx.lineTo(-5, -5);
+        this.ctx.fill();
+        
+        this.ctx.restore();
+    },
+    
     start: function() {
-        if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
+        if(this.animationFrame) cancelAnimationFrame(this.animationFrame);
         this.update();
     }
 };
