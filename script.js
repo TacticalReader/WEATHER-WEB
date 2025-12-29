@@ -794,7 +794,7 @@ function updateChart(data, type) {
         title: {
             display: true,
             text: label,
-            color: '#9ca3af',
+            color: '#000000',
             font: {
                 family: "'Orbitron', sans-serif",
                 size: 12,
@@ -811,7 +811,7 @@ function updateChart(data, type) {
             display: false
         },
         ticks: {
-            color: '#9ca3af',
+            color: '#000000',
             font: {
                 family: "'Nova Round', sans-serif",
                 size: 11,
@@ -972,7 +972,7 @@ function updateChart(data, type) {
             scales: {
                 x: {
                     ticks: { 
-                        color: '#9ca3af',
+                        color: '#000000',
                         font: { 
                             family: "'Nova Round', sans-serif",
                             size: 12,
