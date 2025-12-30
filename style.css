@@ -11,11 +11,18 @@
     box-sizing: border-box;
     font-family: 'Nova Round', sans-serif;
     user-select: none;
+    overflow-wrap: break-word;
 }
 
 /* Use Orbitron for headers and numbers for a sci-fi/weather station look */
 h1, h2, #temperature, .unit-toggle, #current-time {
     font-family: 'Orbitron', sans-serif;
+}
+
+/* Global constraint for media */
+img, canvas, svg {
+    max-width: 100%;
+    height: auto;
 }
 
 body {
@@ -76,6 +83,7 @@ body {
     max-width: 600px;
     transition: all 0.5s ease;
     margin: auto 0;
+    position: relative;
 }
 
 /* Focus Mode: Dim everything except search */
@@ -103,10 +111,11 @@ body.search-focus .glass-card > *:not(.search-section) {
         align-items: start;
     }
 
-    .left-column {
+    .left-column, .right-column {
         display: flex;
         flex-direction: column;
         justify-content: center;
+        min-width: 0; /* Prevents grid blowout from canvas/scrollables */
     }
 }
 
@@ -115,6 +124,7 @@ header {
     flex-direction: column;
     align-items: center;
     margin-bottom: 20px;
+    width: 100%;
 }
 
 .header-top {
@@ -123,6 +133,8 @@ header {
     align-items: center;
     width: 100%;
     margin-bottom: 0;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .logo {
@@ -145,6 +157,7 @@ header {
     display: flex;
     align-items: center;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
 .share-btn {
@@ -160,6 +173,7 @@ header {
     color: #1f2937;
     transition: all 0.3s ease;
     backdrop-filter: blur(5px);
+    flex-shrink: 0;
 }
 
 .share-btn:hover {
@@ -187,6 +201,7 @@ header {
     display: inline-block;
     width: 68px;
     height: 34px;
+    flex-shrink: 0;
 }
 
 .switch input {
@@ -309,6 +324,7 @@ input:checked + .slider:before {
 .search-wrapper {
     flex: 1;
     position: relative;
+    min-width: 0;
 }
 
 .search-box input {
@@ -367,6 +383,7 @@ input:checked + .slider:before {
     justify-content: center;
     align-items: center;
     transition: background 0.3s;
+    flex-shrink: 0;
 }
 
 .search-box button:hover {
@@ -429,6 +446,7 @@ input:checked + .slider:before {
     justify-content: center;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .fav-btn {
@@ -480,6 +498,7 @@ input:checked + .slider:before {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 #temperature {
@@ -696,6 +715,8 @@ body.night-mode .hazard-severe {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
 .precip-title {
@@ -816,6 +837,7 @@ body.night-mode .precip-explanation {
 .canvas-wrapper {
     height: 250px;
     width: 100%;
+    position: relative;
 }
 
 /* Hourly Forecast */
@@ -881,6 +903,7 @@ body.night-mode .precip-explanation {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .wind-map-container h3 {
