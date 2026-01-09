@@ -633,7 +633,7 @@ input:checked + .slider:before {
     from {
         opacity: 0;
         transform: translateY(-10px);
-    }
+    } 
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1390,4 +1390,44 @@ body.night-mode .detail-item span,
 body.night-mode .forecast-item .f-temp,
 body.night-mode .hourly-item .h-temp {
     color: #f1f5f9;
+}
+
+/* Pan-and-Scan Mobile Architecture */
+@media screen and (max-width: 768px) {
+    .canvas-wrapper {
+        /* Create the scrollable window */
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        
+        /* Smooth scrolling physics */
+        -webkit-overflow-scrolling: touch;
+        
+        /* UX Hint: Fade effect on the right edge to indicate scrollability */
+        mask-image: linear-gradient(to right, black 90%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
+        
+        /* Ensure there is padding for the scroll interaction */
+        padding-bottom: 10px;
+    }
+
+    .canvas-wrapper canvas {
+        /* Force the chart to be wider than the screen */
+        /* This preserves the aspect ratio and spacing of the desktop view */
+        min-width: 800px; 
+        height: 250px !important;
+    }
+    
+    /* Style the scrollbar to match the Glassmorphism theme */
+    .canvas-wrapper::-webkit-scrollbar {
+        height: 4px;
+    }
+    .canvas-wrapper::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+    .canvas-wrapper::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+    }
 }
