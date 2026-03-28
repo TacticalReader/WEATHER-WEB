@@ -126,6 +126,23 @@ function init() {
             if (currentForecastData) updateChart(currentForecastData, type);
         });
     });
+
+    // Auto-refresh data every 5 minutes silently
+    setInterval(() => {
+        if (navigator.onLine && currentCity) {
+            fetchWeather(currentCity, true);
+        }
+    }, 300000);
+
+    // Offline/Online notifications
+    window.addEventListener('offline', () => {
+        showToast("Your internet connection is not working. Please check your internet connection.", "wifi_off");
+    });
+
+    window.addEventListener('online', () => {
+        showToast("Internet connection restored.", "wifi");
+        if (currentCity) fetchWeather(currentCity, true);
+    });
 }
 
 // --- Clock Logic ---
@@ -225,12 +242,15 @@ function downloadBlob(blob) {
 }
 
 // --- Fetching Logic ---
-async function fetchWeather(city) {
+async function fetchWeather(city, isSilent = false) {
     if (!navigator.onLine) {
-        showError("No Internet Connection");
+        if (!isSilent) {
+            showError("No Internet Connection");
+            showToast("Your internet connection is not working. Please check your internet connection.", "wifi_off");
+        }
         return;
     }
-    showSkeleton();
+    if (!isSilent) showSkeleton();
     try {
         const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${CONFIG.apiKey}&units=${currentUnit}`);
       
@@ -242,15 +262,22 @@ async function fetchWeather(city) {
         localStorage.setItem('lastCity', currentCity);
         lastFetchedCurrentWeather = weatherData;
       
-        await fetchAdditionalData(weatherData);
+        await fetchAdditionalData(weatherData, isSilent);
     } catch (error) {
         console.error(error);
-        showError(error.message);
+        if (!isSilent) showError(error.message);
     }
 }
 
-async function fetchWeatherByCoords(lat, lon) {
-    showSkeleton();
+async function fetchWeatherByCoords(lat, lon, isSilent = false) {
+    if (!navigator.onLine) {
+        if (!isSilent) {
+            showError("No Internet Connection");
+            showToast("Your internet connection is not working. Please check your internet connection.", "wifi_off");
+        }
+        return;
+    }
+    if (!isSilent) showSkeleton();
     try {
         const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${CONFIG.apiKey}&units=${currentUnit}`);
         if (!weatherRes.ok) throw new Error('Location not found');
@@ -259,14 +286,14 @@ async function fetchWeatherByCoords(lat, lon) {
         localStorage.setItem('lastCity', currentCity);
         lastFetchedCurrentWeather = weatherData;
       
-        await fetchAdditionalData(weatherData);
+        await fetchAdditionalData(weatherData, isSilent);
     } catch (error) {
         console.error(error);
-        showError(error.message);
+        if (!isSilent) showError(error.message);
     }
 }
 
-async function fetchAdditionalData(weatherData) {
+async function fetchAdditionalData(weatherData, isSilent = false) {
     try {
         const { lat, lon } = weatherData.coord;
         const forecastRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${CONFIG.apiKey}&units=${currentUnit}`);
@@ -298,7 +325,7 @@ async function fetchAdditionalData(weatherData) {
         updateBackground(weatherData.weather[0].main, weatherData);
         checkFavoriteStatus(weatherData.name);
       
-        hideSkeleton();
+        if (!isSilent) hideSkeleton();
 
         // Initialize Wind Map here (after element is visible)
         if (typeof WindMap !== 'undefined') {
@@ -308,9 +335,9 @@ async function fetchAdditionalData(weatherData) {
         }
     } catch (error) {
         console.error(error);
-        showToast("Failed to load some details");
+        if (!isSilent) showToast("Failed to load some details");
         updateUI(weatherData);
-        hideSkeleton();
+        if (!isSilent) hideSkeleton();
         // Initialize Wind Map even on partial error if basic data exists
         if (typeof WindMap !== 'undefined') {
             WindMap.init('windMapCanvas', weatherData.wind.speed, weatherData.wind.deg, weatherData.weather[0].id, false);
@@ -1052,6 +1079,10 @@ function handleSearchInput(e) {
         return;
     }
     debounceTimer = setTimeout(async () => {
+        if (!navigator.onLine) {
+            showToast("Your internet connection is not working. Please check your internet connection.", "wifi_off");
+            return;
+        }
         try {
             const res = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${CONFIG.apiKey}`);
             const locations = await res.json();
@@ -1157,6 +1188,10 @@ function checkFavoriteStatus(city) {
 
 // --- Helpers ---
 function handleLocationSearch() {
+    if (!navigator.onLine) {
+        showToast("Your internet connection is not working. Please check your internet connection.", "wifi_off");
+        return;
+    }
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -1191,11 +1226,17 @@ function showError(msg) {
     errorText.textContent = msg || "City not found or location unavailable. Please try again.";
 }
 
-function showToast(msg) {
+function showToast(msg, icon = null) {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = 'toast';
-    toast.textContent = msg;
+    
+    if (icon) {
+        toast.innerHTML = `<span class="material-icons">${icon}</span><span>${msg}</span>`;
+    } else {
+        toast.textContent = msg;
+    }
+  
     container.appendChild(toast);
   
     setTimeout(() => {
@@ -1204,7 +1245,7 @@ function showToast(msg) {
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 4000);
 }
 
 function getCardinalDirection(angle) {
