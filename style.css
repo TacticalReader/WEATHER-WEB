@@ -1065,6 +1065,9 @@ body.night-mode .wind-map-container h3 {
     transform: translateX(120%);
     transition: transform 0.3s ease;
     font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .toast.show {
