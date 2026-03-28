@@ -1371,6 +1371,18 @@ body.night-mode .wind-item {
     color: white;
 }
 
+/* Location Button Icon */
+#location-btn .material-icons {
+    background: none;
+    -webkit-text-fill-color: #fff;
+    color: #fff;
+    transition: transform 0.3s ease;
+}
+
+#location-btn:hover .material-icons {
+    transform: scale(1.2);
+}
+
 /* --- Night Mode Text Visibility --- */
 body.night-mode #description,
 body.night-mode #current-date {
