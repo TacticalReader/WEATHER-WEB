@@ -184,10 +184,6 @@ header {
     border-color: transparent;
 }
 
-.share-btn .material-icons {
-    font-size: 20px;
-}
-
 /* --- Unit Toggle Redesign --- */
 .unit-toggle {
     display: flex;
@@ -1367,6 +1363,12 @@ body.night-mode .wind-item {
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+.share-btn:hover .material-icons {
+    background: none;
+    -webkit-text-fill-color: white;
+    color: white;
 }
 
 /* --- Night Mode Text Visibility --- */
