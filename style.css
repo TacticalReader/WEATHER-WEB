@@ -589,6 +589,7 @@ input:checked+.slider:before {
 
 .detail-item p {
     font-size: 12px;
+    font-weight: bolder;
     color: #4b5563;
 }
 
