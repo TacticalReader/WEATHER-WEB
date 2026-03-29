@@ -2046,7 +2046,8 @@ body.night-mode .unit-toggle {
 body.night-mode .detail-item p,
 body.night-mode .forecast-item .f-day,
 body.night-mode .hourly-item .h-time {
-    color: #cbd5e1;
+    color: #181919;
+    font-weight: bolder;
 }
 
 body.night-mode .detail-item span,
