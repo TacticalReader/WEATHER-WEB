@@ -6,6 +6,7 @@ A modern, feature-rich weather application with stunning visual effects and comp
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow.svg)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=pwa&logoColor=white)
 
 ## ✨ Features
 
@@ -39,6 +40,10 @@ A modern, feature-rich weather application with stunning visual effects and comp
 - **Health Recommendations** - Actionable advice based on current air quality and weather conditions
 
 ### 🎯 Smart Features
+- **Progressive Web App (PWA)** - Installable on desktop and mobile with offline caching support
+- **Network Awareness** - Real-time offline/online toast notifications
+- **Auto-Refresh** - Silently updates weather data every 5 minutes
+- **Dynamic Project Timeline** - Interactive development history fetching real commit dates from GitHub
 - **Social Sharing** - Generate and share downloadable snapshots of current weather
 - **City Search** - Autocomplete suggestions for quick city lookup
 - **Geolocation** - Automatic weather detection for current location
@@ -57,12 +62,13 @@ Visit the live application: [SkyCast Weather](https://tacticalreader.github.io/W
 
 ## 🛠️ Technologies Used
 
-- **HTML5** - Semantic markup structure
-- **CSS3** - Modern styling with custom properties, animations, and gradients
-- **JavaScript (ES6+)** - Core functionality and API integration
+- **HTML5 & CSS3** - Semantic markup and modern styling (custom properties, animations, gradients)
+- **JavaScript (ES6+)** - Core functionality, API integration, and DOM manipulation
+- **Service Workers & Web App Manifest** - PWA offline capabilities and installability
 - **Chart.js** - Interactive weather data visualizations
 - **html2canvas** - Screenshot generation functionality
 - **OpenWeather API** - Weather and air quality data provider
+- **GitHub API** - Dynamic commit history fetching
 - **Google Fonts** - Custom typography (Orbitron, Nova Round, Geo)
 - **Material Icons** - Icon set for UI elements
 - **Unsplash** - High-quality background images
@@ -76,7 +82,7 @@ Visit the live application: [SkyCast Weather](https://tacticalreader.github.io/W
 ### Setup Instructions
 
 1. **Clone the repository**
-   ```
+   ```bash
    git clone https://github.com/TacticalReader/WEATHER-WEB.git
    cd WEATHER-WEB
    ```
@@ -98,7 +104,7 @@ Visit the live application: [SkyCast Weather](https://tacticalreader.github.io/W
 
 4. **Launch the application**
    - Open `index.html` in your web browser
-   - Or use a local server:
+   - Or use a local server (recommended for PWA features):
      ```bash
      # Using Python
      python -m http.server 8000
@@ -112,20 +118,22 @@ Visit the live application: [SkyCast Weather](https://tacticalreader.github.io/W
 
 ## 📁 Project Structure
 
-```
+```text
 WEATHER-WEB/
 ├── index.html           # Main HTML structure
-├── style.css           # Styles and animations
-├── script.js           # Core application logic
-├── config.js           # API key and configuration
-├── icons.js            # Weather icon mappings
-├── particles.js        # Particle effects, hazard analysis, and wind map logic
-├── LICENSE             # Apache 2.0 License
-├── README.md           # Documentation
-├── images/             # Image assets
-│   ├── weather_icons/  # Weather condition icons
-│   └── openweather.png # API attribution logo
-└── .github/            # GitHub-specific files
+├── style.css            # Styles and animations
+├── script.js            # Core application logic
+├── config.js            # API key and configuration
+├── icons.js             # Weather icon mappings
+├── particles.js         # Particle effects, hazard analysis, and wind map logic
+├── sw.js                # Service Worker for PWA offline support
+├── manifest.json        # Web App Manifest for PWA installability
+├── LICENSE              # Apache 2.0 License
+├── README.md            # Documentation
+├── images/              # Image assets
+│   ├── weather_icons/   # Weather condition icons
+│   └── openweather.png  # API attribution logo
+└── .github/             # GitHub-specific files
 ```
 
 ## 🎮 Usage
@@ -167,6 +175,9 @@ WEATHER-WEB/
 - **Air Pollution API** - Air quality index and pollutants
 - **Weather Icons** - Official OpenWeather icon set
 
+### GitHub API
+- **Commits API** - Fetches real-time project development history
+
 ## 🎨 Customization
 
 ### Modify Backgrounds
@@ -201,6 +212,11 @@ Modify CSS custom properties in `style.css`:
 Configure Chart.js options in `script.js` under the `createChart()` function.
 
 ## 🌟 Features in Detail
+
+### Progressive Web App (PWA)
+- Installable on mobile and desktop devices
+- Service Worker caches core assets for faster load times
+- Offline fallback support for uninterrupted access
 
 ### Dynamic Background System
 - Automatically changes based on weather conditions
