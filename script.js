@@ -48,7 +48,7 @@ function init() {
     loadFavorites();
     fetchWeather(currentCity);
     startClock(); // Start the live clock
-  
+
     // Event Listeners
     searchBtn.addEventListener('click', () => {
         if (searchBox.classList.contains('focus-mode') && cityInput.value.length > 0) {
@@ -66,7 +66,7 @@ function init() {
         }
     });
     locationBtn.addEventListener('click', handleLocationSearch);
-  
+
     cityInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             const city = cityInput.value.trim();
@@ -79,7 +79,7 @@ function init() {
             suggestionsList.classList.remove('show');
         }
     });
-    
+
     // Search Focus/Blur & Morphing Logic
     cityInput.addEventListener('focus', () => {
         searchBox.classList.add('focus-mode');
@@ -97,7 +97,7 @@ function init() {
         }, 200);
     });
     cityInput.addEventListener('input', handleSearchInput);
-  
+
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.search-box')) {
             suggestionsList.classList.remove('show');
@@ -105,7 +105,7 @@ function init() {
     });
     unitSwitch.addEventListener('change', () => {
         currentUnit = unitSwitch.checked ? 'imperial' : 'metric';
-      
+
         if (currentUnit === 'imperial') {
             glassCard.classList.add('is-imperial');
         } else {
@@ -155,14 +155,14 @@ function startClock() {
 
     function update() {
         const now = new Date();
-        
+
         // Date: Day, DD/MM/YYYY
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayName = days[now.getDay()];
         const date = now.getDate().toString().padStart(2, '0');
         const month = (now.getMonth() + 1).toString().padStart(2, '0');
         const year = now.getFullYear();
-        
+
         if (dateEl) dateEl.textContent = `${dayName}, ${date}/${month}/${year}`;
 
         // Time: HH:MM:SS AM/PM
@@ -170,13 +170,13 @@ function startClock() {
         const minutes = now.getMinutes().toString().padStart(2, '0');
         const seconds = now.getSeconds().toString().padStart(2, '0');
         const ampm = hours >= 12 ? 'PM' : 'AM';
-        
+
         hours = hours % 12;
         hours = hours ? hours : 12;
-        
+
         if (timeEl) timeEl.textContent = `${hours}:${minutes}:${seconds} ${ampm}`;
     }
-    
+
     update();
     setInterval(update, 1000);
 }
@@ -185,7 +185,7 @@ function startClock() {
 async function handleShare() {
     const originalText = shareBtn.innerHTML;
     shareBtn.innerHTML = '<span class="material-icons">hourglass_empty</span>';
-    
+
     try {
         const canvas = await html2canvas(glassCard, {
             allowTaint: false, // Changed from true to false to prevent tainting error
@@ -202,28 +202,28 @@ async function handleShare() {
         });
 
         canvas.toBlob(async (blob) => {
-             // Web Share API
-             if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'weather.png', { type: blob.type })] })) {
+            // Web Share API
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'weather.png', { type: blob.type })] })) {
                 try {
                     const file = new File([blob], `weather-${currentCity}.png`, { type: 'image/png' });
-                    await navigator.share({ 
-                        files: [file], 
+                    await navigator.share({
+                        files: [file],
                         title: `Weather in ${currentCity}`,
                         text: `Check out the current weather in ${currentCity}!`
                     });
                     showToast('Shared successfully!');
                 } catch (err) {
-                     if (err.name !== 'AbortError') {
+                    if (err.name !== 'AbortError') {
                         console.error('Share failed', err);
                         downloadBlob(blob);
-                     }
+                    }
                 }
-             } else {
-                 // Fallback to Download
-                 downloadBlob(blob);
-                 showToast('Snapshot downloaded!');
-             }
-             shareBtn.innerHTML = originalText;
+            } else {
+                // Fallback to Download
+                downloadBlob(blob);
+                showToast('Snapshot downloaded!');
+            }
+            shareBtn.innerHTML = originalText;
         }, 'image/png');
 
     } catch (err) {
@@ -256,7 +256,7 @@ async function fetchWeather(city, isSilent = false) {
     if (!isSilent) showSkeleton();
     try {
         const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${CONFIG.apiKey}&units=${currentUnit}`);
-      
+
         if (weatherRes.status === 404) throw new Error('City not found');
         if (weatherRes.status === 429) throw new Error('API Limit Reached');
         if (!weatherRes.ok) throw new Error('Something went wrong');
@@ -264,7 +264,7 @@ async function fetchWeather(city, isSilent = false) {
         currentCity = weatherData.name;
         localStorage.setItem('lastCity', currentCity);
         lastFetchedCurrentWeather = weatherData;
-      
+
         await fetchAdditionalData(weatherData, isSilent);
     } catch (error) {
         console.error(error);
@@ -288,7 +288,7 @@ async function fetchWeatherByCoords(lat, lon, isSilent = false) {
         currentCity = weatherData.name;
         localStorage.setItem('lastCity', currentCity);
         lastFetchedCurrentWeather = weatherData;
-      
+
         await fetchAdditionalData(weatherData, isSilent);
     } catch (error) {
         console.error(error);
@@ -307,7 +307,7 @@ async function fetchAdditionalData(weatherData, isSilent = false) {
         const airData = await airRes.json();
         updateUI(weatherData);
         updateAirQuality(airData);
-        
+
         // Initialize Hazard Interpretation Layer
         if (typeof HazardSystem !== 'undefined') {
             updateHazards(weatherData, forecastData, airData);
@@ -317,17 +317,17 @@ async function fetchAdditionalData(weatherData, isSilent = false) {
         if (typeof ProbabilitySystem !== 'undefined') {
             updatePrecipitation(forecastData);
         }
-      
+
         chartButtons.forEach(b => b.classList.remove('active'));
         document.querySelector('[data-type="temp"]').classList.add('active');
         updateChart(forecastData, 'temp');
-      
+
         updateForecast(forecastData);
         updateHourlyForecast(forecastData);
         updateWindForecast(forecastData);
         updateBackground(weatherData.weather[0].main, weatherData);
         checkFavoriteStatus(weatherData.name);
-      
+
         if (!isSilent) hideSkeleton();
 
         // Initialize Wind Map here (after element is visible)
@@ -351,7 +351,7 @@ async function fetchAdditionalData(weatherData, isSilent = false) {
 // --- Icon Preloading ---
 function preloadChartIcons(list) {
     const uniqueCodes = [...new Set(list.map(item => item.weather[0].icon))];
-  
+
     const promises = uniqueCodes.map(code => {
         if (weatherIconsCache[code]) return Promise.resolve();
         return new Promise((resolve) => {
@@ -382,7 +382,7 @@ function updateUI(data) {
     const unitSymbol = currentUnit === 'metric' ? '°C' : '°F';
     const speedUnit = currentUnit === 'metric' ? 'm/s' : 'mph';
     document.getElementById('city-name').textContent = `${data.name}, ${data.sys.country}`;
-  
+
     if (data.sys.country) {
         countryFlag.src = `https://flagcdn.com/h40/${data.sys.country.toLowerCase()}.png`;
         countryFlag.style.display = 'block';
@@ -391,21 +391,21 @@ function updateUI(data) {
     }
     document.getElementById('temperature').textContent = `${Math.round(data.main.temp)}${unitSymbol}`;
     document.getElementById('description').textContent = data.weather[0].description;
-  
+
     const iconCode = data.weather[0].icon;
     document.getElementById('weather-icon').src = getIconUrl(iconCode);
-  
+
     document.getElementById('wind-speed').textContent = `${data.wind.speed} ${speedUnit}`;
     document.getElementById('wind-dir').textContent = getCardinalDirection(data.wind.deg);
-  
+
     document.getElementById('humidity').textContent = `${data.main.humidity}%`;
     document.getElementById('pressure').textContent = `${data.main.pressure} hPa`;
-  
+
     const visibility = currentUnit === 'metric' ?
         `${(data.visibility / 1000).toFixed(1)} km` :
         `${(data.visibility / 1609).toFixed(1)} mi`;
     document.getElementById('visibility').textContent = visibility;
-  
+
     document.getElementById('sunrise').textContent = formatTime(data.sys.sunrise, data.timezone);
     document.getElementById('sunset').textContent = formatTime(data.sys.sunset, data.timezone);
     updateCountdown(data.sys.sunrise, data.sys.sunset, data.timezone);
@@ -414,15 +414,15 @@ function updateUI(data) {
 function updateHazards(current, forecast, air) {
     const container = document.getElementById('hazard-container');
     if (!container) return;
-    
+
     const alerts = HazardSystem.analyze(current, forecast, air, currentUnit);
-    
+
     container.innerHTML = '';
     if (alerts.length === 0) {
         container.style.display = 'none';
         return;
     }
-    
+
     container.style.display = 'flex';
     alerts.forEach(alert => {
         const div = document.createElement('div');
@@ -448,7 +448,7 @@ function updatePrecipitation(forecast) {
     }
 
     const data = ProbabilitySystem.analyze(forecast);
-    
+
     if (!data) {
         container.style.display = 'none';
         return;
@@ -480,14 +480,14 @@ function updateBackground(weatherMain, data, isNightOverride = null) {
     } else {
         isNight = false;
     }
-  
+
     // Toggle night-mode class on body for CSS styling
     if (isNight) {
         document.body.classList.add('night-mode');
     } else {
         document.body.classList.remove('night-mode');
     }
-  
+
     let bgUrl;
     if (isNight && CONFIG.nightBackgrounds) {
         bgUrl = CONFIG.nightBackgrounds[weatherMain] || CONFIG.nightBackgrounds['Default'];
@@ -498,7 +498,7 @@ function updateBackground(weatherMain, data, isNightOverride = null) {
     const nextLayer = bgLayers[nextIndex];
     const currentLayer = bgLayers[activeBgIndex];
     nextLayer.style.backgroundImage = `url('${bgUrl}')`;
-  
+
     setTimeout(() => {
         nextLayer.classList.add('active');
         currentLayer.classList.remove('active');
@@ -508,12 +508,12 @@ function updateBackground(weatherMain, data, isNightOverride = null) {
 
 function updateCountdown(sunrise, sunset, timezone) {
     const el = document.getElementById('daylight-countdown');
-  
+
     if (window.countdownInterval) clearInterval(window.countdownInterval);
     function update() {
         const now = Math.floor(Date.now() / 1000);
         let targetTime, label;
-      
+
         if (now < sunrise) {
             targetTime = sunrise;
             label = "Sunrise";
@@ -539,11 +539,11 @@ function updateCountdown(sunrise, sunset, timezone) {
 
 function updateAirQuality(data) {
     if (!data.list || data.list.length === 0) return;
-  
+
     const record = data.list[0];
     const aqi = record.main.aqi;
     const { pm2_5, so2, no2, o3, co } = record.components;
-  
+
     const aqiLabels = { 1: 'Good', 2: 'Fair', 3: 'Moderate', 4: 'Poor', 5: 'Very Poor' };
     document.getElementById('aqi-status').textContent = aqiLabels[aqi] || aqi;
     document.getElementById('pm25').textContent = pm2_5;
@@ -556,7 +556,7 @@ function updateAirQuality(data) {
 function updateHourlyForecast(data) {
     hourlyForecastList.innerHTML = '';
     const unitSymbol = currentUnit === 'metric' ? '°C' : '°F';
-  
+
     const hourlyData = data.list.slice(0, 8);
     hourlyData.forEach(item => {
         const date = new Date(item.dt * 1000);
@@ -564,7 +564,7 @@ function updateHourlyForecast(data) {
         const time = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
         const temp = Math.round(item.main.temp);
         const iconCode = item.weather[0].icon;
-      
+
         const div = document.createElement('div');
         div.className = 'hourly-item';
         div.innerHTML = `
@@ -605,9 +605,9 @@ function updateWindForecast(data) {
 function updateForecast(data) {
     forecastList.innerHTML = '';
     const unitSymbol = currentUnit === 'metric' ? '°C' : '°F';
-  
+
     const dailyMap = new Map();
-  
+
     data.list.forEach(item => {
         const dateStr = item.dt_txt.split(' ')[0];
         if (!dailyMap.has(dateStr)) {
@@ -618,7 +618,7 @@ function updateForecast(data) {
     const days = Array.from(dailyMap.keys()).slice(0, 5);
     days.forEach(dateStr => {
         const items = dailyMap.get(dateStr);
-      
+
         let forecastItem = items.find(i => i.dt_txt.includes("12:00:00"));
         if (!forecastItem) {
             forecastItem = items[Math.floor(items.length / 2)];
@@ -644,7 +644,7 @@ function updateForecast(data) {
 
 function updateChart(data, type) {
     const ctx = document.getElementById('forecastChart').getContext('2d');
-  
+
     const slice = data.list.slice(0, 8);
     const labels = slice.map(item => {
         const d = new Date(item.dt * 1000);
@@ -664,7 +664,7 @@ function updateChart(data, type) {
     [-1, 0, 1].forEach(dayOffset => {
         const sr = baseSunrise + (dayOffset * daySeconds);
         const ss = baseSunset + (dayOffset * daySeconds);
-      
+
         if (sr >= startDt && sr <= endDt) sunEvents.push({ type: 'sunrise', time: sr });
         if (ss >= startDt && ss <= endDt) sunEvents.push({ type: 'sunset', time: ss });
     });
@@ -674,15 +674,15 @@ function updateChart(data, type) {
         beforeDraw: (chart) => {
             const { ctx, chartArea, scales } = chart;
             const xAxis = scales.x;
-          
+
             const getPixelForTime = (timestamp) => {
                 for (let i = 0; i < slice.length - 1; i++) {
                     const t1 = slice[i].dt;
-                    const t2 = slice[i+1].dt;
+                    const t2 = slice[i + 1].dt;
                     if (timestamp >= t1 && timestamp <= t2) {
                         const pct = (timestamp - t1) / (t2 - t1);
                         const x1 = xAxis.getPixelForValue(i);
-                        const x2 = xAxis.getPixelForValue(i+1);
+                        const x2 = xAxis.getPixelForValue(i + 1);
                         return x1 + (x2 - x1) * pct;
                     }
                 }
@@ -696,18 +696,18 @@ function updateChart(data, type) {
                 { x: chartArea.right, time: endDt }
             ];
             ctx.save();
-          
+
             for (let i = 0; i < boundaries.length - 1; i++) {
                 const start = boundaries[i];
-                const end = boundaries[i+1];
-              
+                const end = boundaries[i + 1];
+
                 let isNight = false;
-              
+
                 if (i === 0) {
                     const daysPassed = Math.round((startDt - baseSunrise) / 86400);
                     const localSR = baseSunrise + daysPassed * 86400;
                     const localSS = baseSunset + daysPassed * 86400;
-                  
+
                     if (startDt >= localSR && startDt < localSS) {
                         isNight = false;
                     } else {
@@ -743,7 +743,7 @@ function updateChart(data, type) {
                 const x = e.x;
                 const yBottom = chartArea.bottom;
                 const yTop = chartArea.top;
-                
+
                 ctx.beginPath();
                 ctx.setLineDash([5, 5]);
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
@@ -751,15 +751,15 @@ function updateChart(data, type) {
                 ctx.moveTo(x, yTop);
                 ctx.lineTo(x, yBottom);
                 ctx.stroke();
-                
+
                 const iconSize = 14;
                 const iconY = yBottom - 10;
-              
+
                 ctx.beginPath();
-                ctx.arc(x, iconY, iconSize/2, Math.PI, 0);
+                ctx.arc(x, iconY, iconSize / 2, Math.PI, 0);
                 ctx.fillStyle = '#fbbf24';
                 ctx.fill();
-              
+
                 ctx.beginPath();
                 ctx.setLineDash([]);
                 ctx.strokeStyle = '#fff';
@@ -779,7 +779,7 @@ function updateChart(data, type) {
     const pointHoverRadii = [];
     const pointBackgroundColors = [];
     const pointBorderColors = [];
-    
+
     // Extract values first to determine Min/Max
     slice.forEach(item => {
         if (type === 'humidity') datasetData.push(item.main.humidity);
@@ -816,7 +816,7 @@ function updateChart(data, type) {
         const condition = item.weather[0].main;
         const iconCode = item.weather[0].icon;
         const showIcon = (index % 3 === 0) || (lastCondition && condition !== lastCondition);
-        
+
         const isMax = val === maxVal;
         const isMin = val === minVal;
 
@@ -847,10 +847,10 @@ function updateChart(data, type) {
             pointStyles.push('circle');
             pointRadii.push(4);
             pointHoverRadii.push(7);
-            pointBackgroundColors.push('#ffffff'); 
-            pointBorderColors.push(color); 
+            pointBackgroundColors.push('#ffffff');
+            pointBorderColors.push(color);
         }
-      
+
         lastCondition = condition;
     });
 
@@ -867,7 +867,7 @@ function updateChart(data, type) {
             },
             padding: { bottom: 10 }
         },
-        grid: { 
+        grid: {
             color: 'rgba(255, 255, 255, 0.1)',
             drawBorder: false,
             tickLength: 8
@@ -966,7 +966,7 @@ function updateChart(data, type) {
         type: 'line',
         data: {
             labels: labels,
-            datasets: [{ 
+            datasets: [{
                 label: label,
                 data: datasetData,
                 borderColor: color,
@@ -1021,11 +1021,11 @@ function updateChart(data, type) {
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     borderWidth: 1,
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             let value = context.parsed.y;
                             let suffix = '';
                             let typeLabel = '';
-                            
+
                             if (type === 'temp') {
                                 suffix = (currentUnit === 'metric' ? '°C' : '°F');
                                 typeLabel = 'Temperature';
@@ -1036,11 +1036,11 @@ function updateChart(data, type) {
                                 suffix = (currentUnit === 'metric' ? ' m/s' : ' mph');
                                 typeLabel = 'Wind Speed';
                             }
-                            
+
                             let extra = '';
                             if (value === maxVal) extra = ` (Peak ${typeLabel})`;
                             if (value === minVal) extra = ` (Lowest Point)`;
-                            
+
                             return `${value}${suffix}${extra}`;
                         }
                     }
@@ -1048,9 +1048,9 @@ function updateChart(data, type) {
             },
             scales: {
                 x: {
-                    ticks: { 
+                    ticks: {
                         color: '#000000',
-                        font: { 
+                        font: {
                             family: "'Nova Round', sans-serif",
                             size: window.innerWidth <= 768 ? 10 : 12,
                             weight: 'bold'
@@ -1063,7 +1063,7 @@ function updateChart(data, type) {
                         // Show fewer ticks on mobile/tablet so they don't overlap while horizontal
                         maxTicksLimit: window.innerWidth <= 768 ? 4 : 8,
                         // Shorten "12:00 PM" → "12 PM" on smaller screens to save space
-                        callback: function(value, index) {
+                        callback: function (value, index) {
                             const label = this.getLabelForValue(value);
                             if (window.innerWidth <= 768) {
                                 // Strip the ":00" — "12:00 PM" → "12 PM"
@@ -1093,7 +1093,7 @@ function updateChart(data, type) {
 function handleSearchInput(e) {
     const query = e.target.value.trim();
     clearTimeout(debounceTimer);
-  
+
     if (query.length > 0) {
         searchBox.classList.add('focus-mode');
         searchIconPath.setAttribute('d', PATH_CLOSE);
@@ -1154,12 +1154,12 @@ function createFavoriteChip(city) {
         <span onclick="fetchWeather('${city}')">${city}</span>
         <span class="material-icons remove-fav">close</span>
     `;
-  
+
     chip.querySelector('.remove-fav').addEventListener('click', (e) => {
         e.stopPropagation();
         removeFavorite(city);
     });
-  
+
     favoritesList.appendChild(chip);
 }
 
@@ -1168,11 +1168,11 @@ function toggleFavorite() {
     if (index === -1) {
         favorites.push(currentCity);
         createFavoriteChip(currentCity);
-      
+
         favBtn.classList.add('active');
         favBtn.classList.add('animating');
         favBtn.textContent = 'favorite';
-      
+
         const rect = favBtn.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
@@ -1254,15 +1254,15 @@ function showToast(msg, icon = null) {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = 'toast';
-    
+
     if (icon) {
         toast.innerHTML = `<span class="material-icons">${icon}</span><span>${msg}</span>`;
     } else {
         toast.textContent = msg;
     }
-  
+
     container.appendChild(toast);
-  
+
     setTimeout(() => {
         toast.classList.add('show');
     }, 10);
@@ -1284,7 +1284,7 @@ function formatTime(unixTimestamp, timezoneOffset) {
     const ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
     hours = hours ? hours : 12;
-    minutes = minutes < 10 ? '0'+minutes : minutes;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
     return `${hours}:${minutes} ${ampm}`;
 }
 
@@ -1297,7 +1297,7 @@ function getIconUrl(code) {
 // =============================================================
 async function initTimelineDates() {
     const REPO = 'TacticalReader/WEATHER-WEB';
-    const API  = `https://api.github.com/repos/${REPO}/commits?per_page=100`;
+    const API = `https://api.github.com/repos/${REPO}/commits?per_page=100`;
 
     // Each milestone: { nodeId (desktop button), vtlId (mobile li index),
     //                   keywords to match in commit message (case-insensitive) }
@@ -1368,13 +1368,27 @@ async function initTimelineDates() {
                 ? fmtDate(match.commit.author.date)
                 : milestone.fallback;
 
+            const commitUrl = match
+                ? match.html_url
+                : 'https://github.com/TacticalReader/WEATHER-WEB/commits/main';
+
             // Inject into desktop node
             if (desktopDates[idx]) {
                 desktopDates[idx].textContent = dateStr;
+                const tooltip = document.getElementById(`tooltip-${idx + 1}`);
+                if (tooltip) {
+                    tooltip.setAttribute('data-commit-url', commitUrl);
+                    tooltip.title = 'Double-click to view the exact feature commit on GitHub';
+                }
             }
             // Inject into mobile accordion
             if (vtlDates[idx]) {
                 vtlDates[idx].textContent = dateStr;
+                const vtlNode = vtlDates[idx].closest('.vtl-content');
+                if (vtlNode) {
+                    vtlNode.setAttribute('data-commit-url', commitUrl);
+                    vtlNode.title = 'Double-click to view the exact feature commit on GitHub';
+                }
             }
         });
 
@@ -1401,4 +1415,33 @@ async function initTimelineDates() {
         // Network failure or rate-limit — silently keep the hardcoded fallbacks
         console.warn('[Timeline] Could not fetch GitHub commit dates:', err.message);
     }
+
+    // --- Interactive Commit Links (Double Click to view commit) ---
+    // Runs unconditionally so even fallback dates link to the repo
+    const clickableNodes = document.querySelectorAll('.glass-tooltip, .vtl-content');
+    clickableNodes.forEach(node => {
+        let clickCount = 0;
+        let clickTimeout;
+
+        // Visual cue
+        node.style.cursor = 'pointer';
+
+        node.addEventListener('click', function (e) {
+            // Prevent triggering if user clicks a real <a> link inside the tooltip
+            if (e.target.tagName === 'A') return;
+
+            clickCount++;
+            if (clickCount >= 2) {
+                const url = this.getAttribute('data-commit-url');
+                // Open exact commit if fetched, otherwise fallback to repo commits page
+                window.open(url || 'https://github.com/TacticalReader/WEATHER-WEB/commits/main', '_blank');
+                clickCount = 0;
+                clearTimeout(clickTimeout);
+            } else {
+                clickTimeout = setTimeout(() => {
+                    clickCount = 0;
+                }, 400); // 400ms window to click twice
+            }
+        });
+    });
 }
