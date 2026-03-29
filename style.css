@@ -2052,7 +2052,8 @@ body.night-mode .hourly-item .h-time {
 body.night-mode .detail-item span,
 body.night-mode .forecast-item .f-temp,
 body.night-mode .hourly-item .h-temp {
-    color: #f1f5f9;
+    color: #7407b4;
+    font-weight: bolder;
 }
 
 body.night-mode .logo h1,
