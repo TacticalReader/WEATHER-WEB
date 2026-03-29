@@ -1,18 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkyCast Weather</title>
+    <!-- PWA Manifest & App Icons -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#06b6d4">
+    <link rel="apple-touch-icon" href="images/icon-192.png">
+    
     <link rel="icon" href="images/weather_icons/01d.png" type="image/png">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geo:ital@0;1&family=Meow+Script&family=Nova+Round&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Geo:ital@0;1&family=Meow+Script&family=Nova+Round&family=Orbitron:wght@400..900&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
+
 <body>
     <!-- Double layer for smooth transitions -->
     <div class="parallax-bg active" id="bg-layer-1"></div>
@@ -26,7 +35,7 @@
                         <span class="material-icons">filter_drama</span>
                         <h1>SkyCast</h1>
                     </div>
-                    
+
                     <div class="header-controls">
                         <div class="unit-toggle">
                             <span>°C</span>
@@ -35,11 +44,15 @@
                                 <span class="slider round">
                                     <!-- Snowflake Icon (Celsius) -->
                                     <svg class="toggle-icon icon-snowflake" viewBox="0 0 24 24">
-                                        <path fill="currentColor" d="M12,2L12,22M2,12L22,12M4.93,4.93L19.07,19.07M4.93,19.07L19.07,4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                        <path fill="currentColor"
+                                            d="M12,2L12,22M2,12L22,12M4.93,4.93L19.07,19.07M4.93,19.07L19.07,4.93"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                                     </svg>
                                     <!-- Sun Icon (Fahrenheit) -->
                                     <svg class="toggle-icon icon-sun" viewBox="0 0 24 24">
-                                        <path fill="currentColor" d="M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,2V4M12,20V22M4.93,4.93L6.34,6.34M17.66,17.66L19.07,19.07M2,12H4M20,12H22M4.93,19.07L6.34,17.66M17.66,6.34L19.07,4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                        <path fill="currentColor"
+                                            d="M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,2V4M12,20V22M4.93,4.93L6.34,6.34M17.66,17.66L19.07,19.07M2,12H4M20,12H22M4.93,19.07L6.34,17.66M17.66,6.34L19.07,4.93"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                                     </svg>
                                 </span>
                             </label>
@@ -51,7 +64,7 @@
                     </div>
                 </div>
             </header>
-            
+
             <div class="search-section">
                 <div class="search-box">
                     <div class="search-wrapper">
@@ -61,10 +74,13 @@
                     <button id="search-btn" title="Search">
                         <!-- SVG for Morphing -->
                         <svg class="search-icon-svg" viewBox="0 0 24 24" width="24" height="24">
-                            <path id="search-path" fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                            <path id="search-path" fill="currentColor"
+                                d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z">
+                            </path>
                         </svg>
                     </button>
-                    <button id="location-btn" title="Current Location"><span class="material-icons">my_location</span></button>
+                    <button id="location-btn" title="Current Location"><span
+                            class="material-icons">my_location</span></button>
                 </div>
                 <div id="favorites-list" class="favorites-list"></div>
             </div>
@@ -97,10 +113,12 @@
                             <div class="main-info">
                                 <div class="city-header">
                                     <h2 id="city-name">City Name</h2>
-                                    <img id="country-flag" class="country-flag" src="" alt="Flag" style="display: none;">
-                                    <button id="fav-btn" class="material-icons fav-btn" title="Add to Favorites">favorite_border</button>
+                                    <img id="country-flag" class="country-flag" src="" alt="Flag"
+                                        style="display: none;">
+                                    <button id="fav-btn" class="material-icons fav-btn"
+                                        title="Add to Favorites">favorite_border</button>
                                 </div>
-                                
+
                                 <!-- Date and Time Display -->
                                 <div class="date-time-info">
                                     <p id="current-date"></p>
@@ -210,10 +228,10 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>                       
-                           <div id="hazard-container" class="hazard-container" style="display: none;"></div>
-                           <!-- Precipitation Probability Explanation Layer -->
-                           <div id="precip-container" class="precip-container" style="display: none;"></div>
+                        </div>
+                        <div id="hazard-container" class="hazard-container" style="display: none;"></div>
+                        <!-- Precipitation Probability Explanation Layer -->
+                        <div id="precip-container" class="precip-container" style="display: none;"></div>
                     </div>
 
                     <!-- Right Column: Chart & Forecast -->
@@ -260,7 +278,7 @@
                     </div>
                 </div>
             </main>
-            
+
             <div id="error-message" class="error" style="display: none;">
                 <span class="material-icons">error</span>
                 <p id="error-text">City not found or location unavailable. Please try again.</p>
@@ -288,7 +306,8 @@
                                 <span class="node-date">Oct 2023</span>
                             </button>
                             <div id="tooltip-1" class="glass-tooltip" role="tooltip">
-                                <strong><span class="material-icons history-icon">rocket_launch</span> V1.0 — Initial Launch</strong>
+                                <strong><span class="material-icons history-icon">rocket_launch</span> V1.0 — Initial
+                                    Launch</strong>
                                 <p>SkyCast born. OpenWeather API integrated by TacticalReader.</p>
                             </div>
                         </li>
@@ -300,7 +319,8 @@
                                 <span class="node-date">Dec 2023</span>
                             </button>
                             <div id="tooltip-2" class="glass-tooltip" role="tooltip">
-                                <strong><span class="material-icons history-icon">warning_amber</span> Hazard Interpretation Layer</strong>
+                                <strong><span class="material-icons history-icon">warning_amber</span> Hazard
+                                    Interpretation Layer</strong>
                                 <p>Dynamic weather hazard alerts and severity indicators added.</p>
                             </div>
                         </li>
@@ -312,7 +332,8 @@
                                 <span class="node-date">Feb 2024</span>
                             </button>
                             <div id="tooltip-3" class="glass-tooltip" role="tooltip">
-                                <strong><span class="material-icons history-icon">show_chart</span> Chart.js Data Visualization</strong>
+                                <strong><span class="material-icons history-icon">show_chart</span> Chart.js Data
+                                    Visualization</strong>
                                 <p>Interactive temperature, humidity &amp; wind charts integrated.</p>
                             </div>
                         </li>
@@ -324,7 +345,8 @@
                                 <span class="node-date">Apr 2024</span>
                             </button>
                             <div id="tooltip-4" class="glass-tooltip" role="tooltip">
-                                <strong><span class="material-icons history-icon">air</span> Air Quality Index (AQI)</strong>
+                                <strong><span class="material-icons history-icon">air</span> Air Quality Index
+                                    (AQI)</strong>
                                 <p>Real-time PM2.5, SO2, NO2, O3 &amp; CO monitoring added.</p>
                             </div>
                         </li>
@@ -336,7 +358,8 @@
                                 <span class="node-date">Jun 2024</span>
                             </button>
                             <div id="tooltip-5" class="glass-tooltip" role="tooltip">
-                                <strong><span class="material-icons history-icon">cyclone</span> Wind Flow Canvas</strong>
+                                <strong><span class="material-icons history-icon">cyclone</span> Wind Flow
+                                    Canvas</strong>
                                 <p>Animated wind particle simulation rendered on HTML Canvas.</p>
                             </div>
                         </li>
@@ -348,19 +371,18 @@
                                 <span class="node-date">Oct 2024</span>
                             </button>
                             <div id="tooltip-6" class="glass-tooltip" role="tooltip">
-                                <strong><span class="material-icons history-icon">auto_awesome</span> Premium UI Overhaul</strong>
+                                <strong><span class="material-icons history-icon">auto_awesome</span> Premium UI
+                                    Overhaul</strong>
                                 <p>Glassmorphism, icon gradients, night mode &amp; micro-animations.</p>
                             </div>
                         </li>
 
                         <!-- Live Node: Actively Maintained -->
                         <li class="timeline-node timeline-node-live" role="listitem">
-                            <a href="https://github.com/TacticalReader"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               class="node-trigger live-indicator"
-                               aria-label="Actively maintained by TacticalReader on GitHub — click to visit profile"
-                               aria-describedby="tooltip-live">
+                            <a href="https://github.com/TacticalReader" target="_blank" rel="noopener noreferrer"
+                                class="node-trigger live-indicator"
+                                aria-label="Actively maintained by TacticalReader on GitHub — click to visit profile"
+                                aria-describedby="tooltip-live">
                                 <span class="pulse-ring" aria-hidden="true"></span>
                                 <span class="pulse-ring pulse-ring-delay" aria-hidden="true"></span>
                                 <span class="live-dot" aria-hidden="true"></span>
@@ -373,7 +395,8 @@
 
                     </ol>
                     <div class="timeline-footer">
-                        <p class="timeline-author">Project designed &amp; programmed by <strong>Tanmay Srivastava</strong></p>
+                        <p class="timeline-author">Project designed &amp; programmed by <strong>Tanmay
+                                Srivastava</strong></p>
                         <p class="timeline-label" aria-hidden="true">Development Timeline &bull; TacticalReader</p>
                     </div>
                 </div>
@@ -390,7 +413,8 @@
                             <span class="vtl-dot"></span>
                             <div class="vtl-content">
                                 <span class="vtl-date">Oct 2023</span>
-                                <strong><span class="material-icons history-icon">rocket_launch</span> V1.0 — Initial Launch</strong>
+                                <strong><span class="material-icons history-icon">rocket_launch</span> V1.0 — Initial
+                                    Launch</strong>
                                 <p>SkyCast born. OpenWeather API integrated.</p>
                             </div>
                         </li>
@@ -398,7 +422,8 @@
                             <span class="vtl-dot"></span>
                             <div class="vtl-content">
                                 <span class="vtl-date">Dec 2023</span>
-                                <strong><span class="material-icons history-icon">warning_amber</span> Hazard Interpretation Layer</strong>
+                                <strong><span class="material-icons history-icon">warning_amber</span> Hazard
+                                    Interpretation Layer</strong>
                                 <p>Dynamic weather hazard alerts added.</p>
                             </div>
                         </li>
@@ -406,7 +431,8 @@
                             <span class="vtl-dot"></span>
                             <div class="vtl-content">
                                 <span class="vtl-date">Feb 2024</span>
-                                <strong><span class="material-icons history-icon">show_chart</span> Chart.js Data Visualization</strong>
+                                <strong><span class="material-icons history-icon">show_chart</span> Chart.js Data
+                                    Visualization</strong>
                                 <p>Interactive forecast charts integrated.</p>
                             </div>
                         </li>
@@ -414,7 +440,8 @@
                             <span class="vtl-dot"></span>
                             <div class="vtl-content">
                                 <span class="vtl-date">Apr 2024</span>
-                                <strong><span class="material-icons history-icon">air</span> Air Quality Index (AQI)</strong>
+                                <strong><span class="material-icons history-icon">air</span> Air Quality Index
+                                    (AQI)</strong>
                                 <p>Real-time air quality monitoring added.</p>
                             </div>
                         </li>
@@ -422,7 +449,8 @@
                             <span class="vtl-dot"></span>
                             <div class="vtl-content">
                                 <span class="vtl-date">Jun 2024</span>
-                                <strong><span class="material-icons history-icon">cyclone</span> Wind Flow Canvas</strong>
+                                <strong><span class="material-icons history-icon">cyclone</span> Wind Flow
+                                    Canvas</strong>
                                 <p>Animated wind particle simulation.</p>
                             </div>
                         </li>
@@ -430,7 +458,8 @@
                             <span class="vtl-dot"></span>
                             <div class="vtl-content">
                                 <span class="vtl-date">Oct 2024</span>
-                                <strong><span class="material-icons history-icon">auto_awesome</span> Premium UI Overhaul</strong>
+                                <strong><span class="material-icons history-icon">auto_awesome</span> Premium UI
+                                    Overhaul</strong>
                                 <p>Glassmorphism, gradients, night mode.</p>
                             </div>
                         </li>
@@ -439,7 +468,8 @@
                             <div class="vtl-content">
                                 <span class="vtl-date">Now</span>
                                 <strong>🟢 Actively Maintained</strong>
-                                <p><a href="https://github.com/TacticalReader" target="_blank" rel="noopener noreferrer">TacticalReader</a> (Tanmay Srivastava)</p>
+                                <p><a href="https://github.com/TacticalReader" target="_blank"
+                                        rel="noopener noreferrer">TacticalReader</a> (Tanmay Srivastava)</p>
                             </div>
                         </li>
                     </ol>
@@ -455,7 +485,8 @@
     <script src="config.js"></script>
     <script src="icons.js"></script>
     <script src="particles.js"></script>
-  
+
     <script src="script.js"></script>
 </body>
+
 </html>
