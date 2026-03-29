@@ -272,13 +272,180 @@
                 <img src="images/openweather.png" alt="OpenWeather">
             </div>
 
-            <!-- Credit Section -->
-            <div class="credit-section">
-                <p class="credit-text">Designed and Programmed by <span class="credit-name">Tanmay Srivastava</span></p>
-                <a href="https://github.com/TacticalReader" target="blank" class="credit-github">
-                    <span class="material-icons">code</span> TacticalReader
-                </a>
-            </div>
+            <!-- Data-Driven Project Timeline Credit Section -->
+            <section class="credit-timeline-container" aria-label="Project Development History and Credits">
+                <h3 class="timeline-desktop-title">Development Timeline and Credits</h3>
+
+                <!-- Desktop: Horizontal Timeline -->
+                <div class="timeline-desktop">
+                    <div class="timeline-axis-line" aria-hidden="true"></div>
+                    <ol class="timeline-track" role="list">
+
+                        <!-- Node 1: Initial Launch -->
+                        <li class="timeline-node" role="listitem">
+                            <button class="node-trigger" aria-describedby="tooltip-1" tabindex="0">
+                                <span class="node-dot" aria-hidden="true"></span>
+                                <span class="node-date">Oct 2023</span>
+                            </button>
+                            <div id="tooltip-1" class="glass-tooltip" role="tooltip">
+                                <strong><span class="material-icons history-icon">rocket_launch</span> V1.0 — Initial Launch</strong>
+                                <p>SkyCast born. OpenWeather API integrated by TacticalReader.</p>
+                            </div>
+                        </li>
+
+                        <!-- Node 2: Hazard System -->
+                        <li class="timeline-node" role="listitem">
+                            <button class="node-trigger" aria-describedby="tooltip-2" tabindex="0">
+                                <span class="node-dot" aria-hidden="true"></span>
+                                <span class="node-date">Dec 2023</span>
+                            </button>
+                            <div id="tooltip-2" class="glass-tooltip" role="tooltip">
+                                <strong><span class="material-icons history-icon">warning_amber</span> Hazard Interpretation Layer</strong>
+                                <p>Dynamic weather hazard alerts and severity indicators added.</p>
+                            </div>
+                        </li>
+
+                        <!-- Node 3: Chart.js (Major — orange) -->
+                        <li class="timeline-node" role="listitem">
+                            <button class="node-trigger node-major" aria-describedby="tooltip-3" tabindex="0">
+                                <span class="node-dot" aria-hidden="true"></span>
+                                <span class="node-date">Feb 2024</span>
+                            </button>
+                            <div id="tooltip-3" class="glass-tooltip" role="tooltip">
+                                <strong><span class="material-icons history-icon">show_chart</span> Chart.js Data Visualization</strong>
+                                <p>Interactive temperature, humidity &amp; wind charts integrated.</p>
+                            </div>
+                        </li>
+
+                        <!-- Node 4: AQI -->
+                        <li class="timeline-node" role="listitem">
+                            <button class="node-trigger" aria-describedby="tooltip-4" tabindex="0">
+                                <span class="node-dot" aria-hidden="true"></span>
+                                <span class="node-date">Apr 2024</span>
+                            </button>
+                            <div id="tooltip-4" class="glass-tooltip" role="tooltip">
+                                <strong><span class="material-icons history-icon">air</span> Air Quality Index (AQI)</strong>
+                                <p>Real-time PM2.5, SO2, NO2, O3 &amp; CO monitoring added.</p>
+                            </div>
+                        </li>
+
+                        <!-- Node 5: Wind Flow (Major — orange) -->
+                        <li class="timeline-node" role="listitem">
+                            <button class="node-trigger node-major" aria-describedby="tooltip-5" tabindex="0">
+                                <span class="node-dot" aria-hidden="true"></span>
+                                <span class="node-date">Jun 2024</span>
+                            </button>
+                            <div id="tooltip-5" class="glass-tooltip" role="tooltip">
+                                <strong><span class="material-icons history-icon">cyclone</span> Wind Flow Canvas</strong>
+                                <p>Animated wind particle simulation rendered on HTML Canvas.</p>
+                            </div>
+                        </li>
+
+                        <!-- Node 6: UI Polish -->
+                        <li class="timeline-node" role="listitem">
+                            <button class="node-trigger" aria-describedby="tooltip-6" tabindex="0">
+                                <span class="node-dot" aria-hidden="true"></span>
+                                <span class="node-date">Oct 2024</span>
+                            </button>
+                            <div id="tooltip-6" class="glass-tooltip" role="tooltip">
+                                <strong><span class="material-icons history-icon">auto_awesome</span> Premium UI Overhaul</strong>
+                                <p>Glassmorphism, icon gradients, night mode &amp; micro-animations.</p>
+                            </div>
+                        </li>
+
+                        <!-- Live Node: Actively Maintained -->
+                        <li class="timeline-node timeline-node-live" role="listitem">
+                            <a href="https://github.com/TacticalReader"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="node-trigger live-indicator"
+                               aria-label="Actively maintained by TacticalReader on GitHub — click to visit profile"
+                               aria-describedby="tooltip-live">
+                                <span class="pulse-ring" aria-hidden="true"></span>
+                                <span class="pulse-ring pulse-ring-delay" aria-hidden="true"></span>
+                                <span class="live-dot" aria-hidden="true"></span>
+                            </a>
+                            <div id="tooltip-live" class="glass-tooltip glass-tooltip-live" role="tooltip">
+                                <strong>🟢 Actively Maintained</strong>
+                                <p>Designed &amp; programmed by <em>TacticalReader</em> (Tanmay Srivastava)</p>
+                            </div>
+                        </li>
+
+                    </ol>
+                    <div class="timeline-footer">
+                        <p class="timeline-author">Project designed &amp; programmed by <strong>Tanmay Srivastava</strong></p>
+                        <p class="timeline-label" aria-hidden="true">Development Timeline &bull; TacticalReader</p>
+                    </div>
+                </div>
+
+                <!-- Mobile: Collapsible Accordion Vertical Timeline -->
+                <details class="timeline-mobile">
+                    <summary class="timeline-summary">
+                        <span class="material-icons timeline-summary-icon">history</span>
+                        Project History &amp; Credits
+                        <span class="timeline-chevron material-icons" aria-hidden="true">expand_more</span>
+                    </summary>
+                    <ol class="timeline-track-vertical" role="list">
+                        <li class="vtl-node">
+                            <span class="vtl-dot"></span>
+                            <div class="vtl-content">
+                                <span class="vtl-date">Oct 2023</span>
+                                <strong><span class="material-icons history-icon">rocket_launch</span> V1.0 — Initial Launch</strong>
+                                <p>SkyCast born. OpenWeather API integrated.</p>
+                            </div>
+                        </li>
+                        <li class="vtl-node">
+                            <span class="vtl-dot"></span>
+                            <div class="vtl-content">
+                                <span class="vtl-date">Dec 2023</span>
+                                <strong><span class="material-icons history-icon">warning_amber</span> Hazard Interpretation Layer</strong>
+                                <p>Dynamic weather hazard alerts added.</p>
+                            </div>
+                        </li>
+                        <li class="vtl-node vtl-major">
+                            <span class="vtl-dot"></span>
+                            <div class="vtl-content">
+                                <span class="vtl-date">Feb 2024</span>
+                                <strong><span class="material-icons history-icon">show_chart</span> Chart.js Data Visualization</strong>
+                                <p>Interactive forecast charts integrated.</p>
+                            </div>
+                        </li>
+                        <li class="vtl-node">
+                            <span class="vtl-dot"></span>
+                            <div class="vtl-content">
+                                <span class="vtl-date">Apr 2024</span>
+                                <strong><span class="material-icons history-icon">air</span> Air Quality Index (AQI)</strong>
+                                <p>Real-time air quality monitoring added.</p>
+                            </div>
+                        </li>
+                        <li class="vtl-node vtl-major">
+                            <span class="vtl-dot"></span>
+                            <div class="vtl-content">
+                                <span class="vtl-date">Jun 2024</span>
+                                <strong><span class="material-icons history-icon">cyclone</span> Wind Flow Canvas</strong>
+                                <p>Animated wind particle simulation.</p>
+                            </div>
+                        </li>
+                        <li class="vtl-node">
+                            <span class="vtl-dot"></span>
+                            <div class="vtl-content">
+                                <span class="vtl-date">Oct 2024</span>
+                                <strong><span class="material-icons history-icon">auto_awesome</span> Premium UI Overhaul</strong>
+                                <p>Glassmorphism, gradients, night mode.</p>
+                            </div>
+                        </li>
+                        <li class="vtl-node vtl-live">
+                            <span class="vtl-dot vtl-dot-live"></span>
+                            <div class="vtl-content">
+                                <span class="vtl-date">Now</span>
+                                <strong>🟢 Actively Maintained</strong>
+                                <p><a href="https://github.com/TacticalReader" target="_blank" rel="noopener noreferrer">TacticalReader</a> (Tanmay Srivastava)</p>
+                            </div>
+                        </li>
+                    </ol>
+                </details>
+
+            </section>
         </div>
     </div>
 
