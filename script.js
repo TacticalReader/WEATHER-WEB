@@ -489,7 +489,7 @@ function updateBackground(weatherMain, data, isNightOverride = null) {
     if (isNight && CONFIG.nightBackgrounds) {
         bgUrl = CONFIG.nightBackgrounds[weatherMain] || CONFIG.nightBackgrounds['Default'];
     } else {
-        bgUrl = CONFIG.backgrounds[weatherMain] || CONFIG.backgrounds['Clear'];
+        bgUrl = CONFIG.backgrounds[weatherMain] || CONFIG.backgrounds['Default'];
     }
     const nextIndex = (activeBgIndex + 1) % 2;
     const nextLayer = bgLayers[nextIndex];
