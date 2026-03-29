@@ -2068,7 +2068,13 @@ body.night-mode .forecast-container h3 {
 body.night-mode .h-time{
     color: #ffffff;
 }
+
 body.night-mode .h-temp{
     color: #24973e
 }
 
+body.night-mode .forecast-item .f-desc{
+    font-size: 0.9rem;
+    color: #000000;
+    font-weight: bolder;
+}
