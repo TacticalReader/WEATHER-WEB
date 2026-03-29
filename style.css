@@ -15,12 +15,18 @@
 }
 
 /* Use Orbitron for headers and numbers for a sci-fi/weather station look */
-h1, h2, #temperature, .unit-toggle, #current-time {
+h1,
+h2,
+#temperature,
+.unit-toggle,
+#current-time {
     font-family: 'Orbitron', sans-serif;
 }
 
 /* Global constraint for media */
-img, canvas, svg {
+img,
+canvas,
+svg {
     max-width: 100%;
     height: auto;
 }
@@ -87,7 +93,7 @@ body {
 }
 
 /* Focus Mode: Dim everything except search */
-body.search-focus .glass-card > *:not(.search-section) {
+body.search-focus .glass-card>*:not(.search-section) {
     opacity: 0.4;
     filter: blur(3px);
     transition: all 0.4s ease;
@@ -103,7 +109,7 @@ body.search-focus .glass-card > *:not(.search-section) {
     .glass-card {
         max-width: 1200px;
     }
-    
+
     .content-grid {
         display: grid;
         grid-template-columns: 1fr 1.5fr;
@@ -111,11 +117,13 @@ body.search-focus .glass-card > *:not(.search-section) {
         align-items: start;
     }
 
-    .left-column, .right-column {
+    .left-column,
+    .right-column {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        min-width: 0; /* Prevents grid blowout from canvas/scrollables */
+        min-width: 0;
+        /* Prevents grid blowout from canvas/scrollables */
     }
 }
 
@@ -167,7 +175,7 @@ header {
     border-radius: 50%;
     width: 40px;
     height: 40px;
-    display: flex; 
+    display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
@@ -218,14 +226,17 @@ header {
     transition: 0.4s;
     border-radius: 34px;
     overflow: hidden;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Imperial Background Overlay for Cross-fade */
 .slider::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: var(--fahrenheit-gradient);
     opacity: 0;
     transition: opacity 0.4s ease;
@@ -248,11 +259,11 @@ header {
     transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), width 0.2s;
     border-radius: 50%;
     z-index: 2;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 /* Move Knob */
-input:checked + .slider:before {
+input:checked+.slider:before {
     transform: translateX(34px);
 }
 
@@ -303,7 +314,7 @@ input:checked + .slider:before {
     border-radius: 30px;
     padding: 5px;
     border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     gap: 5px;
     position: relative;
     z-index: 10;
@@ -314,7 +325,7 @@ input:checked + .slider:before {
 .search-box.focus-mode {
     transform: scale(1.05);
     background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
     border-color: rgba(255, 255, 255, 0.8);
 }
 
@@ -344,7 +355,7 @@ input:checked + .slider:before {
     border-radius: 15px;
     margin-top: 5px;
     list-style: none;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     max-height: 200px;
     overflow-y: auto;
@@ -359,7 +370,7 @@ input:checked + .slider:before {
     padding: 10px 20px;
     cursor: pointer;
     transition: background 0.2s;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
 }
@@ -461,12 +472,15 @@ input:checked + .slider:before {
     0% {
         transform: scale(1);
     }
+
     40% {
         transform: scale(0.8);
     }
+
     60% {
         transform: scale(1.2);
     }
+
     100% {
         transform: scale(1);
     }
@@ -634,6 +648,7 @@ input:checked + .slider:before {
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -655,7 +670,8 @@ input:checked + .slider:before {
 
 /* Severity Levels */
 .hazard-caution {
-    background: rgba(253, 224, 71, 0.2); /* Yellow */
+    background: rgba(253, 224, 71, 0.2);
+    /* Yellow */
     border-color: rgba(253, 224, 71, 0.5);
     color: #854d0e;
 }
@@ -665,7 +681,8 @@ input:checked + .slider:before {
 }
 
 .hazard-danger {
-    background: rgba(249, 115, 22, 0.2); /* Orange */
+    background: rgba(249, 115, 22, 0.2);
+    /* Orange */
     border-color: rgba(249, 115, 22, 0.5);
     color: #9a3412;
 }
@@ -676,7 +693,8 @@ input:checked + .slider:before {
 
 .hazard-severe {
     margin: 7px;
-    background: rgba(239, 68, 68, 0.2); /* Red */
+    background: rgba(239, 68, 68, 0.2);
+    /* Red */
     border-color: rgba(239, 68, 68, 0.5);
     color: #7f1d1d;
     box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
@@ -892,14 +910,19 @@ body.night-mode .precip-explanation {
 
 /* Wind Map Container - Enhanced */
 .wind-map-container {
-    background: rgba(255, 255, 255, 0.1); /* More transparent */
-    border-radius: 20px; /* Softer corners */
-    padding: 0; /* Remove padding to let canvas fill */
+    background: rgba(255, 255, 255, 0.1);
+    /* More transparent */
+    border-radius: 20px;
+    /* Softer corners */
+    padding: 0;
+    /* Remove padding to let canvas fill */
     margin-bottom: 30px;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); /* Deeper shadow */
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    /* Deeper shadow */
     backdrop-filter: blur(8px);
-    height: 250px; /* Slightly taller */
+    height: 250px;
+    /* Slightly taller */
     position: relative;
     overflow: hidden;
     display: flex;
@@ -919,7 +942,7 @@ body.night-mode .precip-explanation {
     padding: 5px 12px;
     border-radius: 20px;
     backdrop-filter: blur(4px);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     font-family: 'Orbitron', sans-serif;
     letter-spacing: 1px;
 }
@@ -1015,6 +1038,7 @@ body.night-mode .wind-map-container h3 {
     0% {
         background-position: 200% 0;
     }
+
     100% {
         background-position: -200% 0;
     }
@@ -1050,7 +1074,7 @@ body.night-mode .wind-map-container h3 {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    display: flex; 
+    display: flex;
     flex-direction: column;
     gap: 10px;
     z-index: 1000;
@@ -1061,7 +1085,7 @@ body.night-mode .wind-map-container h3 {
     color: white;
     padding: 12px 24px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transform: translateX(120%);
     transition: transform 0.3s ease;
     font-size: 0.9rem;
@@ -1078,11 +1102,11 @@ body.night-mode .wind-map-container h3 {
     .glass-card {
         padding: 20px;
     }
-    
+
     #temperature {
         font-size: 48px;
     }
-    
+
     .details-grid {
         grid-template-columns: 1fr;
     }
@@ -1096,6 +1120,56 @@ body.night-mode .wind-map-container h3 {
         width: 100%;
         justify-content: center;
     }
+
+    /* ---- Chart: mobile fixes (≤480px) ---- */
+
+    /* Shrink the canvas to a comfortable mobile height */
+    .canvas-wrapper {
+        height: 180px;
+    }
+
+    /* Tighter container padding on very small screens */
+    .chart-container {
+        padding: 12px 10px;
+        border-radius: 18px;
+    }
+
+    /* Make the chart-header stack nicely */
+    .chart-header {
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+
+    /* Larger touch targets for the Temp / Humidity / Wind buttons */
+    .chart-btn {
+        padding: 7px 14px;
+        font-size: 0.78rem;
+        min-height: 36px;
+    }
+
+    /* The controls row: spread them a little */
+    .chart-controls {
+        gap: 4px;
+        padding: 4px;
+        width: 100%;
+        justify-content: space-evenly;
+    }
+}
+
+/* ---- Chart: tablet range (481-768px) ---- */
+@media (min-width: 481px) and (max-width: 768px) {
+    .canvas-wrapper {
+        height: 210px;
+    }
+
+    .chart-container {
+        padding: 14px 12px;
+    }
+
+    .chart-btn {
+        padding: 6px 12px;
+        min-height: 34px;
+    }
 }
 
 /* Flag Styles */
@@ -1103,7 +1177,7 @@ body.night-mode .wind-map-container h3 {
     height: 28px;
     width: auto;
     border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .suggestion-flag {
@@ -1111,7 +1185,7 @@ body.night-mode .wind-map-container h3 {
     height: auto;
     margin-right: 12px;
     border-radius: 3px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* API Attribution */
@@ -1143,7 +1217,8 @@ body.night-mode .wind-map-container h3 {
     display: flex;
     gap: 12px;
     overflow-x: auto;
-    padding: 10px 5px 20px 5px; /* Padding for shadow/scroll */
+    padding: 10px 5px 20px 5px;
+    /* Padding for shadow/scroll */
     scrollbar-width: thin;
     scrollbar-color: rgba(37, 99, 235, 0.5) transparent;
 }
@@ -1165,7 +1240,7 @@ body.night-mode .wind-map-container h3 {
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(5px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
@@ -1175,7 +1250,7 @@ body.night-mode .wind-map-container h3 {
 
 .wind-item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2));
 }
 
@@ -1183,7 +1258,7 @@ body.night-mode .wind-map-container h3 {
     width: 32px;
     height: 32px;
     margin: 8px auto;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
     transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -1216,28 +1291,41 @@ body.night-mode .wind-item {
 /* Color tints based on weather main condition (applied via JS class) */
 .icon-tint-clear {
     filter: hue-rotate(180deg) saturate(1.2) brightness(1.1) drop-shadow(0 4px 12px rgba(59, 130, 246, 0.4));
-} /* Cyan-blue glow for clear */
+}
+
+/* Cyan-blue glow for clear */
 .icon-tint-clouds {
     filter: saturate(0.8) brightness(1.2) drop-shadow(0 4px 8px rgba(255, 255, 255, 0.4));
 }
+
 .icon-tint-rain,
 .icon-tint-drizzle {
     filter: hue-rotate(200deg) saturate(1.3) drop-shadow(0 4px 12px rgba(59, 130, 246, 0.5));
-} /* Blue tint */
+}
+
+/* Blue tint */
 .icon-tint-thunderstorm {
     filter: hue-rotate(270deg) saturate(1.4) brightness(0.9) drop-shadow(0 4px 16px rgba(147, 51, 234, 0.6));
-} /* Purple electric glow */
+}
+
+/* Purple electric glow */
 .icon-tint-snow {
     filter: brightness(1.3) saturate(1.2) drop-shadow(0 4px 12px rgba(147, 197, 253, 0.6));
-} /* Icy blue-white */
+}
+
+/* Icy blue-white */
 .icon-tint-fog,
 .icon-tint-mist,
 .icon-tint-haze {
     filter: brightness(1.1) saturate(0.6) drop-shadow(0 4px 8px rgba(156, 163, 175, 0.4));
-} /* Grayish */
+}
+
+/* Grayish */
 .icon-tint-night {
     filter: hue-rotate(220deg) brightness(1.1) saturate(1.1);
-} /* Cooler moonlit tone */
+}
+
+/* Cooler moonlit tone */
 
 /* Imperial mode - warmer overall tint for icons */
 .glass-card.is-imperial #weather-icon,
@@ -1246,69 +1334,620 @@ body.night-mode .wind-item {
     filter: hue-rotate(30deg) saturate(1.3) brightness(1.05) !important;
 }
 
-/* --- New Credit Section & Icon Gradients --- */
+/* ============================================================
+   Data-Driven Project Timeline — Credit Section
+   ============================================================ */
 
-.credit-section {
-    margin-top: 25px;
-    padding-top: 15px;
+/* Screen-reader only helper */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ---- Outer Container ---- */
+.credit-timeline-container {
+    margin-top: 30px;
+    padding-top: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 10;
+    width: 100%;
+}
+
+.timeline-desktop-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.15rem;
+    color: #1e293b;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    text-align: center;
+    margin: 0 0 24px 0;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+}
+
+/* ---- Desktop: Horizontal Timeline ---- */
+.timeline-desktop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    width: 100%;
+    padding: 0 10px;
+}
+
+.timeline-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    margin-top: 10px;
+    user-select: none;
+}
+
+/* The horizontal axis line */
+.timeline-axis-line {
+    position: absolute;
+    top: 162px;
+    /* vertically centred on the node dots now shifted down by padding */
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: linear-gradient(to right,
+            transparent,
+            rgba(255, 255, 255, 0.3) 10%,
+            rgba(6, 182, 212, 0.5) 50%,
+            rgba(255, 255, 255, 0.3) 90%,
+            transparent);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* The scrollable track */
+.timeline-track {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    list-style: none;
+    width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 140px 20px 20px 20px;
+    /* Space at top for permanently visible tooltips */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(6, 182, 212, 0.4) transparent;
+    cursor: grab;
+    position: relative;
+    z-index: 1;
+    justify-content: flex-start;
+}
+
+.timeline-track::-webkit-scrollbar {
+    height: 6px;
+}
+
+.timeline-track::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.timeline-track::-webkit-scrollbar-thumb {
+    background: rgba(6, 182, 212, 0.3);
+    border-radius: 10px;
+}
+
+.timeline-track::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 182, 212, 0.5);
+}
+
+.timeline-track:active {
+    cursor: grabbing;
+}
+
+/* Individual milestone node */
+.timeline-node {
+    position: relative;
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+    min-width: 200px;
+}
+
+/* ---- Node Trigger (button / link) ---- */
+.node-trigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 4px;
+    position: relative;
+    text-decoration: none;
+}
+
+/* The glowing dot — standard (cyan) */
+.node-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #22d3ee, #0891b2);
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.6),
+        0 0 16px rgba(6, 182, 212, 0.3);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.3s ease;
+    flex-shrink: 0;
+}
+
+/* Major milestone — orange dot */
+.node-major .node-dot {
+    background: radial-gradient(circle, #fb923c, #ea580c);
+    box-shadow: 0 0 8px rgba(249, 115, 22, 0.7),
+        0 0 20px rgba(249, 115, 22, 0.35);
+}
+
+/* Hover & focus: scale dot, intensify glow, show tooltip */
+.node-trigger:hover .node-dot,
+.node-trigger:focus .node-dot {
+    transform: scale(1.6);
+    box-shadow: 0 0 14px rgba(6, 182, 212, 0.9),
+        0 0 28px rgba(6, 182, 212, 0.5);
+}
+
+.node-major:hover .node-dot,
+.node-major:focus .node-dot {
+    box-shadow: 0 0 14px rgba(249, 115, 22, 0.9),
+        0 0 28px rgba(249, 115, 22, 0.5);
+}
+
+/* Date label below dot */
+.node-date {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.62rem;
+    font-weight: bolder;
+    color: rgba(255, 255, 255, 0.65);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    transition: color 0.3s ease;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.node-trigger:hover .node-date,
+.node-trigger:focus .node-date {
+    color: #22d3ee;
+}
+
+.node-major:hover .node-date,
+.node-major:focus .node-date {
+    color: #fb923c;
+}
+
+/* ---- Glassmorphic Tooltip (Now permanently visible card) ---- */
+.glass-tooltip {
+    opacity: 1;
+    pointer-events: auto;
+    position: absolute;
+    bottom: calc(100% + 14px);
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    z-index: 100;
+    width: 180px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.75);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    text-align: left;
+}
+
+/* Tooltip arrow */
+.glass-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(6, 182, 212, 0.35);
+}
+
+.glass-tooltip strong {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    color: #22d3ee;
+    margin-bottom: 4px;
+    letter-spacing: 0.3px;
+    background: none !important;
+    -webkit-text-fill-color: #22d3ee !important;
+}
+
+.history-icon {
+    font-size: 1.15em;
+    flex-shrink: 0;
+}
+
+.glass-tooltip p {
+    font-size: 0.75rem;
+    color: rgba(224, 242, 254, 0.85);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Hover effects on cards for extra interaction */
+.node-trigger:hover+.glass-tooltip,
+.node-trigger:focus+.glass-tooltip,
+.live-indicator:hover+.glass-tooltip,
+.live-indicator:focus+.glass-tooltip {
+    transform: translateX(-50%) translateY(-4px);
+    box-shadow: 0 12px 30px rgba(6, 182, 212, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Orange border for major-node tooltips */
+.timeline-node .node-major+.glass-tooltip {
+    border-color: rgba(249, 115, 22, 0.35);
+}
+
+.timeline-node .node-major+.glass-tooltip::after {
+    border-top-color: rgba(249, 115, 22, 0.4);
+}
+
+.timeline-node .node-major+.glass-tooltip strong {
+    color: #fb923c;
+    -webkit-text-fill-color: #fb923c !important;
+}
+
+/* Live tooltip — green accent */
+.glass-tooltip-live {
+    border-color: rgba(34, 197, 94, 0.4);
+    width: 210px;
+}
+
+.glass-tooltip-live::after {
+    border-top-color: rgba(34, 197, 94, 0.4);
+}
+
+.glass-tooltip-live strong {
+    color: #4ade80 !important;
+    -webkit-text-fill-color: #4ade80 !important;
+}
+
+/* ---- Live / Active-Developer Node ---- */
+.timeline-node-live {
+    position: relative;
+}
+
+.live-indicator {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* The solid green centre dot */
+.live-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.8),
+        0 0 16px rgba(34, 197, 94, 0.4);
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+/* Expanding pulse rings */
+.pulse-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(34, 197, 94, 0.6);
+    animation: pulseExpand 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    z-index: 1;
+}
+
+.pulse-ring-delay {
+    animation-delay: 0.8s;
+}
+
+@keyframes pulseExpand {
+    0% {
+        transform: scale(0.6);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(2.2);
+        opacity: 0;
+    }
+}
+
+/* Live indicator hover — boost glow */
+.live-indicator:hover .live-dot,
+.live-indicator:focus .live-dot {
+    box-shadow: 0 0 14px rgba(34, 197, 94, 1),
+        0 0 28px rgba(34, 197, 94, 0.6);
+}
+
+/* ============================================================
+   Mobile: Vertical Accordion Timeline
+   ============================================================ */
+.timeline-mobile {
+    display: none;
+    margin-top: 15px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.timeline-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.75);
+    letter-spacing: 1px;
+    list-style: none;
+    user-select: none;
+    transition: background 0.3s ease;
+}
+
+.timeline-summary::-webkit-details-marker {
+    display: none;
+}
+
+.timeline-summary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.timeline-summary-icon {
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, #22d3ee, #3b82f6) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+.timeline-chevron {
+    margin-left: auto;
+    font-size: 1.2rem;
+    background: none !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.5) !important;
+    transition: transform 0.3s ease;
+}
+
+details[open] .timeline-chevron {
+    transform: rotate(180deg);
+}
+
+/* Vertical timeline list */
+.timeline-track-vertical {
+    list-style: none;
+    padding: 0 16px 16px 16px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-left: 2px solid rgba(6, 182, 212, 0.3);
+    margin-left: 22px;
+}
+
+.vtl-node {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    position: relative;
+    padding: 10px 0;
+}
+
+/* Dot on the vertical axis */
+.vtl-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #22d3ee, #0891b2);
+    box-shadow: 0 0 6px rgba(6, 182, 212, 0.6);
+    flex-shrink: 0;
+    margin-left: -7px;
+    /* overlap with border-left line */
+    margin-top: 4px;
+}
+
+.vtl-major .vtl-dot {
+    background: radial-gradient(circle, #fb923c, #ea580c);
+    box-shadow: 0 0 6px rgba(249, 115, 22, 0.7);
+}
+
+.vtl-dot-live {
+    background: radial-gradient(circle, #4ade80, #16a34a) !important;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.8) !important;
+    animation: vtlLivePulse 2s ease-in-out infinite;
+}
+
+@keyframes vtlLivePulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+    }
+
+    50% {
+        box-shadow: 0 0 14px rgba(34, 197, 94, 1);
+    }
+}
+
+.vtl-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.vtl-date {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    color: rgba(6, 182, 212, 0.85);
+    letter-spacing: 0.5px;
+}
+
+.vtl-major .vtl-date {
+    color: rgba(249, 115, 22, 0.9);
+}
+
+.vtl-live .vtl-date {
+    color: rgba(74, 222, 128, 0.9);
+}
+
+.vtl-content strong {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.9);
+    background: none !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.vtl-content p {
+    font-size: 0.75rem;
+    color: rgba(203, 213, 225, 0.75);
+    margin: 0;
+}
+
+.vtl-content p a {
+    color: #22d3ee;
+    text-decoration: underline;
+}
+
+/* ---- Credit Footer & Persistent Author Labelling (Desktop) ---- */
+.timeline-footer {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    text-align: center;
-    position: relative;
-    z-index: 10;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+    animation: fadeIn 0.8s ease-out both 0.5s;
 }
 
-.credit-text {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 600;
-    background: linear-gradient(to right, #e2e8f0, #94a3b8);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    margin: 0;
+.timeline-author {
+    font-family: 'Nova Round', sans-serif;
+    font-size: 0.95rem;
+    color: #1e293b;
     letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
-.credit-name {
-    background: linear-gradient(135deg, #06b6d4, #3b82f6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    font-weight: 800;
-    text-transform: uppercase;
-    padding: 0 4px;
-}
-
-.credit-github {
-    text-decoration: none;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: linear-gradient(3deg, #f472b6, #8b5cf6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    transition: transform 0.3s ease, filter 0.3s ease;
+.timeline-author strong {
+    color: #2563eb;
     font-weight: 700;
 }
 
-.credit-github:hover {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.4));
+.timeline-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(30, 41, 59, 0.4);
+    pointer-events: none;
+    margin: 0;
 }
 
-.credit-github .material-icons {
-    font-size: 1.1rem;
-    background: inherit;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+/* ============================================================
+   Responsive — Mobile shows accordion, desktop shows horizontal
+   ============================================================ */
+@media (max-width: 768px) {
+    .timeline-desktop,
+    .timeline-desktop-title {
+        display: none;
+    }
+
+    .timeline-mobile {
+        display: block;
+    }
+}
+
+/* ============================================================
+   Night Mode Overrides for Timeline
+   ============================================================ */
+body.night-mode .timeline-desktop-title {
+    color: rgba(240, 249, 255, 0.95);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+body.night-mode .glass-tooltip {
+    background: rgba(2, 6, 23, 0.85);
+    border-color: rgba(6, 182, 212, 0.4);
+}
+
+body.night-mode .glass-tooltip p {
+    color: rgba(186, 230, 253, 0.9);
+}
+
+body.night-mode .timeline-author {
+    color: rgba(240, 249, 255, 0.9);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.night-mode .timeline-author strong {
+    color: #38bdf8;
+}
+
+body.night-mode .timeline-label {
+    color: rgba(255, 255, 255, 0.25);
+    border-color: rgba(6, 182, 212, 0.2);
+}
+
+body.night-mode .timeline-footer {
+    border-color: rgba(6, 182, 212, 0.15);
+}
+
+body.night-mode .node-date {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+body.night-mode .timeline-mobile {
+    background: rgba(2, 6, 23, 0.4);
+    border-color: rgba(6, 182, 212, 0.2);
+}
+
+body.night-mode .vtl-content strong {
+    -webkit-text-fill-color: rgba(240, 249, 255, 0.95) !important;
+}
+
+body.night-mode .vtl-content p {
+    color: rgba(148, 163, 184, 0.85);
 }
 
 /* Apply Gradients to Existing Icons */
