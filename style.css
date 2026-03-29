@@ -150,6 +150,7 @@ header {
 
 .logo h1 {
     color: #111827;
+    transition: color 0.5s ease, text-shadow 0.5s ease;
 }
 
 /* --- Header Controls (Share & Unit) --- */
@@ -593,6 +594,7 @@ input:checked + .slider:before {
     margin-bottom: 15px;
     font-size: 1.2rem;
     color: #111827;
+    transition: color 0.5s ease, text-shadow 0.5s ease;
 }
 
 .aqi-grid {
@@ -942,6 +944,7 @@ body.night-mode .wind-map-container h3 {
     margin-bottom: 15px;
     font-size: 1.2rem;
     color: #111827;
+    transition: color 0.5s ease, text-shadow 0.5s ease;
 }
 
 .forecast-list {
@@ -1410,4 +1413,11 @@ body.night-mode .detail-item span,
 body.night-mode .forecast-item .f-temp,
 body.night-mode .hourly-item .h-temp {
     color: #f1f5f9;
+}
+
+body.night-mode .logo h1,
+body.night-mode .aqi-container h3,
+body.night-mode .forecast-container h3 {
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
