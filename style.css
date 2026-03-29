@@ -823,6 +823,7 @@ body.night-mode .precip-explanation {
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.8rem;
+    font-weight: bold;
     color: #4b5563;
     transition: all 0.2s;
 }
