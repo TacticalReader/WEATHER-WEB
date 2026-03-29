@@ -12,7 +12,7 @@ const CONFIG = {
         "Mist": "images/mist.jpg",
         "Default": "images/clear_daysky.jpg"       
     },
-
+        // nighttime Backgrounds
     nightBackgrounds: {
         "Default": "images/Nightsky-default.jpg",
         "Clear": "images/Night-clearsky.jpg",
