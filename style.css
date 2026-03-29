@@ -2064,3 +2064,8 @@ body.night-mode .forecast-container h3 {
     color: #ffffff;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
+
+body.night-mode .h-time{
+    colour: #ffffff;
+}
+
