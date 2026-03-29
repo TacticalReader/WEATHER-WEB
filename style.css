@@ -1711,6 +1711,7 @@ body.night-mode .wind-item {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-weight: bolder;
     padding: 12px 16px;
     cursor: pointer;
     font-family: 'Orbitron', sans-serif;
