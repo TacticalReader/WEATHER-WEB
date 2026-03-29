@@ -2078,3 +2078,7 @@ body.night-mode .forecast-item .f-desc{
     color: #000000;
     font-weight: bolder;
 }
+
+body.night-mode .api-attribution{
+    color: #a5a5a5;
+}
