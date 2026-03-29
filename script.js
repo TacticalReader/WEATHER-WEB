@@ -134,6 +134,9 @@ function init() {
         }
     }, 300000);
 
+    // Fetch real commit dates from GitHub and populate timeline
+    initTimelineDates();
+
     // Offline/Online notifications
     window.addEventListener('offline', () => {
         showToast("Your internet connection is not working. Please check your internet connection.", "wifi_off");
@@ -854,12 +857,12 @@ function updateChart(data, type) {
     let yScaleConfig = {
         display: true,
         title: {
-            display: true,
+            display: window.innerWidth > 480,  // Hide on mobile — button already labels it
             text: label,
             color: '#000000',
             font: {
                 family: "'Orbitron', sans-serif",
-                size: 12,
+                size: window.innerWidth <= 768 ? 10 : 12,
                 weight: 'bold'
             },
             padding: { bottom: 10 }
@@ -876,10 +879,11 @@ function updateChart(data, type) {
             color: '#000000',
             font: {
                 family: "'Nova Round', sans-serif",
-                size: 11,
+                size: window.innerWidth <= 480 ? 9 : window.innerWidth <= 768 ? 10 : 11,
                 weight: '600'
             },
-            padding: 8
+            padding: window.innerWidth <= 480 ? 4 : 8,
+            maxTicksLimit: window.innerWidth <= 480 ? 4 : 6
         }
     };
 
@@ -1048,17 +1052,37 @@ function updateChart(data, type) {
                         color: '#000000',
                         font: { 
                             family: "'Nova Round', sans-serif",
-                            size: 12,
+                            size: window.innerWidth <= 768 ? 10 : 12,
                             weight: 'bold'
                         },
-                        padding: 8
+                        padding: window.innerWidth <= 768 ? 4 : 8,
+                        // Force horizontal for everyone
+                        maxRotation: 0,
+                        minRotation: 0,
+                        autoSkip: true,
+                        // Show fewer ticks on mobile/tablet so they don't overlap while horizontal
+                        maxTicksLimit: window.innerWidth <= 768 ? 4 : 8,
+                        // Shorten "12:00 PM" → "12 PM" on smaller screens to save space
+                        callback: function(value, index) {
+                            const label = this.getLabelForValue(value);
+                            if (window.innerWidth <= 768) {
+                                // Strip the ":00" — "12:00 PM" → "12 PM"
+                                return label.replace(':00', '');
+                            }
+                            return label;
+                        }
                     },
                     grid: { display: false }
                 },
                 y: yScaleConfig
             },
             layout: {
-                padding: { top: 10, bottom: 5, left: 10, right: 10 }
+                padding: {
+                    top: 10,
+                    bottom: window.innerWidth <= 480 ? 5 : 5,
+                    left: window.innerWidth <= 480 ? 0 : 10,
+                    right: window.innerWidth <= 480 ? 0 : 10
+                }
             }
         },
         plugins: [lineGlowPlugin, dayNightPlugin, crosshairPlugin, glowPlugin]
@@ -1266,4 +1290,115 @@ function formatTime(unixTimestamp, timezoneOffset) {
 
 function getIconUrl(code) {
     return `https://openweathermap.org/img/wn/${code}@4x.png`;
+}
+
+// =============================================================
+// GitHub Commit Timeline — Dynamic Date Injection
+// =============================================================
+async function initTimelineDates() {
+    const REPO = 'TacticalReader/WEATHER-WEB';
+    const API  = `https://api.github.com/repos/${REPO}/commits?per_page=100`;
+
+    // Each milestone: { nodeId (desktop button), vtlId (mobile li index),
+    //                   keywords to match in commit message (case-insensitive) }
+    // We search the commit list oldest-first for the first match.
+    const MILESTONES = [
+        {
+            desktopDateEl: '#tooltip-1 ~ * .node-date, .timeline-node:nth-child(1) .node-date',
+            vtlIndex: 0,
+            keywords: ['initial', 'create', 'add files', 'init', 'first commit', 'upload'],
+            fallback: 'Dec 2025'
+        },
+        {
+            vtlIndex: 1,
+            keywords: ['hazard'],
+            fallback: 'Dec 2025'
+        },
+        {
+            vtlIndex: 2,
+            keywords: ['chart', 'forecast chart', 'chart.js'],
+            fallback: 'Dec 2025'
+        },
+        {
+            vtlIndex: 3,
+            keywords: ['air', 'aqi', 'quality', 'pollution'],
+            fallback: 'Dec 2025'
+        },
+        {
+            vtlIndex: 4,
+            keywords: ['wind', 'particle', 'particles', 'wind map', 'wind flow'],
+            fallback: 'Dec 2025'
+        },
+        {
+            vtlIndex: 5,
+            keywords: ['style', 'ui', 'glass', 'gradient', 'overhaul', 'premium', 'night'],
+            fallback: 'Jan 2026'
+        }
+    ];
+
+    try {
+        const res = await fetch(API);
+        if (!res.ok) return; // Silently fail — keep hardcoded dates
+        const commits = await res.json();
+        if (!Array.isArray(commits) || commits.length === 0) return;
+
+        // Format a date string as 'MMM YYYY' e.g. 'Dec 2025'
+        function fmtDate(isoString) {
+            const d = new Date(isoString);
+            return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }
+
+        // GitHub returns commits newest-first; reverse for oldest-first searching
+        const oldest = [...commits].reverse();
+
+        // --- Desktop node-date elements (inside .timeline-node buttons) ---
+        const desktopDates = document.querySelectorAll('.timeline-track .node-date');
+        // --- Mobile vtl-date elements (inside .timeline-track-vertical) ---
+        const vtlDates = document.querySelectorAll('.timeline-track-vertical .vtl-date');
+
+        MILESTONES.forEach((milestone, idx) => {
+            // Find first commit (oldest-first) that matches any keyword
+            const match = oldest.find(c =>
+                milestone.keywords.some(kw =>
+                    c.commit.message.toLowerCase().includes(kw)
+                )
+            );
+
+            const dateStr = match
+                ? fmtDate(match.commit.author.date)
+                : milestone.fallback;
+
+            // Inject into desktop node
+            if (desktopDates[idx]) {
+                desktopDates[idx].textContent = dateStr;
+            }
+            // Inject into mobile accordion
+            if (vtlDates[idx]) {
+                vtlDates[idx].textContent = dateStr;
+            }
+        });
+
+        // --- Live node: use the MOST RECENT commit date ---
+        const latestDate = fmtDate(commits[0].commit.author.date);
+
+        // Desktop live node has no .node-date, it uses the tooltip;
+        // update the tooltip description with the real latest-updated date
+        const liveTooltip = document.getElementById('tooltip-live');
+        if (liveTooltip) {
+            const liveP = liveTooltip.querySelector('p');
+            if (liveP) {
+                liveP.innerHTML = `Designed &amp; programmed by <em>TacticalReader</em> (Tanmay Srivastava)<br><span style="font-size:0.68rem;opacity:0.7;">Last updated: ${latestDate}</span>`;
+            }
+        }
+
+        // Mobile live vtl-date (the last one)
+        const liveVtlDate = vtlDates[vtlDates.length - 1];
+        if (liveVtlDate) {
+            liveVtlDate.textContent = latestDate;
+        }
+
+    } catch (err) {
+        // Network failure or rate-limit — silently keep the hardcoded fallbacks
+        console.warn('[Timeline] Could not fetch GitHub commit dates:', err.message);
+    }
 }
