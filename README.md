@@ -60,6 +60,9 @@ Visit the live application: [SkyCast Weather](https://tacticalreader.github.io/W
 
 *(Add screenshots of your application here)*
 
+![weather_demo_video](https://github.com/user-attachments/assets/6e2e8cb7-4f0b-4456-abca-db37d8a8abd3)
+
+
 ## 🛠️ Technologies Used
 
 - **HTML5 & CSS3** - Semantic markup and modern styling (custom properties, animations, gradients)
