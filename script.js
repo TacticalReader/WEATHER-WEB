@@ -181,68 +181,181 @@ function startClock() {
     setInterval(update, 1000);
 }
 
-// --- Share Logic ---
+// --- Share Logic (Off-Screen Flattened DOM Render) ---
 async function handleShare() {
-    const originalText = shareBtn.innerHTML;
+    // Guard: must have weather data loaded first
+    if (!lastFetchedCurrentWeather) {
+        showToast('Search for a city first before sharing!');
+        return;
+    }
+
+    // Step 1 — Show loading spinner on button
     shareBtn.innerHTML = '<span class="material-icons">hourglass_empty</span>';
+    shareBtn.classList.add('loading');
+    shareBtn.disabled = true;
 
     try {
-        const canvas = await html2canvas(glassCard, {
-            allowTaint: false, // Changed from true to false to prevent tainting error
-            useCORS: true,
-            scale: 2, // Retina quality
-            backgroundColor: null, // Transparent to keep glass effect
-            ignoreElements: (element) => {
-                // Cleaner look: remove search bar and the share button itself
-                if (element.classList.contains('search-section')) return true;
-                if (element.id === 'share-btn') return true;
-                if (element.classList.contains('retry-btn')) return true;
-                return false;
+        const data = lastFetchedCurrentWeather;
+        const unitSymbol  = currentUnit === 'metric' ? '°C' : '°F';
+        const speedUnit   = currentUnit === 'metric' ? 'm/s' : 'mph';
+        const isNight     = document.body.classList.contains('night-mode');
+        const bgMap       = isNight ? CONFIG.nightBackgrounds : CONFIG.backgrounds;
+        const weatherMain = data.weather[0].main;
+        const bgUrl       = bgMap[weatherMain] || bgMap['Default'];
+
+        // Step 2 — Convert Chart.js canvas to static base64 BEFORE capture
+        // (avoids blank/mid-animation chart in the snapshot)
+        let chartDataUrl = '';
+        if (weatherChart) {
+            try {
+                chartDataUrl = weatherChart.toBase64Image('image/png', 1);
+            } catch (e) {
+                console.warn('Chart export failed, continuing without chart:', e);
             }
+        }
+
+        // Step 3 — Populate the hidden export template with current state
+        const container = document.getElementById('export-canvas-container');
+
+        // Background image — set on the #export-bg child so the container
+        // itself keeps its CSS fallback gradient, which renders cleanly.
+        const exportBg = document.getElementById('export-bg');
+        exportBg.style.backgroundImage = `url('${bgUrl}')`;
+
+        // Header: date + time
+        const now = new Date();
+        const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const dateStr = `${days[now.getDay()]}, ${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
+        let h = now.getHours(), m = now.getMinutes().toString().padStart(2,'0');
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        document.getElementById('export-datetime').innerHTML = `${dateStr}<br>${h}:${m} ${ampm}`;
+
+        // City + flag
+        document.getElementById('export-city').textContent =
+            `${data.name}, ${data.sys.country}`;
+        const exportFlag = document.getElementById('export-flag');
+        if (data.sys.country) {
+            exportFlag.src = `https://flagcdn.com/h40/${data.sys.country.toLowerCase()}.png`;
+            exportFlag.style.display = 'inline-block';
+        } else {
+            exportFlag.style.display = 'none';
+        }
+
+        // Temperature, icon, description
+        document.getElementById('export-temp').textContent =
+            `${Math.round(data.main.temp)}${unitSymbol}`;
+        document.getElementById('export-icon').src = getIconUrl(data.weather[0].icon);
+        document.getElementById('export-desc').textContent =
+            data.weather[0].description;
+
+        // Stats strip
+        document.getElementById('export-humidity').textContent =
+            `${data.main.humidity}%`;
+        document.getElementById('export-wind').textContent =
+            `${data.wind.speed} ${speedUnit}`;
+        document.getElementById('export-sunrise').textContent =
+            formatTime(data.sys.sunrise, data.timezone);
+        document.getElementById('export-sunset').textContent =
+            formatTime(data.sys.sunset, data.timezone);
+
+        // Chart: inject static base64 image so it's guaranteed fully rendered
+        const chartImg = document.getElementById('export-chart-img');
+        if (chartDataUrl) {
+            chartImg.src = chartDataUrl;
+            chartImg.style.display = 'block';
+        } else {
+            chartImg.style.display = 'none';
+        }
+
+        // Step 4 — Wait for the background image to actually load
+        // (prevents blank bg when image hasn't been cached yet)
+        await new Promise((resolve) => {
+            const testImg = new Image();
+            testImg.onload  = resolve;
+            testImg.onerror = resolve; // proceed even on CORS/load failure
+            testImg.src = bgUrl;
         });
 
+        // Also wait for weather icon to load
+        const exportIconEl = document.getElementById('export-icon');
+        await new Promise((resolve) => {
+            if (exportIconEl.complete) { resolve(); return; }
+            exportIconEl.onload  = resolve;
+            exportIconEl.onerror = resolve;
+        });
+
+        // Small settledown tick so the browser has painted the hidden DOM
+        await new Promise(r => setTimeout(r, 80));
+
+        // Step 5 — Run html2canvas on the hidden export container
+        const canvas = await html2canvas(container, {
+            useCORS: true,          // required for OpenWeather icons + flag CDN
+            allowTaint: false,
+            scale: 2,               // retina-quality output
+            backgroundColor: null,  // preserve container's own background
+            width: 1200,
+            height: 630,
+            logging: false
+        });
+
+        // Step 6 — Trigger download / Web Share API
         canvas.toBlob(async (blob) => {
-            // Web Share API
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'weather.png', { type: blob.type })] })) {
+            const fileName = `SkyCast-${currentCity}-${Date.now()}.png`;
+
+            // Try native Web Share (mobile)
+            const file = new File([blob], fileName, { type: 'image/png' });
+            if (
+                navigator.share &&
+                navigator.canShare &&
+                navigator.canShare({ files: [file] })
+            ) {
                 try {
-                    const file = new File([blob], `weather-${currentCity}.png`, { type: 'image/png' });
                     await navigator.share({
                         files: [file],
                         title: `Weather in ${currentCity}`,
-                        text: `Check out the current weather in ${currentCity}!`
+                        text: `Current weather in ${currentCity} — shared from SkyCast`
                     });
-                    showToast('Shared successfully!');
+                    showToast('Shared successfully! 🎉');
                 } catch (err) {
                     if (err.name !== 'AbortError') {
-                        console.error('Share failed', err);
-                        downloadBlob(blob);
+                        downloadBlob(blob, fileName);
+                        showToast('Snapshot downloaded! 📸');
                     }
                 }
             } else {
-                // Fallback to Download
-                downloadBlob(blob);
-                showToast('Snapshot downloaded!');
+                // Desktop fallback — direct download
+                downloadBlob(blob, fileName);
+                showToast('Snapshot downloaded! 📸');
             }
-            shareBtn.innerHTML = originalText;
+
+            // Restore button
+            shareBtn.innerHTML = '<span class="material-icons">share</span>';
+            shareBtn.classList.remove('loading');
+            shareBtn.disabled = false;
         }, 'image/png');
 
     } catch (err) {
-        console.error('Screenshot error:', err);
-        showToast('Failed to create snapshot');
-        shareBtn.innerHTML = originalText;
+        console.error('Export snapshot error:', err);
+        // Graceful failure — non-intrusive toast, no silent console-only errors
+        showToast('Unable to generate snapshot. Please try again.', 'error');
+        shareBtn.innerHTML = '<span class="material-icons">share</span>';
+        shareBtn.classList.remove('loading');
+        shareBtn.disabled = false;
     }
 }
 
-function downloadBlob(blob) {
+function downloadBlob(blob, fileName = `SkyCast-${currentCity}.png`) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `SkyCast-${currentCity}.png`;
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
+
 
 // --- Fetching Logic ---
 async function fetchWeather(city, isSilent = false) {
