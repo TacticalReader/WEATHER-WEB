@@ -9,7 +9,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#06b6d4">
     <link rel="apple-touch-icon" href="images/icon-192.png">
-    
+
     <link rel="icon" href="images/weather_icons/01d.png" type="image/png">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -476,6 +476,71 @@
                 </details>
 
             </section>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- OFF-SCREEN EXPORT TEMPLATE — html2canvas capture target     -->
+    <!-- Intentionally avoids backdrop-filter / box-shadow blur      -->
+    <!-- ============================================================ -->
+    <div id="export-canvas-container" aria-hidden="true">
+        <!-- Dynamic background set via JS inline style -->
+        <div id="export-bg"></div>
+        <!-- Gradient overlay for contrast -->
+        <div class="export-overlay"></div>
+
+        <!-- Header row -->
+        <div class="export-header">
+            <div class="export-logo">
+                <span class="export-logo-icon">☁</span>
+                <span class="export-logo-text">SkyCast</span>
+            </div>
+            <div id="export-datetime" class="export-datetime"></div>
+        </div>
+
+        <!-- Main weather info -->
+        <div class="export-main">
+            <div class="export-city-row">
+                <img id="export-flag" class="export-flag" src="" alt="">
+                <h2 id="export-city" class="export-city">—</h2>
+            </div>
+            <div class="export-temp-row">
+                <img id="export-icon" class="export-icon" src="" alt="Weather icon" width="96" height="96">
+                <span id="export-temp" class="export-temp">—</span>
+            </div>
+            <p id="export-desc" class="export-desc">—</p>
+        </div>
+
+        <!-- Stats strip -->
+        <div class="export-stats">
+            <div class="export-stat">
+                <span class="export-stat-label">💧 Humidity</span>
+                <span id="export-humidity" class="export-stat-value">—</span>
+            </div>
+            <div class="export-stat">
+                <span class="export-stat-label">💨 Wind</span>
+                <span id="export-wind" class="export-stat-value">—</span>
+            </div>
+            <div class="export-stat">
+                <span class="export-stat-label">🌅 Sunrise</span>
+                <span id="export-sunrise" class="export-stat-value">—</span>
+            </div>
+            <div class="export-stat">
+                <span class="export-stat-label">🌇 Sunset</span>
+                <span id="export-sunset" class="export-stat-value">—</span>
+            </div>
+        </div>
+
+        <!-- Chart snapshot (injected as <img>) -->
+        <div class="export-chart-section">
+            <p class="export-chart-label">24-Hour Temperature Forecast</p>
+            <img id="export-chart-img" class="export-chart-img" src="" alt="Forecast chart" width="900" height="220">
+        </div>
+
+        <!-- Footer watermark -->
+        <div class="export-footer">
+            <span>skycast-weather.app</span>
+            <span>Powered by OpenWeather</span>
         </div>
     </div>
 
