@@ -12,7 +12,6 @@ function createSparks(x, y) {
         spark.style.top = `${y}px`;
         spark.style.transform = `rotate(${angle}deg) translate(0px)`;
 
-        // Animate
         spark.animate([
             { transform: `rotate(${angle}deg) translate(0px) scale(1)`, opacity: 1 },
             { transform: `rotate(${angle}deg) translate(${velocity}px) scale(0)`, opacity: 0 }
@@ -29,10 +28,9 @@ const HazardSystem = {
         visibility: { caution: 5000, danger: 1000, severe: 200 }, // meters
         aqi: { caution: 3, danger: 4, severe: 5 }
     },
-    analyze: function(current, forecast, airQuality, unit) {
+    analyze: function (current, forecast, airQuality, unit) {
         const alerts = [];
 
-        // Normalize inputs to Metric for calculation
         let t = current.main.temp;
         let w = current.wind.speed;
         let vis = current.visibility;
@@ -104,7 +102,7 @@ const HazardSystem = {
 };
 
 const ProbabilitySystem = {
-    analyze: function(forecast) {
+    analyze: function (forecast) {
         if (!forecast || !forecast.list) return null;
 
         // Analyze next 12 hours (4 segments of 3h)
@@ -217,26 +215,32 @@ const WindMap = {
     boundMouse: null,
     boundLeave: null,
 
-    init: function(canvasId, windSpeed, windDeg, weatherId, isNight) {
+
+    extraLayers: true,
+    windArrowEnabled: true,
+    speedGaugeEnabled: true,
+    depthParticles: [],
+    lastGustTime: 0,
+
+    init: function (canvasId, windSpeed, windDeg, weatherId, isNight) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) return;
-        
+
         this.ctx = this.canvas.getContext('2d');
         this.speed = windSpeed;
         this.weatherId = weatherId || 800;
         this.isNight = isNight;
 
-        // Convert wind deg (from) to flow angle (to)
-        // 0 deg (N) -> flows to S (90 deg in canvas)
+
         const targetDir = (windDeg - 90 + 180) * (Math.PI / 180);
-        
+
         if (this.currentDirection === null) {
             this.currentDirection = targetDir;
         }
         this.targetDirection = targetDir;
 
         this.resize();
-        
+
         if (this.width === 0) {
             setTimeout(() => this.init(canvasId, windSpeed, windDeg, weatherId, isNight), 200);
             return;
@@ -253,61 +257,72 @@ const WindMap = {
                 this.mouse.active = true;
             };
             this.boundLeave = () => { this.mouse.active = false; };
-            
+
             this.canvas.addEventListener('mousemove', this.boundMouse);
             this.canvas.addEventListener('mouseleave', this.boundLeave);
             this.canvas.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 this.boundMouse(e.touches[0]);
-            }, {passive: false});
+            }, { passive: false });
             this.canvas.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 this.boundMouse(e.touches[0]);
-            }, {passive: false});
+            }, { passive: false });
         }
 
         this.createParticles();
         this.start();
-        
+
         if (this.boundResize) window.removeEventListener('resize', this.boundResize);
         this.boundResize = this.resize.bind(this);
         window.addEventListener('resize', this.boundResize);
+
+        if (this.extraLayers) {
+            this.createDepthParticles();
+            this.canvas.addEventListener('click', (e) => {
+                const rect = this.canvas.getBoundingClientRect();
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                const clickX = (e.clientX - rect.left) * scaleX;
+                const clickY = (e.clientY - rect.top) * scaleY;
+                this.triggerCanvasSparks(clickX, clickY, 18);
+            });
+        }
     },
 
-    resize: function() {
+    resize: function () {
         if (!this.canvas) return;
         const rect = this.canvas.parentElement.getBoundingClientRect();
         if (rect.width === 0) return;
-        
+
         this.width = rect.width;
         this.height = rect.height;
-        
+
         const dpr = window.devicePixelRatio || 1;
         this.canvas.width = this.width * dpr;
         this.canvas.height = this.height * dpr;
         this.ctx.scale(dpr, dpr);
     },
 
-    createParticles: function() {
+    createParticles: function () {
         const baseCount = this.speed > 10 ? 200 : 120;
         const count = Math.min(baseCount, window.innerWidth < 768 ? 100 : 300);
-        
+
         this.particles = [];
         for (let i = 0; i < count; i++) {
             this.particles.push(this.resetParticle({}));
         }
     },
 
-    resetParticle: function(p, isBurst = false) {
+    resetParticle: function (p, isBurst = false) {
         p.x = Math.random() * this.width;
         p.y = Math.random() * this.height;
-        
-        // If burst, spawn upstream relative to current direction
+
         if (isBurst) {
             const dist = Math.random() * 100;
             const angle = this.currentDirection + Math.PI;
-            p.x = (this.width/2) + Math.cos(angle) * (this.width/2 + dist);
-            p.y = (this.height/2) + Math.sin(angle) * (this.height/2 + dist);
+            p.x = (this.width / 2) + Math.cos(angle) * (this.width / 2 + dist);
+            p.y = (this.height / 2) + Math.sin(angle) * (this.height / 2 + dist);
         }
 
         p.age = 0;
@@ -328,12 +343,11 @@ const WindMap = {
             const g = Math.floor(Math.random() * 100) + 50;
             p.color = `rgba(37, ${g}, 235,`;
         }
-        
+
         return p;
     },
 
-    drawBackground: function() {
-        // Enhanced Gradient
+    drawBackground: function () {
         const grad = this.ctx.createLinearGradient(0, 0, 0, this.height);
         if (this.isNight) {
             grad.addColorStop(0, '#0f172a'); // Slate 900
@@ -345,47 +359,45 @@ const WindMap = {
         this.ctx.fillStyle = grad;
         this.ctx.fillRect(0, 0, this.width, this.height);
 
-        // Grid Overlay
         this.ctx.save();
         this.ctx.strokeStyle = this.isNight ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
         this.ctx.lineWidth = 1;
         const gridSize = 40;
-        
+
         this.ctx.beginPath();
-        for(let x = 0; x <= this.width; x += gridSize) {
+        for (let x = 0; x <= this.width; x += gridSize) {
             this.ctx.moveTo(x, 0);
             this.ctx.lineTo(x, this.height);
         }
-        for(let y = 0; y <= this.height; y += gridSize) {
+        for (let y = 0; y <= this.height; y += gridSize) {
             this.ctx.moveTo(0, y);
             this.ctx.lineTo(this.width, y);
         }
         this.ctx.stroke();
         this.ctx.restore();
 
-        // Weather Overlay (Clouds/Mist)
         const isCloudy = (this.weatherId >= 801 && this.weatherId <= 804) || (this.weatherId >= 200 && this.weatherId < 600);
         if (isCloudy) {
             this.ctx.fillStyle = this.isNight ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.15)';
             this.ctx.beginPath();
-            this.ctx.arc(this.width * 0.2, this.height * 0.3, 80, 0, Math.PI*2);
-            this.ctx.arc(this.width * 0.8, this.height * 0.7, 100, 0, Math.PI*2);
+            this.ctx.arc(this.width * 0.2, this.height * 0.3, 80, 0, Math.PI * 2);
+            this.ctx.arc(this.width * 0.8, this.height * 0.7, 100, 0, Math.PI * 2);
             this.ctx.fill();
         }
     },
 
-    drawCompass: function() {
-        const r = 24; // Slightly larger
+    drawCompass: function () {
+        const r = 24;
         const padding = 20;
         const cx = this.width - r - padding;
         const cy = this.height - r - padding;
 
         this.ctx.save();
         this.ctx.translate(cx, cy);
-        
-        // Compass Background
+
+
         this.ctx.beginPath();
-        this.ctx.arc(0, 0, r + 4, 0, Math.PI*2);
+        this.ctx.arc(0, 0, r + 4, 0, Math.PI * 2);
         this.ctx.fillStyle = this.isNight ? 'rgba(15, 23, 42, 0.6)' : 'rgba(255, 255, 255, 0.6)';
         this.ctx.fill();
         this.ctx.strokeStyle = this.isNight ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)';
@@ -395,13 +407,13 @@ const WindMap = {
         this.ctx.strokeStyle = this.isNight ? 'rgba(255,255,255,0.6)' : 'rgba(30, 58, 138, 0.6)';
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
-        this.ctx.arc(0, 0, r, 0, Math.PI*2);
+        this.ctx.arc(0, 0, r, 0, Math.PI * 2);
         this.ctx.stroke();
 
         // Ticks
         this.ctx.lineWidth = 1;
-        for(let i=0; i<4; i++) {
-            this.ctx.rotate(Math.PI/2);
+        for (let i = 0; i < 4; i++) {
+            this.ctx.rotate(Math.PI / 2);
             this.ctx.beginPath();
             this.ctx.moveTo(0, -r);
             this.ctx.lineTo(0, -r + 4);
@@ -415,10 +427,10 @@ const WindMap = {
         this.ctx.textBaseline = "middle";
 
         this.ctx.fillText("N", 0, -r + 10);
-        
+
         // North Arrow (Red tip)
         this.ctx.rotate(-Math.PI); // Reset rotation
-        
+
         // Draw Needle
         this.ctx.beginPath();
         this.ctx.moveTo(0, -r + 6);
@@ -436,20 +448,113 @@ const WindMap = {
 
         // Center Dot
         this.ctx.beginPath();
-        this.ctx.arc(0, 0, 2, 0, Math.PI*2);
+        this.ctx.arc(0, 0, 2, 0, Math.PI * 2);
         this.ctx.fillStyle = '#fff';
         this.ctx.fill();
 
         this.ctx.restore();
     },
 
-    update: function() {
+
+    drawWindArrow: function () {
+        if (!this.windArrowEnabled || !this.extraLayers) return;
+        const cx = this.width / 2;
+        const cy = this.height / 2;
+        const len = Math.min(this.width, this.height) * 0.35 * (this.speed / 20 + 0.5);
+
+        this.ctx.save();
+        this.ctx.translate(cx, cy);
+        this.ctx.rotate(this.currentDirection);
+
+        // Shaft
+        this.ctx.strokeStyle = this.isNight ? 'rgba(147, 197, 253, 0.25)' : 'rgba(37, 99, 235, 0.25)';
+        this.ctx.lineWidth = 8;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, 0);
+        this.ctx.lineTo(len, 0);
+        this.ctx.stroke();
+
+        // Arrow head (pulsing with speed)
+        const pulse = 1 + Math.sin(this.time * 8) * 0.1;
+        this.ctx.fillStyle = '#ef4444';
+        this.ctx.beginPath();
+        this.ctx.moveTo(len, 0);
+        this.ctx.lineTo(len - 20 * pulse, -12);
+        this.ctx.lineTo(len - 20 * pulse, 12);
+        this.ctx.closePath();
+        this.ctx.fill();
+
+        this.ctx.restore();
+    },
+
+    // NEW: Speed gauge (circular bar above compass – instantly shows wind strength + color-coded hazard)
+    drawSpeedGauge: function () {
+        if (!this.speedGaugeEnabled || !this.extraLayers) return;
+        const r = 28;
+        const cx = this.width - r - 20;
+        const cy = this.height - r * 2.8 - 20; // above the compass
+
+        this.ctx.save();
+        this.ctx.translate(cx, cy);
+
+        // Background ring
+        this.ctx.strokeStyle = this.isNight ? 'rgba(148, 163, 184, 0.3)' : 'rgba(30, 58, 138, 0.3)';
+        this.ctx.lineWidth = 6;
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, r, 0, Math.PI * 2);
+        this.ctx.stroke();
+
+        // Filled arc (0–40 m/s normalized)
+        const normalized = Math.min(this.speed / 40, 1);
+        this.ctx.strokeStyle = this.speed >= 17 ? '#ef4444' : (this.speed >= 10 ? '#f59e0b' : '#3b82f6');
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, r, -0.5 * Math.PI, -0.5 * Math.PI + normalized * 2 * Math.PI);
+        this.ctx.stroke();
+
+        // Speed number
+        this.ctx.fillStyle = this.isNight ? '#fff' : '#1e3a8a';
+        this.ctx.font = 'bold 13px Orbitron, sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(Math.round(this.speed), 0, 0);
+
+        this.ctx.restore();
+    },
+
+    // NEW: Creates slower parallax depth particles (gives true 3D wind depth)
+    createDepthParticles: function () {
+        this.depthParticles = [];
+        const count = Math.floor(this.particles.length * 0.6);
+        for (let i = 0; i < count; i++) {
+            const p = this.resetParticle({});
+            p.speedMult = 0.3 + Math.random() * 0.3;   // much slower
+            p.thickness = 0.3;
+            p.trailLength = 5;
+            this.depthParticles.push(p);
+        }
+    },
+
+
+    triggerCanvasSparks: function (x, y, count = 12) {
+        if (!this.extraLayers) return;
+        for (let i = 0; i < count; i++) {
+            const p = this.resetParticle({}, true);
+            p.x = x;
+            p.y = y;
+            p.life = 25 + Math.random() * 15;
+            p.speedMult *= 2.2;
+            p.color = this.isNight ? 'rgba(251, 191, 36,' : 'rgba(249, 115, 22,';
+            this.burstParticles.push(p);
+        }
+    },
+
+    update: function () {
         if (!this.width) {
-             this.resize();
-             if (!this.width) {
-                 this.animationFrame = requestAnimationFrame(() => this.update());
-                 return;
-             }
+            this.resize();
+            if (!this.width) {
+                this.animationFrame = requestAnimationFrame(() => this.update());
+                return;
+            }
         }
 
         this.ctx.clearRect(0, 0, this.width, this.height);
@@ -467,20 +572,84 @@ const WindMap = {
 
         // Bursts
         if (Math.random() < 0.005) {
-            for(let k=0; k<10; k++) this.burstParticles.push(this.resetParticle({}, true));
+            for (let k = 0; k < 10; k++) this.burstParticles.push(this.resetParticle({}, true));
         }
+
+
+        if (this.extraLayers) {
+            this.ctx.globalAlpha = 0.35;
+            this.ctx.lineCap = 'round';
+            for (let i = this.depthParticles.length - 1; i >= 0; i--) {
+                let p = this.depthParticles[i];
+
+                // Flow Vector with Noise (identical logic to original – no changes)
+                const scale = 0.01;
+                const noise = Math.sin(p.x * scale + noiseTime) * Math.cos(p.y * scale + noiseTime);
+                const angle = this.currentDirection + (noise * 0.3);
+
+                const speedFactor = Math.min(Math.max(this.speed, 2), 20) * p.speedMult;
+                const vx = Math.cos(angle) * speedFactor;
+                const vy = Math.sin(angle) * speedFactor;
+
+                p.x += vx;
+                p.y += vy;
+                p.age++;
+
+                p.trail.push({ x: p.x, y: p.y });
+                if (p.trail.length > p.trailLength) p.trail.shift();
+
+                // Interaction & Appearance (identical to original)
+                let alpha = Math.sin((p.age / p.life) * Math.PI);
+                let thickness = p.thickness;
+
+                if (this.mouse.active) {
+                    const dx = p.x - this.mouse.x;
+                    const dy = p.y - this.mouse.y;
+                    if (dx * dx + dy * dy < 2500) {
+                        alpha = Math.min(1, alpha + 0.3);
+                        thickness += 1;
+                    }
+                }
+
+                this.ctx.strokeStyle = `${p.color} ${alpha})`;
+                this.ctx.lineWidth = thickness;
+
+                if (this.speed < 5) {
+                    this.ctx.shadowBlur = 4;
+                    this.ctx.shadowColor = p.color + "0.5)";
+                }
+
+                if (p.trail.length > 1) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p.trail[0].x, p.trail[0].y);
+                    for (let j = 1; j < p.trail.length; j++) {
+                        this.ctx.lineTo(p.trail[j].x, p.trail[j].y);
+                    }
+                    this.ctx.stroke();
+                }
+                this.ctx.shadowBlur = 0;
+
+                // Cleanup for depth layer
+                if (p.age >= p.life || p.x < -50 || p.x > this.width + 50 || p.y < -50 || p.y > this.height + 50) {
+                    this.resetParticle(p);
+                    p.trail = [];
+                }
+            }
+            this.ctx.globalAlpha = 1;
+        }
+
 
         const all = [...this.particles, ...this.burstParticles];
         this.ctx.lineCap = 'round';
 
         for (let i = all.length - 1; i >= 0; i--) {
             let p = all[i];
-            
+
             // Flow Vector with Noise
             const scale = 0.01;
             const noise = Math.sin(p.x * scale + noiseTime) * Math.cos(p.y * scale + noiseTime);
             const angle = this.currentDirection + (noise * 0.3);
-            
+
             const speedFactor = Math.min(Math.max(this.speed, 2), 20) * p.speedMult;
             const vx = Math.cos(angle) * speedFactor;
             const vy = Math.sin(angle) * speedFactor;
@@ -489,17 +658,17 @@ const WindMap = {
             p.y += vy;
             p.age++;
 
-            p.trail.push({x: p.x, y: p.y});
+            p.trail.push({ x: p.x, y: p.y });
             if (p.trail.length > p.trailLength) p.trail.shift();
 
             // Interaction & Appearance
             let alpha = Math.sin((p.age / p.life) * Math.PI);
             let thickness = p.thickness;
-            
+
             if (this.mouse.active) {
                 const dx = p.x - this.mouse.x;
                 const dy = p.y - this.mouse.y;
-                if (dx*dx + dy*dy < 2500) {
+                if (dx * dx + dy * dy < 2500) {
                     alpha = Math.min(1, alpha + 0.3);
                     thickness += 1;
                 }
@@ -507,7 +676,7 @@ const WindMap = {
 
             this.ctx.strokeStyle = `${p.color} ${alpha})`;
             this.ctx.lineWidth = thickness;
-            
+
             if (this.speed < 5) {
                 this.ctx.shadowBlur = 4;
                 this.ctx.shadowColor = p.color + "0.5)";
@@ -535,10 +704,28 @@ const WindMap = {
             }
         }
 
+        if (this.extraLayers) {
+            this.drawWindArrow();
+            this.drawSpeedGauge();
+
+
+            if (this.speed > 12 && Date.now() - this.lastGustTime > 1800) {
+                if (Math.random() < 0.07) {
+                    this.triggerCanvasSparks(
+                        Math.random() * this.width,
+                        Math.random() * this.height * 0.6,
+                        8 + Math.floor(this.speed / 3)
+                    );
+                    this.lastGustTime = Date.now();
+                    this.gustIntensity = 1;
+                }
+            }
+        }
+
         this.animationFrame = requestAnimationFrame(() => this.update());
     },
 
-    start: function() {
+    start: function () {
         if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
         this.update();
     }
