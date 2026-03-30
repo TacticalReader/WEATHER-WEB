@@ -2089,3 +2089,254 @@ body.night-mode .api-attribution {
 body.night-mode .api-attribution img {
     filter: brightness(0) invert(1);
 }
+
+/* ================================================================
+   OFF-SCREEN EXPORT CANVAS CONTAINER
+   ⚠ NO backdrop-filter, NO blur, NO box-shadow blur here —
+     html2canvas cannot render those. All colors are fully opaque.
+   ================================================================ */
+
+#export-canvas-container {
+    /* Hidden completely off-screen — never visible to user */
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    font-family: 'Nova Round', sans-serif;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0;
+    /* Completely opaque fallback background */
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    border-radius: 0;
+    /* Force exact pixel dimensions for html2canvas */
+    box-sizing: border-box;
+}
+
+/* Full-bleed background image layer */
+#export-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* No blur — html2canvas cannot handle CSS filter: blur() well */
+}
+
+/* Solid semi-opaque overlay for text contrast */
+.export-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        160deg,
+        rgba(0, 0, 0, 0.62) 0%,
+        rgba(0, 0, 0, 0.38) 50%,
+        rgba(0, 0, 0, 0.70) 100%
+    );
+    z-index: 0;
+}
+
+/* All direct children sit above the overlay */
+#export-canvas-container > *:not(#export-bg):not(.export-overlay) {
+    position: relative;
+    z-index: 1;
+}
+
+/* ---- Header ---- */
+.export-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 48px 0 48px;
+}
+
+.export-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.export-logo-icon {
+    font-size: 36px;
+    line-height: 1;
+}
+
+.export-logo-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+
+.export-datetime {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.82);
+    text-align: right;
+    line-height: 1.7;
+}
+
+/* ---- Main weather info ---- */
+.export-main {
+    text-align: center;
+    padding: 0 48px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.export-city-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+
+.export-flag {
+    width: 44px;
+    height: auto;
+    border-radius: 3px;
+    /* explicit dimensions prevent html2canvas layout shifts */
+}
+
+.export-city {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.export-temp-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.export-icon {
+    width: 96px;
+    height: 96px;
+    /* Explicit width/height prevent canvas layout failure */
+    object-fit: contain;
+}
+
+.export-temp {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 90px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.6);
+    line-height: 1;
+}
+
+.export-desc {
+    font-size: 22px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.90);
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    margin: 0;
+}
+
+/* ---- Stats strip ---- */
+.export-stats {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    padding: 0 48px;
+    margin-bottom: 8px;
+}
+
+.export-stat {
+    flex: 1;
+    text-align: center;
+    padding: 14px 12px;
+    /* Use solid, opaque background — no backdrop-filter */
+    background: rgba(255, 255, 255, 0.14);
+    border-right: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.export-stat:first-child {
+    border-radius: 14px 0 0 14px;
+}
+
+.export-stat:last-child {
+    border-right: none;
+    border-radius: 0 14px 14px 0;
+}
+
+.export-stat-label {
+    display: block;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.72);
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.export-stat-value {
+    display: block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* ---- Chart section ---- */
+.export-chart-section {
+    padding: 0 48px 0 48px;
+    background: rgba(0, 0, 0, 0.28);
+}
+
+.export-chart-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.65);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    padding-top: 10px;
+}
+
+.export-chart-img {
+    width: 100%;
+    /* Explicit height stops html2canvas from collapsing the element */
+    height: 220px;
+    object-fit: fill;
+    border-radius: 8px;
+    display: block;
+}
+
+/* ---- Footer ---- */
+.export-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 48px 16px 48px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.50);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Share button loading spin state */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.share-btn.loading .material-icons {
+    animation: spin 0.9s linear infinite;
+}
